@@ -8,5 +8,5 @@ dist/
 build/
 *.egg-info/
 .novel2script/
+.novel2script*/
 output/
-

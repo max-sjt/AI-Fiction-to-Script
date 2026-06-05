@@ -405,10 +405,11 @@ class QwenAIClient(BaseAIClient):
                 }
             )
         for index, scene in enumerate(payload.get("scene_plans", []), start=1):
+            fallback_act_id = normalized["acts"][min(index - 1, len(normalized["acts"]) - 1)]["act_id"] if normalized["acts"] else "a1"
             normalized["scene_plans"].append(
                 {
                     "scene_id": scene.get("scene_id") or make_id("s", index),
-                    "act_id": scene.get("act_id") or normalized["acts"][min(index - 1, len(normalized["acts"]) - 1)]["act_id"],
+                    "act_id": scene.get("act_id") or fallback_act_id,
                     "title": scene.get("title", f"场景{index}"),
                     "objective": scene.get("objective", "推进核心冲突"),
                     "chapter_refs": _ensure_str_list(scene.get("chapter_refs")),

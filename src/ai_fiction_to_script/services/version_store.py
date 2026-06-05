@@ -58,6 +58,16 @@ class VersionStore:
         record = self._find_record(project_id, version_id)
         return load_yaml(record.script_yaml_path)
 
+    def load_intermediate(self, project_id: str, version_id: str, name: str):
+        record = self._find_record(project_id, version_id)
+        path = Path(record.intermediates_path) / f"{name}.json"
+        if not path.exists():
+            raise FileNotFoundError(f"Intermediate not found: {path}")
+        return json.loads(path.read_text(encoding="utf-8"))
+
+    def get_record(self, project_id: str, version_id: str) -> VersionRecord:
+        return self._find_record(project_id, version_id)
+
     def diff(self, project_id: str, version_a: str, version_b: str) -> str:
         record_a = self._find_record(project_id, version_a)
         record_b = self._find_record(project_id, version_b)
@@ -98,4 +108,3 @@ class VersionStore:
             if record.version_id == version_id:
                 return record
         raise ValueError(f"Version not found: {project_id}/{version_id}")
-

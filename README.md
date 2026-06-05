@@ -4,9 +4,9 @@
 
 ## 当前版本
 
-- `v0.2.0`
+- `v0.3.0`
 - 已完成：项目骨架、YAML Schema 数据模型、Qwen/Mock 编排链路、本地版本仓库、CLI
-- 下一步：补充示例、测试、Schema 导出和场景级重生成
+- 已完成：示例、测试、Schema 导出和场景级重生成
 
 ## 设计目标
 
@@ -38,7 +38,67 @@ extensions: {}
 - `pipeline/`: 任务编排与上下文流转
 - `docs/`: 架构与 Schema 设计文档
 
+## 安装
+
+```bash
+pip install -e .
+```
+
+## Qwen 配置
+
+生产调用默认走阿里通义千问兼容接口：
+
+```bash
+set DASHSCOPE_API_KEY=你的密钥
+```
+
+可选环境变量：
+
+- `QWEN_BASE_URL`
+- `QWEN_TIMEOUT_SECONDS`
+
+## CLI 用法
+
+生成剧本：
+
+```bash
+novel2script adapt examples/sample_novel.txt --title 老街回声 --original-author 测试作者 --project-id demo-project
+```
+
+导出 JSON Schema：
+
+```bash
+novel2script export-schema --output schemas/screenplay.schema.json
+```
+
+查看本地版本：
+
+```bash
+novel2script list-versions demo-project
+```
+
+重生成单场：
+
+```bash
+novel2script regenerate-scene demo-project v0001 s001 --instruction "强化主角对匿名短信的怀疑感"
+```
+
+## 版本管理
+
+工具包含两层版本管理：
+
+- 代码版本：Git 仓库 + 语义化标签
+- 产物版本：`.novel2script/<project>/versions/v000x/`
+
+每次 `adapt` 或 `regenerate-scene` 都会写入：
+
+- `screenplay.yaml`
+- `screenplay.json`
+- `intermediates/*.json`
+- `index.json`
+
 ## 文档
 
 - [架构设计](docs/ARCHITECTURE.md)
 - [YAML Schema 规范](docs/YAML_SCHEMA.md)
+- [变更日志](CHANGELOG.md)

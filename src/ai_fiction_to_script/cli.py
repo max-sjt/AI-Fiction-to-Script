@@ -8,7 +8,8 @@ from rich.console import Console
 from rich.table import Table
 
 from ai_fiction_to_script import __version__
-from ai_fiction_to_script.models.runtime import AdaptationRequest
+from ai_fiction_to_script.models.runtime import AdaptationRequest, ParsedChapter
+from ai_fiction_to_script.models.schema import Outline, ScenePlan, Script, ScriptAct, StoryBible
 from ai_fiction_to_script.pipeline.engine import AdaptationEngine
 from ai_fiction_to_script.services.ai_client import MockAIClient, QwenAIClient
 from ai_fiction_to_script.services.chapter_parser import ChapterParser
@@ -110,6 +111,56 @@ def diff_versions(
     console.print(diff_text or "[green]两个版本没有差异。[/green]")
 
 
+@app.command("regenerate-scene")
+def regenerate_scene(
+    project_id: str = typer.Argument(..., help="Project identifier."),
+    version_id: str = typer.Argument(..., help="Base version ID."),
+    scene_id: str = typer.Argument(..., help="Scene ID to regenerate."),
+    instruction: str = typer.Option("", help="Additional rewrite instruction."),
+    provider: str = typer.Option("", help="Override AI provider: mock or qwen."),
+    version_root: Path = typer.Option(Path(".novel2script"), help="Local version store root."),
+    note: str = typer.Option("", help="Version note."),
+) -> None:
+    store = VersionStore(version_root)
+    document = store.load_document(project_id, version_id)
+    request = AdaptationRequest.model_validate(store.load_intermediate(project_id, version_id, "request"))
+    if provider:
+        request = request.model_copy(update={"provider": provider})
+    chapters = [ParsedChapter.model_validate(item) for item in store.load_intermediate(project_id, version_id, "chapters")]
+    outline = Outline.model_validate(store.load_intermediate(project_id, version_id, "outline"))
+    story_bible = StoryBible.model_validate(store.load_intermediate(project_id, version_id, "story_bible"))
+    scene_plan = _find_scene_plan(outline.scene_plans, scene_id)
+    if instruction:
+        scene_plan = scene_plan.model_copy(
+            update={
+                "objective": f"{scene_plan.objective}；附加要求：{instruction}",
+                "notes": f"{scene_plan.notes} | {instruction}".strip(),
+            }
+        )
+    chapter = _resolve_scene_source(scene_plan, chapters)
+    scene = _build_ai_client(request.provider).generate_scene(scene_plan, story_bible, chapter, request)
+    updated_script = _replace_scene(document.script, scene_plan.act_id, scene_id, scene)
+    updated_document = document.model_copy(update={"script": updated_script})
+    quality = QualityChecker().review(updated_document)
+    ai_warnings, ai_suggestions = _build_ai_client(request.provider).review_document(updated_document, request)
+    quality.warnings = _merge_unique(quality.warnings, ai_warnings)
+    quality.revision_suggestions = _merge_unique(quality.revision_suggestions, ai_suggestions)
+    updated_document = updated_document.model_copy(update={"quality": quality})
+
+    version = store.save(
+        project_id,
+        updated_document,
+        intermediates={
+            "request": request.model_dump(mode="json"),
+            "chapters": [chapter.model_dump(mode="json") for chapter in chapters],
+            "story_bible": story_bible.model_dump(mode="json"),
+            "outline": outline.model_dump(mode="json"),
+        },
+        note=note or f"regenerate {scene_id}",
+    )
+    console.print(f"[green]场景已重生成[/green] {scene_id} -> {version.version_id}")
+
+
 @app.command("export-schema")
 def export_schema(
     output: Path = typer.Option(Path("schemas/screenplay.schema.json"), help="JSON Schema output path."),
@@ -139,6 +190,46 @@ def _slugify(value: str) -> str:
     slug = re.sub(r"[^\w\u4e00-\u9fff-]+", "-", value.strip())
     slug = re.sub(r"-{2,}", "-", slug)
     return slug.strip("-") or "novel-project"
+
+
+def _find_scene_plan(scene_plans: list[ScenePlan], scene_id: str) -> ScenePlan:
+    for scene_plan in scene_plans:
+        if scene_plan.scene_id == scene_id:
+            return scene_plan
+    raise typer.BadParameter(f"Scene plan not found: {scene_id}")
+
+
+def _resolve_scene_source(scene_plan: ScenePlan, chapters: list[ParsedChapter]) -> ParsedChapter:
+    chapter_map = {chapter.chapter_id: chapter for chapter in chapters}
+    for chapter_id in scene_plan.chapter_refs:
+        if chapter_id in chapter_map:
+            return chapter_map[chapter_id]
+    return chapters[0]
+
+
+def _replace_scene(script: Script, act_id: str, scene_id: str, replacement) -> Script:
+    acts: list[ScriptAct] = []
+    replaced = False
+    for act in script.acts:
+        scenes = []
+        for scene in act.scenes:
+            if act.act_id == act_id and scene.scene_id == scene_id:
+                scenes.append(replacement)
+                replaced = True
+            else:
+                scenes.append(scene)
+        acts.append(ScriptAct(act_id=act.act_id, title=act.title, scenes=scenes))
+    if not replaced:
+        raise typer.BadParameter(f"Scene not found in script: {scene_id}")
+    return Script(acts=acts)
+
+
+def _merge_unique(base: list[str], new_items: list[str]) -> list[str]:
+    output = list(base)
+    for item in new_items:
+        if item and item not in output:
+            output.append(item)
+    return output
 
 
 if __name__ == "__main__":

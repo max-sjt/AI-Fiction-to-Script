@@ -1,0 +1,789 @@
+{
+  "$defs": {
+    "ActOutline": {
+      "additionalProperties": false,
+      "properties": {
+        "act_id": {
+          "title": "Act Id",
+          "type": "string"
+        },
+        "name": {
+          "title": "Name",
+          "type": "string"
+        },
+        "purpose": {
+          "title": "Purpose",
+          "type": "string"
+        },
+        "scene_count": {
+          "default": 0,
+          "minimum": 0,
+          "title": "Scene Count",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "act_id",
+        "name",
+        "purpose"
+      ],
+      "title": "ActOutline",
+      "type": "object"
+    },
+    "AdaptationSettings": {
+      "additionalProperties": false,
+      "properties": {
+        "adaptation_goal": {
+          "title": "Adaptation Goal",
+          "type": "string"
+        },
+        "compression_strategy": {
+          "default": "merge_minor_events",
+          "title": "Compression Strategy",
+          "type": "string"
+        },
+        "pacing_policy": {
+          "default": "preserve_key_conflicts",
+          "title": "Pacing Policy",
+          "type": "string"
+        },
+        "structure_type": {
+          "default": "three_act",
+          "title": "Structure Type",
+          "type": "string"
+        },
+        "style_guide": {
+          "$ref": "#/$defs/StyleGuide"
+        }
+      },
+      "required": [
+        "adaptation_goal"
+      ],
+      "title": "AdaptationSettings",
+      "type": "object"
+    },
+    "Beat": {
+      "additionalProperties": false,
+      "properties": {
+        "beat_id": {
+          "title": "Beat Id",
+          "type": "string"
+        },
+        "type": {
+          "enum": [
+            "action",
+            "dialogue",
+            "transition",
+            "narration"
+          ],
+          "title": "Type",
+          "type": "string"
+        },
+        "text": {
+          "title": "Text",
+          "type": "string"
+        },
+        "speaker_ref": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Speaker Ref"
+        },
+        "emotion": {
+          "default": "",
+          "title": "Emotion",
+          "type": "string"
+        }
+      },
+      "required": [
+        "beat_id",
+        "type",
+        "text"
+      ],
+      "title": "Beat",
+      "type": "object"
+    },
+    "CharacterCard": {
+      "additionalProperties": false,
+      "properties": {
+        "character_id": {
+          "title": "Character Id",
+          "type": "string"
+        },
+        "name": {
+          "title": "Name",
+          "type": "string"
+        },
+        "role": {
+          "title": "Role",
+          "type": "string"
+        },
+        "traits": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Traits",
+          "type": "array"
+        },
+        "goal": {
+          "default": "",
+          "title": "Goal",
+          "type": "string"
+        },
+        "conflict": {
+          "default": "",
+          "title": "Conflict",
+          "type": "string"
+        },
+        "arc": {
+          "default": "",
+          "title": "Arc",
+          "type": "string"
+        },
+        "voice": {
+          "default": "",
+          "title": "Voice",
+          "type": "string"
+        },
+        "relations": {
+          "items": {
+            "$ref": "#/$defs/CharacterRelation"
+          },
+          "title": "Relations",
+          "type": "array"
+        }
+      },
+      "required": [
+        "character_id",
+        "name",
+        "role"
+      ],
+      "title": "CharacterCard",
+      "type": "object"
+    },
+    "CharacterRelation": {
+      "additionalProperties": false,
+      "properties": {
+        "target_character_id": {
+          "title": "Target Character Id",
+          "type": "string"
+        },
+        "relation": {
+          "title": "Relation",
+          "type": "string"
+        },
+        "notes": {
+          "default": "",
+          "title": "Notes",
+          "type": "string"
+        }
+      },
+      "required": [
+        "target_character_id",
+        "relation"
+      ],
+      "title": "CharacterRelation",
+      "type": "object"
+    },
+    "ContinuityChecks": {
+      "additionalProperties": false,
+      "properties": {
+        "character_consistency": {
+          "default": true,
+          "title": "Character Consistency",
+          "type": "boolean"
+        },
+        "timeline_consistency": {
+          "default": true,
+          "title": "Timeline Consistency",
+          "type": "boolean"
+        },
+        "location_consistency": {
+          "default": true,
+          "title": "Location Consistency",
+          "type": "boolean"
+        },
+        "reference_consistency": {
+          "default": true,
+          "title": "Reference Consistency",
+          "type": "boolean"
+        }
+      },
+      "title": "ContinuityChecks",
+      "type": "object"
+    },
+    "LocationCard": {
+      "additionalProperties": false,
+      "properties": {
+        "location_id": {
+          "title": "Location Id",
+          "type": "string"
+        },
+        "name": {
+          "title": "Name",
+          "type": "string"
+        },
+        "description": {
+          "default": "",
+          "title": "Description",
+          "type": "string"
+        },
+        "mood": {
+          "default": "",
+          "title": "Mood",
+          "type": "string"
+        }
+      },
+      "required": [
+        "location_id",
+        "name"
+      ],
+      "title": "LocationCard",
+      "type": "object"
+    },
+    "MetaInfo": {
+      "additionalProperties": false,
+      "properties": {
+        "project_id": {
+          "description": "Unique project identifier.",
+          "title": "Project Id",
+          "type": "string"
+        },
+        "title": {
+          "description": "Screenplay title.",
+          "title": "Title",
+          "type": "string"
+        },
+        "original_novel_title": {
+          "description": "Original novel title.",
+          "title": "Original Novel Title",
+          "type": "string"
+        },
+        "original_author": {
+          "description": "Original novel author.",
+          "title": "Original Author",
+          "type": "string"
+        },
+        "target_format": {
+          "description": "Target screenplay format, such as film or tv_drama.",
+          "title": "Target Format",
+          "type": "string"
+        },
+        "language": {
+          "default": "zh-CN",
+          "title": "Language",
+          "type": "string"
+        },
+        "genre": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Genre",
+          "type": "array"
+        },
+        "tone": {
+          "default": "balanced",
+          "title": "Tone",
+          "type": "string"
+        },
+        "created_at": {
+          "description": "ISO 8601 timestamp.",
+          "title": "Created At",
+          "type": "string"
+        },
+        "model_provider": {
+          "default": "qwen",
+          "title": "Model Provider",
+          "type": "string"
+        },
+        "model_name": {
+          "default": "qwen-max",
+          "title": "Model Name",
+          "type": "string"
+        }
+      },
+      "required": [
+        "project_id",
+        "title",
+        "original_novel_title",
+        "original_author",
+        "target_format",
+        "created_at"
+      ],
+      "title": "MetaInfo",
+      "type": "object"
+    },
+    "Outline": {
+      "additionalProperties": false,
+      "properties": {
+        "structure_type": {
+          "default": "three_act",
+          "title": "Structure Type",
+          "type": "string"
+        },
+        "acts": {
+          "items": {
+            "$ref": "#/$defs/ActOutline"
+          },
+          "title": "Acts",
+          "type": "array"
+        },
+        "scene_plans": {
+          "items": {
+            "$ref": "#/$defs/ScenePlan"
+          },
+          "title": "Scene Plans",
+          "type": "array"
+        }
+      },
+      "title": "Outline",
+      "type": "object"
+    },
+    "QualityReport": {
+      "additionalProperties": false,
+      "properties": {
+        "confidence": {
+          "default": 1.0,
+          "maximum": 1.0,
+          "minimum": 0.0,
+          "title": "Confidence",
+          "type": "number"
+        },
+        "warnings": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Warnings",
+          "type": "array"
+        },
+        "revision_suggestions": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Revision Suggestions",
+          "type": "array"
+        },
+        "continuity_checks": {
+          "$ref": "#/$defs/ContinuityChecks"
+        }
+      },
+      "title": "QualityReport",
+      "type": "object"
+    },
+    "Scene": {
+      "additionalProperties": false,
+      "properties": {
+        "scene_id": {
+          "title": "Scene Id",
+          "type": "string"
+        },
+        "title": {
+          "title": "Title",
+          "type": "string"
+        },
+        "chapter_refs": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Chapter Refs",
+          "type": "array"
+        },
+        "location_ref": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Location Ref"
+        },
+        "time_of_day": {
+          "default": "",
+          "title": "Time Of Day",
+          "type": "string"
+        },
+        "objective": {
+          "title": "Objective",
+          "type": "string"
+        },
+        "summary": {
+          "default": "",
+          "title": "Summary",
+          "type": "string"
+        },
+        "beats": {
+          "items": {
+            "$ref": "#/$defs/Beat"
+          },
+          "title": "Beats",
+          "type": "array"
+        },
+        "transitions": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/SceneTransition"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "source_refs": {
+          "items": {
+            "$ref": "#/$defs/SourceRef"
+          },
+          "title": "Source Refs",
+          "type": "array"
+        }
+      },
+      "required": [
+        "scene_id",
+        "title",
+        "objective"
+      ],
+      "title": "Scene",
+      "type": "object"
+    },
+    "ScenePlan": {
+      "additionalProperties": false,
+      "properties": {
+        "scene_id": {
+          "title": "Scene Id",
+          "type": "string"
+        },
+        "act_id": {
+          "title": "Act Id",
+          "type": "string"
+        },
+        "title": {
+          "title": "Title",
+          "type": "string"
+        },
+        "objective": {
+          "title": "Objective",
+          "type": "string"
+        },
+        "chapter_refs": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Chapter Refs",
+          "type": "array"
+        },
+        "conflict": {
+          "default": "",
+          "title": "Conflict",
+          "type": "string"
+        },
+        "notes": {
+          "default": "",
+          "title": "Notes",
+          "type": "string"
+        }
+      },
+      "required": [
+        "scene_id",
+        "act_id",
+        "title",
+        "objective"
+      ],
+      "title": "ScenePlan",
+      "type": "object"
+    },
+    "SceneTransition": {
+      "additionalProperties": false,
+      "properties": {
+        "next_scene_hint": {
+          "default": "",
+          "title": "Next Scene Hint",
+          "type": "string"
+        },
+        "transition_type": {
+          "default": "cut",
+          "title": "Transition Type",
+          "type": "string"
+        }
+      },
+      "title": "SceneTransition",
+      "type": "object"
+    },
+    "Script": {
+      "additionalProperties": false,
+      "properties": {
+        "acts": {
+          "items": {
+            "$ref": "#/$defs/ScriptAct"
+          },
+          "title": "Acts",
+          "type": "array"
+        }
+      },
+      "title": "Script",
+      "type": "object"
+    },
+    "ScriptAct": {
+      "additionalProperties": false,
+      "properties": {
+        "act_id": {
+          "title": "Act Id",
+          "type": "string"
+        },
+        "title": {
+          "title": "Title",
+          "type": "string"
+        },
+        "scenes": {
+          "items": {
+            "$ref": "#/$defs/Scene"
+          },
+          "title": "Scenes",
+          "type": "array"
+        }
+      },
+      "required": [
+        "act_id",
+        "title"
+      ],
+      "title": "ScriptAct",
+      "type": "object"
+    },
+    "SourceChapter": {
+      "additionalProperties": false,
+      "properties": {
+        "chapter_id": {
+          "title": "Chapter Id",
+          "type": "string"
+        },
+        "title": {
+          "title": "Title",
+          "type": "string"
+        },
+        "raw_text_ref": {
+          "title": "Raw Text Ref",
+          "type": "string"
+        },
+        "summary": {
+          "default": "",
+          "title": "Summary",
+          "type": "string"
+        },
+        "excerpt_count": {
+          "default": 0,
+          "minimum": 0,
+          "title": "Excerpt Count",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "chapter_id",
+        "title",
+        "raw_text_ref"
+      ],
+      "title": "SourceChapter",
+      "type": "object"
+    },
+    "SourceInfo": {
+      "additionalProperties": false,
+      "properties": {
+        "chapter_count": {
+          "minimum": 3,
+          "title": "Chapter Count",
+          "type": "integer"
+        },
+        "chapters": {
+          "items": {
+            "$ref": "#/$defs/SourceChapter"
+          },
+          "title": "Chapters",
+          "type": "array"
+        }
+      },
+      "required": [
+        "chapter_count"
+      ],
+      "title": "SourceInfo",
+      "type": "object"
+    },
+    "SourceRef": {
+      "additionalProperties": false,
+      "properties": {
+        "chapter_id": {
+          "title": "Chapter Id",
+          "type": "string"
+        },
+        "excerpt_id": {
+          "title": "Excerpt Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "chapter_id",
+        "excerpt_id"
+      ],
+      "title": "SourceRef",
+      "type": "object"
+    },
+    "StoryBible": {
+      "additionalProperties": false,
+      "properties": {
+        "logline": {
+          "title": "Logline",
+          "type": "string"
+        },
+        "synopsis": {
+          "title": "Synopsis",
+          "type": "string"
+        },
+        "theme": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Theme",
+          "type": "array"
+        },
+        "characters": {
+          "items": {
+            "$ref": "#/$defs/CharacterCard"
+          },
+          "title": "Characters",
+          "type": "array"
+        },
+        "locations": {
+          "items": {
+            "$ref": "#/$defs/LocationCard"
+          },
+          "title": "Locations",
+          "type": "array"
+        },
+        "timeline": {
+          "items": {
+            "$ref": "#/$defs/TimelineEvent"
+          },
+          "title": "Timeline",
+          "type": "array"
+        },
+        "props": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Props",
+          "type": "array"
+        }
+      },
+      "required": [
+        "logline",
+        "synopsis"
+      ],
+      "title": "StoryBible",
+      "type": "object"
+    },
+    "StyleGuide": {
+      "additionalProperties": false,
+      "properties": {
+        "dialogue_style": {
+          "default": "自然口语化",
+          "title": "Dialogue Style",
+          "type": "string"
+        },
+        "narration_style": {
+          "default": "简洁",
+          "title": "Narration Style",
+          "type": "string"
+        },
+        "pacing_style": {
+          "default": "平衡",
+          "title": "Pacing Style",
+          "type": "string"
+        }
+      },
+      "title": "StyleGuide",
+      "type": "object"
+    },
+    "TimelineEvent": {
+      "additionalProperties": false,
+      "properties": {
+        "event_id": {
+          "title": "Event Id",
+          "type": "string"
+        },
+        "time_order": {
+          "minimum": 1,
+          "title": "Time Order",
+          "type": "integer"
+        },
+        "summary": {
+          "title": "Summary",
+          "type": "string"
+        },
+        "chapter_refs": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Chapter Refs",
+          "type": "array"
+        }
+      },
+      "required": [
+        "event_id",
+        "time_order",
+        "summary"
+      ],
+      "title": "TimelineEvent",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "default": "1.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "meta": {
+      "$ref": "#/$defs/MetaInfo"
+    },
+    "source": {
+      "$ref": "#/$defs/SourceInfo"
+    },
+    "adaptation": {
+      "$ref": "#/$defs/AdaptationSettings"
+    },
+    "story_bible": {
+      "$ref": "#/$defs/StoryBible"
+    },
+    "outline": {
+      "$ref": "#/$defs/Outline"
+    },
+    "script": {
+      "$ref": "#/$defs/Script"
+    },
+    "quality": {
+      "$ref": "#/$defs/QualityReport"
+    },
+    "extensions": {
+      "additionalProperties": true,
+      "title": "Extensions",
+      "type": "object"
+    }
+  },
+  "required": [
+    "meta",
+    "source",
+    "adaptation",
+    "story_bible",
+    "outline",
+    "script"
+  ],
+  "title": "ScreenplayDocument",
+  "type": "object"
+}

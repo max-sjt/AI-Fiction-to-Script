@@ -107,6 +107,30 @@ h1 {
   box-shadow: var(--shadow);
 }
 
+.hero-controls {
+  display: grid;
+  gap: 0.85rem;
+  justify-items: end;
+}
+
+.language-switcher {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
+  background: rgba(255, 251, 246, 0.82);
+  border: 1px solid rgba(23, 22, 20, 0.06);
+  padding: 0.7rem 0.95rem;
+  border-radius: 999px;
+  box-shadow: var(--shadow);
+}
+
+.language-switcher select {
+  width: auto;
+  min-width: 8rem;
+  border-radius: 999px;
+  padding: 0.45rem 0.8rem;
+}
+
 .status-dot {
   width: 0.72rem;
   height: 0.72rem;
@@ -394,6 +418,15 @@ button:hover {
 @media (max-width: 720px) {
   .hero {
     flex-direction: column;
+  }
+
+  .hero-controls {
+    width: 100%;
+    justify-items: stretch;
+  }
+
+  .language-switcher {
+    justify-content: space-between;
   }
 
   .section-heading,

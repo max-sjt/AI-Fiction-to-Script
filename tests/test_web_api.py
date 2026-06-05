@@ -72,6 +72,8 @@ def test_web_server_lists_projects_and_serves_html(tmp_path) -> None:
         with urlopen(f"{base_url}/") as response:  # noqa: S310
             html = response.read().decode("utf-8")
         assert "Screenplay Workbench" in html
+        assert 'id="languageSelect"' in html
+        assert "中文" in html
     finally:
         stop_server(server, thread)
 

@@ -1,20 +1,26 @@
 # Changelog
 
+## v0.4.0
+
+- Added a browser-based Web workbench
+- Added API endpoints for project browsing, YAML editing, version diffing, and scene regeneration
+- Added the `novel2script web` command
+- Added Web API tests and updated package data for static assets
+
 ## v0.3.0
 
-- 增加示例小说、CLI 测试、流水线测试和 JSON Schema 导出
-- 增加场景级 `regenerate-scene` 命令，支持在本地版本仓库上迭代生成
-- 完善 README，补齐 Qwen 配置和版本管理说明
+- Added sample novel input, CLI tests, pipeline tests, and JSON Schema export
+- Added the `regenerate-scene` command for scene-level iteration
+- Expanded project documentation and usage examples
 
 ## v0.2.0
 
-- 新增章节解析、Qwen/Mock AI 客户端、PromptBuilder、质量检查器
-- 新增适配流水线引擎和本地版本仓库
-- 新增 CLI：`adapt`、`validate`、`list-versions`、`diff`、`export-schema`
+- Added chapter parsing, Qwen/Mock AI clients, prompt building, and quality checks
+- Added the adaptation pipeline engine and local version store
+- Added CLI commands for generation, validation, diffing, and schema export
 
 ## v0.1.0
 
-- 初始化 Git 仓库
-- 建立 YAML Schema 数据模型
-- 补齐架构设计和 Schema 文档
-
+- Bootstrapped the Git repository
+- Added the YAML screenplay schema models
+- Added architecture and schema documentation

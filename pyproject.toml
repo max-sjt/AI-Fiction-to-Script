@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "ai-fiction-to-script"
-version = "0.3.0"
+version = "0.4.0"
 description = "A modular Qwen-powered tool that converts multi-chapter fiction into editable YAML screenplays."
 readme = "README.md"
 requires-python = ">=3.12"
@@ -28,6 +28,9 @@ package-dir = { "" = "src" }
 
 [tool.setuptools.packages.find]
 where = ["src"]
+
+[tool.setuptools.package-data]
+"ai_fiction_to_script.web" = ["static/*"]
 
 [tool.pytest.ini_options]
 pythonpath = ["src"]

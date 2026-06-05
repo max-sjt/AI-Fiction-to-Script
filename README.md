@@ -1,104 +1,132 @@
 # AI Fiction to Script
 
-一个基于阿里通义千问（Qwen）的小说转剧本工具。它面向不少于 3 个章节的小说文本，按“理解 -> 规划 -> 生成 -> 校验”的流水线输出结构化、可编辑、可追溯的 YAML 剧本初稿。
+`AI Fiction to Script` is a modular Qwen-powered tool that converts novels with at least three chapters into structured, editable YAML screenplay drafts.
 
-## 当前版本
+The project follows a staged pipeline:
 
-- `v0.3.0`
-- 已完成：项目骨架、YAML Schema 数据模型、Qwen/Mock 编排链路、本地版本仓库、CLI
-- 已完成：示例、测试、Schema 导出和场景级重生成
+1. Understand the source chapters
+2. Build a story bible
+3. Plan the screenplay outline
+4. Generate scene-level screenplay content
+5. Validate structure and continuity
 
-## 设计目标
+## Current Version
 
-- 用结构化输出代替一整段不可编辑文本
-- 保留章节和片段来源，支持回溯与局部重写
-- 让 Story Bible、Outline、Script、Quality 各阶段可独立演进
-- 为后续接入 Web UI、任务队列、多剧种模板预留接口
+- `v0.4.0`
+- Includes CLI workflow, local version store, schema export, scene regeneration, and a visual Web workbench
 
-## 目标输出
+## Core Features
 
-顶层 YAML 结构：
+- Convert fiction into structured YAML screenplay drafts
+- Preserve chapter references for traceability
+- Save every generated result into a local version store
+- Compare versions with unified diffs
+- Regenerate a single scene without rerunning the whole project
+- Edit YAML directly in a browser-based workbench
 
-```yaml
-schema_version: "1.0"
-meta: {}
-source: {}
-adaptation: {}
-story_bible: {}
-outline: {}
-script: {}
-quality: {}
-extensions: {}
-```
+## Project Layout
 
-## 模块划分
+- `src/ai_fiction_to_script/models/`: Pydantic schema and runtime models
+- `src/ai_fiction_to_script/services/`: parsing, generation, validation, versioning, and workbench services
+- `src/ai_fiction_to_script/pipeline/`: orchestration engine
+- `src/ai_fiction_to_script/web/`: lightweight Web server and static UI assets
+- `docs/`: architecture and schema documentation
+- `examples/`: sample inputs
+- `tests/`: CLI, pipeline, and Web API tests
 
-- `models/`: Pydantic 数据模型和 Schema 基础约束
-- `services/`: 文本解析、Qwen 调用、YAML 序列化、版本管理
-- `pipeline/`: 任务编排与上下文流转
-- `docs/`: 架构与 Schema 设计文档
-
-## 安装
+## Install
 
 ```bash
 pip install -e .
 ```
 
-## Qwen 配置
+If you already installed an older editable version, rerun the same command after pulling the latest changes so the new `web` command is available.
 
-生产调用默认走阿里通义千问兼容接口：
+## Qwen Configuration
+
+Set your DashScope / Qwen API key before using the live provider:
 
 ```bash
-set DASHSCOPE_API_KEY=你的密钥
+set DASHSCOPE_API_KEY=your_key_here
 ```
 
-可选环境变量：
+Optional environment variables:
 
 - `QWEN_BASE_URL`
 - `QWEN_TIMEOUT_SECONDS`
 
-## CLI 用法
+## CLI Usage
 
-生成剧本：
-
-```bash
-novel2script adapt examples/sample_novel.txt --title 老街回声 --original-author 测试作者 --project-id demo-project
-```
-
-导出 JSON Schema：
+Generate a draft from a text file:
 
 ```bash
-novel2script export-schema --output schemas/screenplay.schema.json
+novel2script adapt examples/sample_novel.txt --title OldStreetEcho --original-author DemoAuthor --project-id demo-project
 ```
 
-查看本地版本：
+List saved versions:
 
 ```bash
 novel2script list-versions demo-project
 ```
 
-重生成单场：
+Regenerate one scene:
 
 ```bash
-novel2script regenerate-scene demo-project v0001 s001 --instruction "强化主角对匿名短信的怀疑感"
+novel2script regenerate-scene demo-project v0001 s001 --instruction "Increase the protagonist's urgency."
 ```
 
-## 版本管理
+Export the JSON Schema:
 
-工具包含两层版本管理：
+```bash
+novel2script export-schema --output schemas/screenplay.schema.json
+```
 
-- 代码版本：Git 仓库 + 语义化标签
-- 产物版本：`.novel2script/<project>/versions/v000x/`
+## Web Workbench
 
-每次 `adapt` 或 `regenerate-scene` 都会写入：
+Start the visual workbench:
+
+```bash
+novel2script web --host 127.0.0.1 --port 8098
+```
+
+Then open:
+
+```text
+http://127.0.0.1:8098
+```
+
+The workbench supports:
+
+- draft generation from a file path or pasted novel text
+- project and version browsing
+- direct YAML editing and save-as-new-version
+- version diff inspection
+- scene-level regeneration with extra instructions
+
+## Local Versioning
+
+The tool keeps two layers of versioning:
+
+- source code versioning: Git branches, commits, and tags
+- screenplay artifact versioning: `.novel2script/<project>/versions/v000x/`
+
+Each saved version contains:
 
 - `screenplay.yaml`
 - `screenplay.json`
 - `intermediates/*.json`
 - `index.json`
 
-## 文档
+## Validation
 
-- [架构设计](docs/ARCHITECTURE.md)
-- [YAML Schema 规范](docs/YAML_SCHEMA.md)
-- [变更日志](CHANGELOG.md)
+Run the test suite:
+
+```bash
+python -m pytest -q
+```
+
+## Documentation
+
+- [Architecture](docs/ARCHITECTURE.md)
+- [YAML Schema](docs/YAML_SCHEMA.md)
+- [Changelog](CHANGELOG.md)

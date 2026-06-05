@@ -4,9 +4,9 @@
 
 ## 当前版本
 
-- `v0.1.0`
-- 已完成：项目骨架、YAML Schema 数据模型、模块化架构说明
-- 下一步：接入 Qwen 编排链路、版本仓库、CLI
+- `v0.2.0`
+- 已完成：项目骨架、YAML Schema 数据模型、Qwen/Mock 编排链路、本地版本仓库、CLI
+- 下一步：补充示例、测试、Schema 导出和场景级重生成
 
 ## 设计目标
 
@@ -42,4 +42,3 @@ extensions: {}
 
 - [架构设计](docs/ARCHITECTURE.md)
 - [YAML Schema 规范](docs/YAML_SCHEMA.md)
-

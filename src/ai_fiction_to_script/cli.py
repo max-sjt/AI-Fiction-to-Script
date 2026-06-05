@@ -8,15 +8,17 @@ from rich.console import Console
 from rich.table import Table
 
 from ai_fiction_to_script import __version__
-from ai_fiction_to_script.models.runtime import AdaptationRequest, ParsedChapter
-from ai_fiction_to_script.models.schema import Outline, ScenePlan, Script, ScriptAct, StoryBible
+from ai_fiction_to_script.models.schema import ScreenplayDocument
 from ai_fiction_to_script.pipeline.engine import AdaptationEngine
 from ai_fiction_to_script.services.ai_client import MockAIClient, QwenAIClient
 from ai_fiction_to_script.services.chapter_parser import ChapterParser
 from ai_fiction_to_script.services.quality_checker import QualityChecker
 from ai_fiction_to_script.services.version_store import VersionStore
+from ai_fiction_to_script.services.workbench import WorkbenchService
 from ai_fiction_to_script.services.yaml_service import load_yaml, write_schema, write_yaml
 from ai_fiction_to_script.settings import QwenSettings
+from ai_fiction_to_script.web.server import run_server
+from ai_fiction_to_script.models.runtime import AdaptationRequest
 
 app = typer.Typer(help="AI Fiction to Script CLI.")
 console = Console()
@@ -31,7 +33,7 @@ def main() -> None:
 def adapt(
     input_path: Path = typer.Argument(..., help="Novel text file or a directory of chapter files."),
     title: str = typer.Option("", help="Screenplay title."),
-    original_author: str = typer.Option("未知作者", help="Original novel author."),
+    original_author: str = typer.Option("unknown-author", help="Original novel author."),
     original_title: str = typer.Option("", help="Original novel title."),
     project_id: str = typer.Option("", help="Project identifier used by the local version store."),
     target_format: str = typer.Option("tv_drama", help="Target format: film, tv_drama, short_drama, stage_play."),
@@ -56,20 +58,19 @@ def adapt(
         provider=provider,
     )
 
-    ai_client = _build_ai_client(provider)
     engine = AdaptationEngine(
         parser=ChapterParser(),
-        ai_client=ai_client,
+        ai_client=_build_ai_client(provider),
         quality_checker=QualityChecker(),
         version_store=VersionStore(version_root),
     )
     result = engine.run(input_path=input_path, request=request, note=note)
     write_yaml(result.document, output)
 
-    console.print(f"[green]YAML 已输出到[/green] {output}")
+    console.print(f"[green]YAML written to[/green] {output}")
     if result.version:
-        console.print(f"[green]版本已保存[/green] {result.version.version_id} -> {result.version.script_yaml_path}")
-    console.print(f"[cyan]质量置信度[/cyan] {result.document.quality.confidence}")
+        console.print(f"[green]Saved version[/green] {result.version.version_id} -> {result.version.script_yaml_path}")
+    console.print(f"[cyan]Quality confidence[/cyan] {result.document.quality.confidence}")
     for warning in result.document.quality.warnings:
         console.print(f"[yellow]- {warning}[/yellow]")
 
@@ -78,8 +79,8 @@ def adapt(
 def validate(script_path: Path = typer.Argument(..., help="YAML screenplay path.")) -> None:
     document = load_yaml(script_path)
     quality = QualityChecker().review(document)
-    console.print(f"[green]Schema 验证通过[/green] {script_path}")
-    console.print(f"[cyan]置信度[/cyan] {quality.confidence}")
+    console.print(f"[green]Schema validation passed[/green] {script_path}")
+    console.print(f"[cyan]Confidence[/cyan] {quality.confidence}")
     if quality.warnings:
         for warning in quality.warnings:
             console.print(f"[yellow]- {warning}[/yellow]")
@@ -90,13 +91,13 @@ def list_versions(
     project_id: str = typer.Argument(..., help="Project identifier."),
     version_root: Path = typer.Option(Path(".novel2script"), help="Local version store root."),
 ) -> None:
-    versions = VersionStore(version_root).list_versions(project_id)
+    versions = WorkbenchService(version_root).list_versions(project_id)
     table = Table(title=f"{project_id} versions")
     table.add_column("Version")
     table.add_column("Created At")
     table.add_column("Note")
     for version in versions:
-        table.add_row(version.version_id, version.created_at, version.note)
+        table.add_row(version["version_id"], version["created_at"], version["note"])
     console.print(table)
 
 
@@ -107,8 +108,8 @@ def diff_versions(
     version_b: str = typer.Argument(..., help="Target version."),
     version_root: Path = typer.Option(Path(".novel2script"), help="Local version store root."),
 ) -> None:
-    diff_text = VersionStore(version_root).diff(project_id, version_a, version_b)
-    console.print(diff_text or "[green]两个版本没有差异。[/green]")
+    diff_text = WorkbenchService(version_root).diff_versions(project_id, version_a, version_b)["diff"]
+    console.print(diff_text or "[green]No differences between the selected versions.[/green]")
 
 
 @app.command("regenerate-scene")
@@ -121,44 +122,15 @@ def regenerate_scene(
     version_root: Path = typer.Option(Path(".novel2script"), help="Local version store root."),
     note: str = typer.Option("", help="Version note."),
 ) -> None:
-    store = VersionStore(version_root)
-    document = store.load_document(project_id, version_id)
-    request = AdaptationRequest.model_validate(store.load_intermediate(project_id, version_id, "request"))
-    if provider:
-        request = request.model_copy(update={"provider": provider})
-    chapters = [ParsedChapter.model_validate(item) for item in store.load_intermediate(project_id, version_id, "chapters")]
-    outline = Outline.model_validate(store.load_intermediate(project_id, version_id, "outline"))
-    story_bible = StoryBible.model_validate(store.load_intermediate(project_id, version_id, "story_bible"))
-    scene_plan = _find_scene_plan(outline.scene_plans, scene_id)
-    if instruction:
-        scene_plan = scene_plan.model_copy(
-            update={
-                "objective": f"{scene_plan.objective}；附加要求：{instruction}",
-                "notes": f"{scene_plan.notes} | {instruction}".strip(),
-            }
-        )
-    chapter = _resolve_scene_source(scene_plan, chapters)
-    scene = _build_ai_client(request.provider).generate_scene(scene_plan, story_bible, chapter, request)
-    updated_script = _replace_scene(document.script, scene_plan.act_id, scene_id, scene)
-    updated_document = document.model_copy(update={"script": updated_script})
-    quality = QualityChecker().review(updated_document)
-    ai_warnings, ai_suggestions = _build_ai_client(request.provider).review_document(updated_document, request)
-    quality.warnings = _merge_unique(quality.warnings, ai_warnings)
-    quality.revision_suggestions = _merge_unique(quality.revision_suggestions, ai_suggestions)
-    updated_document = updated_document.model_copy(update={"quality": quality})
-
-    version = store.save(
-        project_id,
-        updated_document,
-        intermediates={
-            "request": request.model_dump(mode="json"),
-            "chapters": [chapter.model_dump(mode="json") for chapter in chapters],
-            "story_bible": story_bible.model_dump(mode="json"),
-            "outline": outline.model_dump(mode="json"),
-        },
-        note=note or f"regenerate {scene_id}",
+    payload = WorkbenchService(version_root).regenerate_scene(
+        project_id=project_id,
+        version_id=version_id,
+        scene_id=scene_id,
+        instruction=instruction,
+        provider_override=provider,
+        note=note,
     )
-    console.print(f"[green]场景已重生成[/green] {scene_id} -> {version.version_id}")
+    console.print(f"[green]Scene regenerated[/green] {scene_id} -> {payload['version']['version_id']}")
 
 
 @app.command("export-schema")
@@ -166,7 +138,17 @@ def export_schema(
     output: Path = typer.Option(Path("schemas/screenplay.schema.json"), help="JSON Schema output path."),
 ) -> None:
     target = write_schema(output)
-    console.print(f"[green]JSON Schema 已导出[/green] {target}")
+    console.print(f"[green]JSON Schema exported[/green] {target}")
+
+
+@app.command("web")
+def web(
+    host: str = typer.Option("127.0.0.1", help="Host interface to bind."),
+    port: int = typer.Option(8098, help="Port to listen on."),
+    version_root: Path = typer.Option(Path(".novel2script"), help="Local version store root."),
+) -> None:
+    console.print(f"[green]Starting web console[/green] http://{host}:{port}")
+    run_server(host=host, port=port, version_root=version_root)
 
 
 @app.command("version")
@@ -190,46 +172,6 @@ def _slugify(value: str) -> str:
     slug = re.sub(r"[^\w\u4e00-\u9fff-]+", "-", value.strip())
     slug = re.sub(r"-{2,}", "-", slug)
     return slug.strip("-") or "novel-project"
-
-
-def _find_scene_plan(scene_plans: list[ScenePlan], scene_id: str) -> ScenePlan:
-    for scene_plan in scene_plans:
-        if scene_plan.scene_id == scene_id:
-            return scene_plan
-    raise typer.BadParameter(f"Scene plan not found: {scene_id}")
-
-
-def _resolve_scene_source(scene_plan: ScenePlan, chapters: list[ParsedChapter]) -> ParsedChapter:
-    chapter_map = {chapter.chapter_id: chapter for chapter in chapters}
-    for chapter_id in scene_plan.chapter_refs:
-        if chapter_id in chapter_map:
-            return chapter_map[chapter_id]
-    return chapters[0]
-
-
-def _replace_scene(script: Script, act_id: str, scene_id: str, replacement) -> Script:
-    acts: list[ScriptAct] = []
-    replaced = False
-    for act in script.acts:
-        scenes = []
-        for scene in act.scenes:
-            if act.act_id == act_id and scene.scene_id == scene_id:
-                scenes.append(replacement)
-                replaced = True
-            else:
-                scenes.append(scene)
-        acts.append(ScriptAct(act_id=act.act_id, title=act.title, scenes=scenes))
-    if not replaced:
-        raise typer.BadParameter(f"Scene not found in script: {scene_id}")
-    return Script(acts=acts)
-
-
-def _merge_unique(base: list[str], new_items: list[str]) -> list[str]:
-    output = list(base)
-    for item in new_items:
-        if item and item not in output:
-            output.append(item)
-    return output
 
 
 if __name__ == "__main__":

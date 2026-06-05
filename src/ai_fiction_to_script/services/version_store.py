@@ -54,6 +54,19 @@ class VersionStore:
     def list_versions(self, project_id: str) -> list[VersionRecord]:
         return self._load_index(project_id).versions
 
+    def list_projects(self) -> list[ProjectIndex]:
+        projects: list[ProjectIndex] = []
+        if not self.root.exists():
+            return projects
+        for child in sorted(self.root.iterdir(), key=lambda item: item.name):
+            if not child.is_dir():
+                continue
+            index_path = child / "index.json"
+            if not index_path.exists():
+                continue
+            projects.append(ProjectIndex.model_validate(json.loads(index_path.read_text(encoding="utf-8"))))
+        return projects
+
     def load_document(self, project_id: str, version_id: str) -> ScreenplayDocument:
         record = self._find_record(project_id, version_id)
         return load_yaml(record.script_yaml_path)

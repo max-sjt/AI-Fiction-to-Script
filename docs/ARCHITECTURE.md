@@ -19,6 +19,8 @@
 - `ScriptGenerator`: 逐场景生成剧本正文
 - `QualityChecker`: 完成 Schema、引用和一致性校验
 - `VersionStore`: 持久化每次产物、支持 diff 与回滚
+- `WorkbenchService`: 复用生成、版本保存、差异对比和单场重生成逻辑
+- `WebServer`: 提供浏览器端的 YAML 编辑、版本对比和可视化操作入口
 
 ## 扩展策略
 
@@ -26,4 +28,3 @@
 - 剧种扩展：由 `target_format`、`structure_type` 和 `style_guide` 驱动
 - 输出扩展：内部先保留对象模型，最终再导出 YAML/JSON/Markdown
 - 编排扩展：每个阶段输入输出固定，后续可接任务队列或 Web 前端
-

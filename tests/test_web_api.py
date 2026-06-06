@@ -92,6 +92,7 @@ def test_web_server_health_includes_version_and_start_time(tmp_path) -> None:
         assert health["data"]["status"] == "healthy"
         assert health["data"]["version"] == __version__
         assert "T" in health["data"]["server_started_at"]
+        assert health["data"]["cache_backend"] in {"disabled", "redis"}
     finally:
         stop_server(server, thread)
 

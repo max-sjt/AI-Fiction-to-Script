@@ -12,30 +12,54 @@ from ai_fiction_to_script.models.runtime import AdaptationRequest, ModelRouting,
 from ai_fiction_to_script.models.schema import Outline, Scene, ScenePlan, ScreenplayDocument, Script, ScriptAct
 from ai_fiction_to_script.pipeline.engine import AdaptationEngine
 from ai_fiction_to_script.services.ai_client import HybridAIClient, MockAIClient, QwenAIClient
+from ai_fiction_to_script.services.cache_store import CacheStore, NullCacheStore
 from ai_fiction_to_script.services.chapter_parser import ChapterParser
 from ai_fiction_to_script.services.presets import SCRIPT_TYPE_PRESETS, TONE_PRESETS, build_adaptation_goal, build_style_guide_for_tone
 from ai_fiction_to_script.services.quality_checker import QualityChecker
 from ai_fiction_to_script.services.version_store import VersionStore
 from ai_fiction_to_script.services.yaml_service import dump_yaml
-from ai_fiction_to_script.settings import QwenSettings
+from ai_fiction_to_script.settings import QwenSettings, WebCacheSettings
 
 
 class WorkbenchService:
-    def __init__(self, version_root: str | Path = ".novel2script") -> None:
+    def __init__(
+        self,
+        version_root: str | Path = ".novel2script",
+        cache_store: CacheStore | None = None,
+        cache_settings: WebCacheSettings | None = None,
+    ) -> None:
         self.version_store = VersionStore(version_root)
         self.quality_checker = QualityChecker()
+        self.cache_settings = cache_settings or WebCacheSettings()
+        self.cache_store = cache_store or NullCacheStore()
 
     def list_projects(self) -> list[dict]:
-        return [project.model_dump(mode="json") for project in self.version_store.list_projects()]
+        key = "projects"
+        cached = self.cache_store.get_json(key)
+        if cached is not None:
+            return cached
+        payload = [project.model_dump(mode="json") for project in self.version_store.list_projects()]
+        self.cache_store.set_json(key, payload, self.cache_settings.ttl_seconds)
+        return payload
 
     def list_versions(self, project_id: str) -> list[dict]:
-        return [version.model_dump(mode="json") for version in self.version_store.list_versions(project_id)]
+        key = f"projects:{project_id}:versions"
+        cached = self.cache_store.get_json(key)
+        if cached is not None:
+            return cached
+        payload = [version.model_dump(mode="json") for version in self.version_store.list_versions(project_id)]
+        self.cache_store.set_json(key, payload, self.cache_settings.ttl_seconds)
+        return payload
 
     def get_version_payload(self, project_id: str, version_id: str) -> dict:
+        key = f"projects:{project_id}:versions:{version_id}:payload"
+        cached = self.cache_store.get_json(key)
+        if cached is not None:
+            return cached
         record = self.version_store.get_record(project_id, version_id)
         document = self.version_store.load_document(project_id, version_id)
         yaml_text = Path(record.script_yaml_path).read_text(encoding="utf-8")
-        return {
+        payload = {
             "project_id": project_id,
             "version": record.model_dump(mode="json"),
             "document": document.model_dump(mode="json"),
@@ -43,14 +67,22 @@ class WorkbenchService:
             "rendered_script": self._render_screenplay(document),
             "scene_options": self._scene_options(document),
         }
+        self.cache_store.set_json(key, payload, self.cache_settings.ttl_seconds)
+        return payload
 
     def diff_versions(self, project_id: str, version_a: str, version_b: str) -> dict:
-        return {
+        key = f"projects:{project_id}:diff:{version_a}:{version_b}"
+        cached = self.cache_store.get_json(key)
+        if cached is not None:
+            return cached
+        payload = {
             "project_id": project_id,
             "version_a": version_a,
             "version_b": version_b,
             "diff": self.version_store.diff(project_id, version_a, version_b),
         }
+        self.cache_store.set_json(key, payload, self.cache_settings.ttl_seconds)
+        return payload
 
     def adapt(self, payload: dict) -> dict:
         title = payload.get("title") or "未命名剧本"
@@ -79,6 +111,7 @@ class WorkbenchService:
         result = engine.run(input_path=input_path, request=request, note=payload.get("note", ""))
         if result.version is None:
             raise RuntimeError("Adaptation completed without a saved version.")
+        self._invalidate_project_cache(request.project_id)
         return self.get_version_payload(request.project_id, result.version.version_id)
 
     def save_edited_yaml(self, project_id: str, version_id: str, yaml_text: str, note: str = "") -> dict:
@@ -97,6 +130,7 @@ class WorkbenchService:
             intermediates=intermediates,
             note=note or f"manual edit from {version_id}",
         )
+        self._invalidate_project_cache(project_id)
         return self.get_version_payload(project_id, saved.version_id)
 
     def regenerate_scene(
@@ -169,6 +203,7 @@ class WorkbenchService:
             intermediates=self._build_intermediates_from_document(project_id, version_id, updated_document, request),
             note=note or f"regenerate {scene_id}",
         )
+        self._invalidate_project_cache(project_id)
         payload = self.get_version_payload(project_id, saved.version_id)
         payload["scene_comparison"] = self._build_scene_comparison(
             document=document,
@@ -418,3 +453,7 @@ class WorkbenchService:
         if request.provider == "mock":
             return "mock-qwen-planner"
         return request.model_routing.generation_model
+
+    def _invalidate_project_cache(self, project_id: str) -> None:
+        self.cache_store.delete_prefix("projects")
+        self.cache_store.delete_prefix(f"projects:{project_id}")

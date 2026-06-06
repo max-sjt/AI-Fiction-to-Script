@@ -10,7 +10,9 @@ from pathlib import Path
 from urllib.parse import parse_qs, unquote, urlparse
 
 from ai_fiction_to_script import __version__
+from ai_fiction_to_script.services.cache_store import build_cache_store
 from ai_fiction_to_script.services.workbench import WorkbenchService
+from ai_fiction_to_script.settings import WebCacheSettings
 
 
 class ApiError(Exception):
@@ -23,6 +25,7 @@ class ApiError(Exception):
 class WorkbenchRequestHandler(BaseHTTPRequestHandler):
     service: WorkbenchService
     server_started_at: str = ""
+    cache_backend: str = "disabled"
 
     def do_GET(self) -> None:  # noqa: N802
         try:
@@ -41,6 +44,7 @@ class WorkbenchRequestHandler(BaseHTTPRequestHandler):
                             "status": "healthy",
                             "version": __version__,
                             "server_started_at": self.server_started_at,
+                            "cache_backend": self.cache_backend,
                         },
                     }
                 )
@@ -177,13 +181,20 @@ class WorkbenchRequestHandler(BaseHTTPRequestHandler):
 
 
 def create_server(host: str, port: int, version_root: str | Path = ".novel2script") -> ThreadingHTTPServer:
-    service = WorkbenchService(version_root)
+    cache_settings = WebCacheSettings.from_env()
+    cache_store = build_cache_store(
+        redis_url=cache_settings.redis_url,
+        enabled=cache_settings.enabled,
+        prefix=cache_settings.key_prefix,
+    )
+    service = WorkbenchService(version_root, cache_store=cache_store, cache_settings=cache_settings)
     handler_class = type(
         "BoundWorkbenchRequestHandler",
         (WorkbenchRequestHandler,),
         {
             "service": service,
             "server_started_at": datetime.now(timezone.utc).isoformat(),
+            "cache_backend": cache_store.backend_name,
         },
     )
     return ThreadingHTTPServer((host, port), handler_class)

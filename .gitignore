@@ -10,3 +10,5 @@ build/
 .novel2script/
 .novel2script*/
 output/
+runtime/*
+!runtime/.gitkeep

@@ -279,6 +279,54 @@ class MockAIClient(BaseAIClient):
         return warnings, revision_suggestions
 
 
+class HybridAIClient(BaseAIClient):
+    """Use local heuristics for planning and a remote model only for scene text."""
+
+    def __init__(
+        self,
+        planner_client: BaseAIClient,
+        generator_client: BaseAIClient,
+        reviewer_client: BaseAIClient | None = None,
+    ) -> None:
+        self._planner_client = planner_client
+        self._generator_client = generator_client
+        self._reviewer_client = reviewer_client or planner_client
+
+    def analyze_chapter(self, chapter: ParsedChapter, request: AdaptationRequest) -> ChapterAnalysis:
+        return self._planner_client.analyze_chapter(chapter, request)
+
+    def build_story_bible(
+        self,
+        analyses: list[ChapterAnalysis],
+        request: AdaptationRequest,
+    ) -> StoryBible:
+        return self._planner_client.build_story_bible(analyses, request)
+
+    def plan_outline(
+        self,
+        analyses: list[ChapterAnalysis],
+        story_bible: StoryBible,
+        request: AdaptationRequest,
+    ) -> Outline:
+        return self._planner_client.plan_outline(analyses, story_bible, request)
+
+    def generate_scene(
+        self,
+        scene_plan: ScenePlan,
+        story_bible: StoryBible,
+        chapter: ParsedChapter,
+        request: AdaptationRequest,
+    ) -> Scene:
+        return self._generator_client.generate_scene(scene_plan, story_bible, chapter, request)
+
+    def review_document(
+        self,
+        document: ScreenplayDocument,
+        request: AdaptationRequest,
+    ) -> tuple[list[str], list[str]]:
+        return self._reviewer_client.review_document(document, request)
+
+
 class QwenAIClient(BaseAIClient):
     def __init__(self, settings: QwenSettings) -> None:
         if not settings.api_key:
@@ -300,14 +348,54 @@ class QwenAIClient(BaseAIClient):
             "Authorization": f"Bearer {self._settings.api_key}",
             "Content-Type": "application/json",
         }
-        response = httpx.post(url, headers=headers, json=payload, timeout=self._settings.timeout_seconds)
-        response.raise_for_status()
+        try:
+            response = httpx.post(
+                url,
+                headers=headers,
+                json=payload,
+                timeout=httpx.Timeout(self._settings.timeout_seconds, connect=15.0),
+            )
+        except httpx.ReadTimeout as exc:
+            raise ValueError(
+                f"DashScope request timed out after {self._settings.timeout_seconds} seconds for model `{model}`。"
+                "当前已启用极速草稿模式；如果仍超时，通常说明当前模型响应过慢、网络不稳定，或账号所在地域与 Base URL 不匹配。"
+            ) from exc
+        except httpx.HTTPError as exc:
+            raise ValueError(f"DashScope request failed for model `{model}`: {exc}") from exc
+        if response.is_error:
+            raise ValueError(self._format_dashscope_error(response, model, url))
         content = response.json()["choices"][0]["message"]["content"]
         if isinstance(content, list):
             text = "".join(part.get("text", "") for part in content if isinstance(part, dict))
         else:
             text = str(content)
         return parse_json_object(text)
+
+    def _format_dashscope_error(self, response: httpx.Response, model: str, url: str) -> str:
+        detail = response.text.strip()
+        try:
+            payload = response.json()
+        except ValueError:
+            payload = None
+
+        if isinstance(payload, dict):
+            detail = str(
+                payload.get("message")
+                or payload.get("error")
+                or payload.get("msg")
+                or payload.get("detail")
+                or detail
+            ).strip()
+
+        if not detail:
+            detail = f"HTTP {response.status_code}"
+
+        message = f"DashScope request failed ({response.status_code}) for model `{model}`: {detail}"
+        if response.status_code == 400:
+            message += (
+                "。请重点检查模型名是否受支持、API Key 与 Base URL 是否是同一区域，以及当前账号是否支持该模型。"
+            )
+        return message
 
     def analyze_chapter(self, chapter: ParsedChapter, request: AdaptationRequest) -> ChapterAnalysis:
         system, user = PromptBuilder.chapter_analysis(chapter, request)
@@ -332,49 +420,50 @@ class QwenAIClient(BaseAIClient):
         system, user = PromptBuilder.story_bible(analyses, request)
         payload = self._chat_json(request.model_routing.planning_model, system, user, request.temperature)
         characters = []
-        for index, item in enumerate(payload.get("characters", []), start=1):
+        for index, raw_item in enumerate(_ensure_list(payload.get("characters")), start=1):
+            item = _normalize_named_mapping(raw_item, fallback_key="name")
             characters.append(
                 CharacterCard(
-                    character_id=item.get("character_id") or make_id("c", index),
-                    name=item.get("name", f"角色{index}"),
-                    role=item.get("role", "supporting"),
+                    character_id=_normalize_text_field(item.get("character_id")) or make_id("c", index),
+                    name=_normalize_text_field(item.get("name")) or f"角色{index}",
+                    role=_normalize_text_field(item.get("role")) or "supporting",
                     traits=_ensure_str_list(item.get("traits")),
-                    goal=item.get("goal", ""),
-                    conflict=item.get("conflict", ""),
-                    arc=item.get("arc", ""),
-                    voice=item.get("voice", ""),
+                    goal=_normalize_text_field(item.get("goal")),
+                    conflict=_normalize_text_field(item.get("conflict")),
+                    arc=_normalize_text_field(item.get("arc")),
+                    voice=_normalize_text_field(item.get("voice")),
                     relations=[
                         CharacterRelation(
-                            target_character_id=relation.get("target_character_id", ""),
-                            relation=relation.get("relation", "关联"),
-                            notes=relation.get("notes", ""),
+                            target_character_id=_normalize_text_field(relation.get("target_character_id")),
+                            relation=_normalize_text_field(relation.get("relation")) or "关联",
+                            notes=_normalize_text_field(relation.get("notes")),
                         )
-                        for relation in item.get("relations", [])
-                        if relation.get("target_character_id")
+                        for relation in _normalize_relation_list(item.get("relations"))
+                        if _normalize_text_field(relation.get("target_character_id"))
                     ],
                 )
             )
         locations = [
             LocationCard(
-                location_id=item.get("location_id") or make_id("l", index),
-                name=item.get("name", f"地点{index}"),
-                description=item.get("description", ""),
-                mood=item.get("mood", ""),
+                location_id=_normalize_text_field(item.get("location_id")) or make_id("l", index),
+                name=_normalize_text_field(item.get("name")) or f"地点{index}",
+                description=_normalize_text_field(item.get("description")),
+                mood=_normalize_text_field(item.get("mood")),
             )
-            for index, item in enumerate(payload.get("locations", []), start=1)
+            for index, item in enumerate(_normalize_named_mapping_list(payload.get("locations"), fallback_key="name"), start=1)
         ]
         timeline = [
             TimelineEvent(
-                event_id=item.get("event_id") or make_id("e", index),
-                time_order=int(item.get("time_order", index)),
-                summary=item.get("summary", ""),
+                event_id=_normalize_text_field(item.get("event_id")) or make_id("e", index),
+                time_order=_normalize_int(item.get("time_order"), index),
+                summary=_normalize_text_field(item.get("summary")) or f"事件{index}",
                 chapter_refs=_ensure_str_list(item.get("chapter_refs")),
             )
-            for index, item in enumerate(payload.get("timeline", []), start=1)
+            for index, item in enumerate(_normalize_named_mapping_list(payload.get("timeline"), fallback_key="summary"), start=1)
         ]
         return StoryBible(
-            logline=payload.get("logline", ""),
-            synopsis=payload.get("synopsis", ""),
+            logline=_normalize_text_field(payload.get("logline")),
+            synopsis=_normalize_text_field(payload.get("synopsis")),
             theme=_ensure_str_list(payload.get("theme")),
             characters=characters,
             locations=locations,
@@ -395,26 +484,26 @@ class QwenAIClient(BaseAIClient):
             "acts": [],
             "scene_plans": [],
         }
-        for index, act in enumerate(payload.get("acts", []), start=1):
+        for index, act in enumerate(_normalize_named_mapping_list(payload.get("acts"), fallback_key="name"), start=1):
             normalized["acts"].append(
                 {
-                    "act_id": act.get("act_id") or make_id("a", index, width=1),
-                    "name": act.get("name", f"第{index}幕"),
-                    "purpose": act.get("purpose", ""),
-                    "scene_count": int(act.get("scene_count", 0)),
+                    "act_id": _normalize_text_field(act.get("act_id")) or make_id("a", index, width=1),
+                    "name": _normalize_text_field(act.get("name")) or f"第{index}幕",
+                    "purpose": _normalize_text_field(act.get("purpose")),
+                    "scene_count": _normalize_int(act.get("scene_count"), 0),
                 }
             )
-        for index, scene in enumerate(payload.get("scene_plans", []), start=1):
+        for index, scene in enumerate(_normalize_named_mapping_list(payload.get("scene_plans"), fallback_key="title"), start=1):
             fallback_act_id = normalized["acts"][min(index - 1, len(normalized["acts"]) - 1)]["act_id"] if normalized["acts"] else "a1"
             normalized["scene_plans"].append(
                 {
-                    "scene_id": scene.get("scene_id") or make_id("s", index),
-                    "act_id": scene.get("act_id") or fallback_act_id,
-                    "title": scene.get("title", f"场景{index}"),
-                    "objective": scene.get("objective", "推进核心冲突"),
+                    "scene_id": _normalize_text_field(scene.get("scene_id")) or make_id("s", index),
+                    "act_id": _normalize_text_field(scene.get("act_id")) or fallback_act_id,
+                    "title": _normalize_text_field(scene.get("title")) or f"场景{index}",
+                    "objective": _normalize_text_field(scene.get("objective")) or "推进核心冲突",
                     "chapter_refs": _ensure_str_list(scene.get("chapter_refs")),
-                    "conflict": scene.get("conflict", ""),
-                    "notes": scene.get("notes", ""),
+                    "conflict": _normalize_text_field(scene.get("conflict")),
+                    "notes": _normalize_text_field(scene.get("notes")),
                 }
             )
         return Outline.model_validate(normalized)
@@ -429,30 +518,41 @@ class QwenAIClient(BaseAIClient):
         system, user = PromptBuilder.scene(scene_plan, story_bible, chapter, request)
         payload = self._chat_json(request.model_routing.generation_model, system, user, request.temperature)
         beats = []
-        for index, beat in enumerate(payload.get("beats", []), start=1):
+        for index, beat in enumerate(_normalize_named_mapping_list(payload.get("beats"), fallback_key="text"), start=1):
             beats.append(
                 Beat(
-                    beat_id=beat.get("beat_id") or make_id("b", index),
-                    type=beat.get("type", "action"),
-                    text=beat.get("text", ""),
-                    speaker_ref=beat.get("speaker_ref"),
-                    emotion=beat.get("emotion", ""),
+                    beat_id=_normalize_beat_id(beat.get("beat_id"), index),
+                    type=_normalize_beat_type(beat.get("type")),
+                    text=_normalize_text_field(beat.get("text")) or scene_plan.objective,
+                    speaker_ref=_normalize_optional_str(beat.get("speaker_ref")),
+                    emotion=_normalize_text_field(beat.get("emotion")),
+                )
+            )
+        if not beats:
+            beats.append(
+                Beat(
+                    beat_id=make_id("b", 1),
+                    type="action",
+                    text=payload.get("summary") or scene_plan.objective,
                 )
             )
         source_refs = [
-            SourceRef(chapter_id=item.get("chapter_id", chapter.chapter_id), excerpt_id=item.get("excerpt_id", "p001"))
-            for item in payload.get("source_refs", [])
+            SourceRef(
+                chapter_id=_normalize_text_field(item.get("chapter_id")) or chapter.chapter_id,
+                excerpt_id=_normalize_text_field(item.get("excerpt_id")) or "p001",
+            )
+            for item in _normalize_named_mapping_list(payload.get("source_refs"), fallback_key="excerpt_id")
         ]
         return Scene(
             scene_id=scene_plan.scene_id,
-            title=payload.get("title", scene_plan.title),
+            title=_normalize_text_field(payload.get("title")) or scene_plan.title,
             chapter_refs=scene_plan.chapter_refs,
-            location_ref=payload.get("location_ref"),
-            time_of_day=payload.get("time_of_day", ""),
-            objective=payload.get("objective", scene_plan.objective),
-            summary=payload.get("summary", ""),
+            location_ref=_normalize_optional_str(payload.get("location_ref")),
+            time_of_day=_normalize_text_field(payload.get("time_of_day")),
+            objective=_normalize_text_field(payload.get("objective")) or scene_plan.objective,
+            summary=_normalize_text_field(payload.get("summary")),
             beats=beats,
-            transitions=SceneTransition.model_validate(payload.get("transitions", {})) if payload.get("transitions") else None,
+            transitions=SceneTransition.model_validate(_normalize_mapping(payload.get("transitions"))) if payload.get("transitions") else None,
             source_refs=source_refs,
         )
 
@@ -476,6 +576,78 @@ def _ensure_str_list(value: Any) -> list[str]:
     if isinstance(value, list):
         return [str(item).strip() for item in value if str(item).strip()]
     return [str(value).strip()] if str(value).strip() else []
+
+
+def _ensure_list(value: Any) -> list[Any]:
+    if value is None:
+        return []
+    if isinstance(value, list):
+        return value
+    return [value]
+
+
+def _normalize_mapping(value: Any) -> dict[str, Any]:
+    if isinstance(value, dict):
+        return value
+    return {}
+
+
+def _normalize_named_mapping(value: Any, fallback_key: str) -> dict[str, Any]:
+    if isinstance(value, dict):
+        return value
+    if value is None:
+        return {}
+    return {fallback_key: str(value)}
+
+
+def _normalize_named_mapping_list(value: Any, fallback_key: str) -> list[dict[str, Any]]:
+    return [_normalize_named_mapping(item, fallback_key) for item in _ensure_list(value)]
+
+
+def _normalize_relation_list(value: Any) -> list[dict[str, Any]]:
+    relations: list[dict[str, Any]] = []
+    for item in _ensure_list(value):
+        if isinstance(item, dict):
+            relations.append(item)
+        elif item is not None:
+            relations.append({"target_character_id": str(item), "relation": "关联"})
+    return relations
+
+
+def _normalize_text_field(value: Any) -> str:
+    if value is None:
+        return ""
+    return str(value).strip()
+
+
+def _normalize_optional_str(value: Any) -> str | None:
+    normalized = _normalize_text_field(value)
+    return normalized or None
+
+
+def _normalize_beat_id(value: Any, index: int) -> str:
+    normalized = _normalize_text_field(value)
+    return normalized or make_id("b", index)
+
+
+def _normalize_beat_type(value: Any) -> str:
+    normalized = _normalize_text_field(value).lower()
+    if normalized in {"dialogue", "line", "speech", "conversation"}:
+        return "dialogue"
+    if normalized in {"transition", "cut", "fade", "wipe"}:
+        return "transition"
+    if normalized in {"narration", "voiceover", "voice_over", "vo", "setup", "intro", "exposition"}:
+        return "narration"
+    if normalized in {"action", "beat", "description", "scene", "movement"}:
+        return "action"
+    return "action"
+
+
+def _normalize_int(value: Any, default: int) -> int:
+    try:
+        return int(value)
+    except (TypeError, ValueError):
+        return default
 
 
 def _dedupe(items: list[str]) -> list[str]:

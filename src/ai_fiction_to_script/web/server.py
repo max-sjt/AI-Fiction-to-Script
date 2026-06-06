@@ -2,12 +2,14 @@ from __future__ import annotations
 
 import json
 import mimetypes
+from datetime import datetime, timezone
 from http import HTTPStatus
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from importlib import resources
 from pathlib import Path
 from urllib.parse import parse_qs, unquote, urlparse
 
+from ai_fiction_to_script import __version__
 from ai_fiction_to_script.services.workbench import WorkbenchService
 
 
@@ -20,6 +22,7 @@ class ApiError(Exception):
 
 class WorkbenchRequestHandler(BaseHTTPRequestHandler):
     service: WorkbenchService
+    server_started_at: str = ""
 
     def do_GET(self) -> None:  # noqa: N802
         try:
@@ -31,7 +34,16 @@ class WorkbenchRequestHandler(BaseHTTPRequestHandler):
                 self._serve_static(parsed.path.removeprefix("/assets/"))
                 return
             if parsed.path == "/api/health":
-                self._send_json({"ok": True, "data": {"status": "healthy"}})
+                self._send_json(
+                    {
+                        "ok": True,
+                        "data": {
+                            "status": "healthy",
+                            "version": __version__,
+                            "server_started_at": self.server_started_at,
+                        },
+                    }
+                )
                 return
             if parsed.path == "/api/projects":
                 self._send_json({"ok": True, "data": {"projects": self.service.list_projects()}})
@@ -102,6 +114,8 @@ class WorkbenchRequestHandler(BaseHTTPRequestHandler):
                             scene_id=scene_id,
                             instruction=payload.get("instruction", ""),
                             provider_override=payload.get("provider", ""),
+                            api_key=payload.get("api_key", ""),
+                            tone_override=payload.get("tone", ""),
                             note=payload.get("note", ""),
                         ),
                     },
@@ -132,6 +146,7 @@ class WorkbenchRequestHandler(BaseHTTPRequestHandler):
         self.send_response(HTTPStatus.OK)
         self.send_header("Content-Type", mime_type)
         self.send_header("Content-Length", str(len(content)))
+        self._send_no_cache_headers()
         self.end_headers()
         self.wfile.write(content)
 
@@ -148,11 +163,17 @@ class WorkbenchRequestHandler(BaseHTTPRequestHandler):
         self.send_response(status)
         self.send_header("Content-Type", "application/json; charset=utf-8")
         self.send_header("Content-Length", str(len(raw)))
+        self._send_no_cache_headers()
         self.end_headers()
         self.wfile.write(raw)
 
     def _path_parts(self, path: str) -> list[str]:
         return [unquote(part) for part in path.strip("/").split("/") if part]
+
+    def _send_no_cache_headers(self) -> None:
+        self.send_header("Cache-Control", "no-store, max-age=0")
+        self.send_header("Pragma", "no-cache")
+        self.send_header("Expires", "0")
 
 
 def create_server(host: str, port: int, version_root: str | Path = ".novel2script") -> ThreadingHTTPServer:
@@ -160,7 +181,10 @@ def create_server(host: str, port: int, version_root: str | Path = ".novel2scrip
     handler_class = type(
         "BoundWorkbenchRequestHandler",
         (WorkbenchRequestHandler,),
-        {"service": service},
+        {
+            "service": service,
+            "server_started_at": datetime.now(timezone.utc).isoformat(),
+        },
     )
     return ThreadingHTTPServer((host, port), handler_class)
 

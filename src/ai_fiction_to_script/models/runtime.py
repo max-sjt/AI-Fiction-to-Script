@@ -77,4 +77,3 @@ class ProjectIndex(RuntimeModel):
     project_id: str
     latest_version: str | None = None
     versions: list[VersionRecord] = Field(default_factory=list)
-

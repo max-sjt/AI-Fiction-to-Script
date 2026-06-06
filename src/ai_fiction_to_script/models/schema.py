@@ -32,13 +32,13 @@ class SourceChapter(SchemaModel):
 
 
 class SourceInfo(SchemaModel):
-    chapter_count: int = Field(..., ge=3)
+    chapter_count: int = Field(..., ge=1)
     chapters: list[SourceChapter] = Field(default_factory=list)
 
 
 class StyleGuide(SchemaModel):
     dialogue_style: str = "自然口语化"
-    narration_style: str = "简洁"
+    narration_style: str = "简洁清晰"
     pacing_style: str = "平衡"
 
 
@@ -180,4 +180,3 @@ class ScreenplayDocument(SchemaModel):
     script: Script
     quality: QualityReport = Field(default_factory=QualityReport)
     extensions: dict[str, Any] = Field(default_factory=dict)
-

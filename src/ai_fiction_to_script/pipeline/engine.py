@@ -48,8 +48,8 @@ class AdaptationEngine:
 
     def run(self, input_path: str | Path, request: AdaptationRequest, note: str = "") -> AdaptationResult:
         chapters = self._parser.parse(input_path)
-        if len(chapters) < 3:
-            raise ValueError("输入小说章节数不足 3 章，无法满足题目要求。")
+        if not chapters or not any(chapter.raw_text.strip() for chapter in chapters):
+            raise ValueError("输入小说正文为空，无法生成剧本。")
 
         analyses = [self._ai_client.analyze_chapter(chapter, request) for chapter in chapters]
         story_bible = self._ai_client.build_story_bible(analyses, request)
@@ -198,4 +198,3 @@ def _merge_unique(base: list[str], new_items: list[str]) -> list[str]:
         if item and item not in output:
             output.append(item)
     return output
-

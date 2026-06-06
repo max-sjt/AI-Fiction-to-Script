@@ -12,179 +12,164 @@
     <header class="hero">
       <div>
         <p class="eyebrow">AI Fiction to Script</p>
-        <h1>Screenplay Workbench</h1>
-        <p class="hero-copy">
-          Generate structured screenplay drafts, inspect version history, edit YAML directly,
-          compare revisions, and regenerate individual scenes without leaving one page.
+        <h1 data-i18n="heroTitle">Qwen 剧本生成工作台</h1>
+        <p class="hero-copy" data-i18n="heroCopy">
+          上传小说文件或直接粘贴正文，调用通义千问生成不同类型、不同语气的结构化剧本，并支持场景级重生成。
         </p>
       </div>
-      <div class="hero-status">
-        <span class="status-dot"></span>
-        <span id="statusText">Loading workspace...</span>
+      <div class="hero-controls">
+        <div id="buildBadge" class="build-badge">server unknown</div>
+        <label class="language-switcher">
+          <span data-i18n="languageLabel">界面语言</span>
+          <select id="languageSelect">
+            <option value="zh">中文</option>
+            <option value="en">English</option>
+          </select>
+        </label>
+        <div class="hero-status">
+          <span class="status-dot"></span>
+          <span id="statusText" data-i18n="loadingWorkspace">正在加载工作区...</span>
+        </div>
       </div>
     </header>
 
     <main class="layout">
       <aside class="sidebar card">
         <div class="section-heading">
-          <h2>Projects</h2>
-          <button id="refreshProjectsButton" class="ghost-button">Refresh</button>
+          <h2 data-i18n="projectsHeading">项目</h2>
+          <button id="refreshProjectsButton" class="ghost-button" data-i18n="refreshButton">刷新</button>
         </div>
         <div id="projectsList" class="project-list"></div>
       </aside>
 
       <section class="content">
+        <div id="messageBanner" class="message-banner hidden"></div>
+
         <section class="card section-card">
           <div class="section-heading">
-            <h2>Generate Draft</h2>
-            <span class="pill">New version</span>
+            <h2 data-i18n="generateHeading">生成剧本</h2>
+            <span class="pill" data-i18n="qwenPill">Qwen 生成</span>
           </div>
           <div class="form-grid">
-            <label>
-              <span>Novel file path</span>
-              <input id="inputPath" type="text" placeholder="examples/sample_novel.txt" />
-            </label>
-            <label>
-              <span>Project ID</span>
-              <input id="projectId" type="text" placeholder="demo-project" />
-            </label>
-            <label>
-              <span>Title</span>
-              <input id="title" type="text" placeholder="老街回声" />
-            </label>
-            <label>
-              <span>Author</span>
-              <input id="author" type="text" placeholder="测试作者" />
-            </label>
-            <label>
-              <span>Original title</span>
-              <input id="originalTitle" type="text" placeholder="老街回声" />
-            </label>
-            <label>
-              <span>Provider</span>
-              <select id="provider">
-                <option value="mock">mock</option>
-                <option value="qwen">qwen</option>
-              </select>
-            </label>
-            <label>
-              <span>Target format</span>
-              <select id="targetFormat">
-                <option value="tv_drama">tv_drama</option>
-                <option value="film">film</option>
-                <option value="short_drama">short_drama</option>
-                <option value="stage_play">stage_play</option>
-              </select>
-            </label>
-            <label>
-              <span>Genre</span>
-              <input id="genre" type="text" placeholder="悬疑,成长" />
-            </label>
-            <label>
-              <span>Tone</span>
-              <input id="tone" type="text" placeholder="balanced" />
+            <label class="full-width">
+              <span data-i18n="apiKeyLabel">Qwen API Key</span>
+              <input id="apiKey" type="password" data-i18n-placeholder="apiKeyPlaceholder" placeholder="请输入 sk-..." />
             </label>
             <label class="full-width">
-              <span>Version note</span>
-              <input id="adaptNote" type="text" placeholder="initial web draft" />
+              <span data-i18n="uploadLabel">上传小说文件（txt / doc / docx）</span>
+              <input id="uploadFile" type="file" accept=".txt,.doc,.docx" />
+            </label>
+            <label>
+              <span data-i18n="titleLabel">剧本标题</span>
+              <input id="title" type="text" data-i18n-placeholder="titlePlaceholder" placeholder="老街回声" />
+            </label>
+            <label>
+              <span data-i18n="authorLabel">原著作者</span>
+              <input id="author" type="text" data-i18n-placeholder="authorPlaceholder" placeholder="测试作者" />
+            </label>
+            <label>
+              <span data-i18n="originalTitleLabel">原著标题</span>
+              <input id="originalTitle" type="text" data-i18n-placeholder="originalTitlePlaceholder" placeholder="老街回声" />
+            </label>
+            <label>
+              <span data-i18n="scriptTypeLabel">生成剧本类型</span>
+              <select id="scriptType"></select>
+            </label>
+            <label>
+              <span data-i18n="genreLabel">题材</span>
+              <input id="genre" type="text" data-i18n-placeholder="genrePlaceholder" placeholder="悬疑,成长" />
+            </label>
+            <label>
+              <span data-i18n="toneLabel">语气风格</span>
+              <select id="tone"></select>
             </label>
             <label class="full-width">
-              <span>Or paste novel text</span>
-              <textarea id="novelText" rows="6" placeholder="Paste 3 or more chapters here if you do not want to use a file path."></textarea>
+              <span data-i18n="pasteTextLabel">直接粘贴小说文本</span>
+              <textarea
+                id="novelText"
+                rows="8"
+                data-i18n-placeholder="novelTextPlaceholder"
+                placeholder="如果不上传文件，可以在这里粘贴一章或多章小说正文；多章生成会更稳定。"
+              ></textarea>
             </label>
           </div>
           <div class="action-row">
-            <button id="generateButton" class="primary-button">Generate Draft</button>
+            <button id="generateButton" class="primary-button" data-i18n="generateButton">生成剧本</button>
           </div>
         </section>
 
         <section class="card section-card">
           <div class="section-heading">
-            <h2>Workspace</h2>
-            <span class="pill" id="workspacePill">No project selected</span>
+            <h2 data-i18n="workspaceHeading">工作区</h2>
+            <span class="pill" id="workspacePill" data-i18n="workspaceEmpty">尚未选择项目</span>
           </div>
 
-          <div class="toolbar-grid">
+          <div class="workspace-toolbar">
             <label>
-              <span>Selected project</span>
+              <span data-i18n="currentProjectLabel">当前项目</span>
               <select id="projectSelect"></select>
             </label>
             <label>
-              <span>Selected version</span>
+              <span data-i18n="currentVersionLabel">当前版本</span>
               <select id="versionSelect"></select>
             </label>
-            <label>
-              <span>Diff base</span>
-              <select id="diffFromSelect"></select>
-            </label>
-            <label>
-              <span>Diff target</span>
-              <select id="diffToSelect"></select>
-            </label>
+            <div class="toolbar-actions">
+              <button id="reloadVersionButton" class="ghost-button" data-i18n="reloadButton">重新加载</button>
+              <button id="downloadYamlButton" class="secondary-button" data-i18n="downloadYamlButton">下载 YAML</button>
+            </div>
           </div>
 
-          <div class="workspace-grid">
-            <div class="editor-panel">
-              <div class="panel-heading">
-                <h3>YAML Editor</h3>
-                <div class="action-row compact">
-                  <input id="saveNote" type="text" placeholder="manual edit note" />
-                  <button id="saveYamlButton" class="secondary-button">Save As New Version</button>
-                </div>
-              </div>
-              <textarea id="yamlEditor" class="yaml-editor" spellcheck="false"></textarea>
+          <div class="script-stage">
+            <div class="panel-heading">
+              <h3 data-i18n="finalScriptHeading">最终生成剧本</h3>
             </div>
-            <div class="summary-panel">
-              <div class="panel-heading">
-                <h3>Version Summary</h3>
-                <button id="reloadVersionButton" class="ghost-button">Reload</button>
-              </div>
-              <div id="summaryCards" class="summary-cards"></div>
-              <div class="scene-chip-block">
-                <h4>Scenes</h4>
-                <div id="sceneChipList" class="scene-chip-list"></div>
-              </div>
-            </div>
+            <pre id="scriptPreview" class="script-preview" data-i18n="scriptPreviewPlaceholder">请选择一个版本查看生成结果。</pre>
           </div>
         </section>
 
         <section class="card section-card">
           <div class="section-heading">
-            <h2>Version Diff</h2>
-            <button id="compareButton" class="secondary-button">Compare Versions</button>
-          </div>
-          <pre id="diffOutput" class="diff-output">Select two versions to compare.</pre>
-        </section>
-
-        <section class="card section-card">
-          <div class="section-heading">
-            <h2>Scene Regeneration</h2>
-            <span class="pill">Targeted rewrite</span>
+            <h2 data-i18n="sceneRegenerationHeading">场景重生成</h2>
+            <span class="pill" data-i18n="targetedRewritePill">定向重写</span>
           </div>
           <div class="form-grid">
             <label>
-              <span>Scene</span>
+              <span data-i18n="sceneLabel">场景</span>
               <select id="sceneSelect"></select>
             </label>
-            <label>
-              <span>Provider override</span>
-              <select id="regenProvider">
-                <option value="">keep current</option>
-                <option value="mock">mock</option>
-                <option value="qwen">qwen</option>
-              </select>
-            </label>
             <label class="full-width">
-              <span>Instruction</span>
-              <textarea id="regenInstruction" rows="4" placeholder="Describe what should change in this scene."></textarea>
-            </label>
-            <label class="full-width">
-              <span>Version note</span>
-              <input id="regenNote" type="text" placeholder="scene rewrite note" />
+              <span data-i18n="instructionLabel">修改要求</span>
+              <textarea
+                id="regenInstruction"
+                rows="4"
+                data-i18n-placeholder="regenInstructionPlaceholder"
+                placeholder="描述这个场景需要如何调整。"
+              ></textarea>
             </label>
           </div>
           <div class="action-row">
-            <button id="regenerateButton" class="primary-button">Regenerate Scene</button>
+            <button id="regenerateButton" class="primary-button" data-i18n="regenerateButton">重生成场景</button>
+          </div>
+
+          <div class="comparison-stage">
+            <div class="panel-heading">
+              <h3 data-i18n="sceneComparisonHeading">修改前后对比</h3>
+              <span class="pill" data-i18n="comparisonResultPill">结果对比</span>
+            </div>
+            <div class="comparison-card">
+              <strong data-i18n="comparisonInstructionLabel">修改要求</strong>
+              <p id="sceneComparisonInstruction" class="comparison-instruction">重生成场景后，这里会显示修改前后对比。</p>
+            </div>
+            <div class="comparison-grid">
+              <div class="comparison-card">
+                <h4 data-i18n="comparisonBeforeLabel">修改前</h4>
+                <pre id="sceneBeforePreview" class="comparison-preview">重生成场景后，这里会显示修改前后对比。</pre>
+              </div>
+              <div class="comparison-card">
+                <h4 data-i18n="comparisonAfterLabel">修改后</h4>
+                <pre id="sceneAfterPreview" class="comparison-preview">重生成场景后，这里会显示修改前后对比。</pre>
+              </div>
+            </div>
           </div>
         </section>
       </section>

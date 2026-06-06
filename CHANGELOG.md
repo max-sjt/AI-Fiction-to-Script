@@ -6,6 +6,7 @@
 - Added API endpoints for project browsing, YAML editing, version diffing, and scene regeneration
 - Added the `novel2script web` command
 - Added Web API tests and updated package data for static assets
+- Added a visible `中文 / English` interface language switch in the Web workbench
 
 ## v0.3.0
 

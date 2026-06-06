@@ -102,6 +102,7 @@ The workbench supports:
 - direct YAML editing and save-as-new-version
 - version diff inspection
 - scene-level regeneration with extra instructions
+- interface language switching between `中文` and `English`
 
 ## Local Versioning
 

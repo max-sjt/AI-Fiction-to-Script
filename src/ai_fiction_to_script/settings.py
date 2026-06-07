@@ -5,6 +5,8 @@ from dataclasses import dataclass
 
 DEFAULT_QWEN_BASE_URL = "https://dashscope.aliyuncs.com/compatible-mode/v1"
 DEFAULT_QWEN_TIMEOUT_SECONDS = 150
+DEFAULT_REDIS_URL = "redis://127.0.0.1:6379/0"
+DEFAULT_CACHE_TTL_SECONDS = 60
 
 
 @dataclass(slots=True)
@@ -19,4 +21,22 @@ class QwenSettings:
             api_key=api_key_override or os.getenv("DASHSCOPE_API_KEY") or os.getenv("QWEN_API_KEY"),
             base_url=os.getenv("QWEN_BASE_URL") or DEFAULT_QWEN_BASE_URL,
             timeout_seconds=int(os.getenv("QWEN_TIMEOUT_SECONDS", str(DEFAULT_QWEN_TIMEOUT_SECONDS))),
+        )
+
+
+@dataclass(slots=True)
+class WebCacheSettings:
+    enabled: bool = True
+    redis_url: str = DEFAULT_REDIS_URL
+    ttl_seconds: int = DEFAULT_CACHE_TTL_SECONDS
+    key_prefix: str = "novel2script"
+
+    @classmethod
+    def from_env(cls) -> "WebCacheSettings":
+        enabled = (os.getenv("WEB_CACHE_ENABLED", "1").strip().lower() not in {"0", "false", "no"})
+        return cls(
+            enabled=enabled,
+            redis_url=os.getenv("REDIS_URL") or DEFAULT_REDIS_URL,
+            ttl_seconds=int(os.getenv("WEB_CACHE_TTL_SECONDS", str(DEFAULT_CACHE_TTL_SECONDS))),
+            key_prefix=os.getenv("WEB_CACHE_KEY_PREFIX", "novel2script"),
         )

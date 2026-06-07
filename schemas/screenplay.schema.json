@@ -331,6 +331,7 @@
           "items": {
             "$ref": "#/$defs/ActOutline"
           },
+          "minItems": 1,
           "title": "Acts",
           "type": "array"
         },
@@ -338,6 +339,7 @@
           "items": {
             "$ref": "#/$defs/ScenePlan"
           },
+          "minItems": 1,
           "title": "Scene Plans",
           "type": "array"
         }
@@ -391,6 +393,7 @@
           "items": {
             "type": "string"
           },
+          "minItems": 1,
           "title": "Chapter Refs",
           "type": "array"
         },
@@ -442,6 +445,7 @@
           "items": {
             "$ref": "#/$defs/SourceRef"
           },
+          "minItems": 1,
           "title": "Source Refs",
           "type": "array"
         }
@@ -477,6 +481,7 @@
           "items": {
             "type": "string"
           },
+          "minItems": 1,
           "title": "Chapter Refs",
           "type": "array"
         },
@@ -524,6 +529,7 @@
           "items": {
             "$ref": "#/$defs/ScriptAct"
           },
+          "minItems": 1,
           "title": "Acts",
           "type": "array"
         }
@@ -604,6 +610,7 @@
           "items": {
             "$ref": "#/$defs/SourceChapter"
           },
+          "minItems": 3,
           "title": "Chapters",
           "type": "array"
         }
@@ -691,12 +698,12 @@
       "additionalProperties": false,
       "properties": {
         "dialogue_style": {
-          "default": "自然口语化",
+          "default": "自然、口语化",
           "title": "Dialogue Style",
           "type": "string"
         },
         "narration_style": {
-          "default": "简洁",
+          "default": "简洁、清晰",
           "title": "Narration Style",
           "type": "string"
         },
@@ -729,6 +736,7 @@
           "items": {
             "type": "string"
           },
+          "minItems": 1,
           "title": "Chapter Refs",
           "type": "array"
         }
@@ -745,7 +753,7 @@
   "additionalProperties": false,
   "properties": {
     "schema_version": {
-      "default": "1.0",
+      "default": "2.0",
       "title": "Schema Version",
       "type": "string"
     },

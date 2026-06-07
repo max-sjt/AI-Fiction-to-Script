@@ -75,7 +75,7 @@ def test_web_server_lists_projects_and_serves_html(tmp_path) -> None:
             cache_control = response.headers.get("Cache-Control")
         assert "Qwen 剧本生成工作台" in html
         assert 'id="languageSelect"' in html
-        assert 'id="buildBadge"' in html
+        assert 'id="resetProjectsButton"' in html
         assert "中文" in html
         assert cache_control == "no-store, max-age=0"
     finally:
@@ -92,6 +92,7 @@ def test_web_server_health_includes_version_and_start_time(tmp_path) -> None:
         assert health["data"]["status"] == "healthy"
         assert health["data"]["version"] == __version__
         assert "T" in health["data"]["server_started_at"]
+        assert health["data"]["cache_backend"] in {"disabled", "redis"}
     finally:
         stop_server(server, thread)
 
@@ -195,5 +196,120 @@ def test_web_server_passes_regenerate_overrides(tmp_path) -> None:
             "tone_override": "dark",
             "note": "web override pass",
         }
+    finally:
+        stop_server(server, thread)
+
+
+def test_web_server_supports_async_adapt_and_task_polling(tmp_path) -> None:
+    version_root = tmp_path / ".novel2script"
+    server, thread, base_url = start_server(version_root)
+
+    def fake_start_adapt_async(payload: dict) -> dict:
+        return {
+            "preview": {
+                "project_id": "async-demo",
+                "version": {"version_id": "v0001"},
+            },
+            "task": {
+                "task_id": "task-123",
+                "kind": "adapt",
+                "project_id": "async-demo",
+                "preview_version_id": "v0001",
+                "status": "running",
+                "final_version_id": "",
+                "error": "",
+                "created_at": "2026-06-06T00:00:00+00:00",
+                "updated_at": "2026-06-06T00:00:00+00:00",
+                "result": None,
+            },
+        }
+
+    def fake_get_task_status(task_id: str) -> dict:
+        assert task_id == "task-123"
+        return {
+            "task_id": "task-123",
+            "kind": "adapt",
+            "project_id": "async-demo",
+            "preview_version_id": "v0001",
+            "status": "completed",
+            "final_version_id": "v0002",
+            "error": "",
+            "created_at": "2026-06-06T00:00:00+00:00",
+            "updated_at": "2026-06-06T00:00:03+00:00",
+            "result": {
+                "project_id": "async-demo",
+                "version": {"version_id": "v0002"},
+            },
+        }
+
+    server.RequestHandlerClass.service.start_adapt_async = fake_start_adapt_async
+    server.RequestHandlerClass.service.get_task_status = fake_get_task_status
+    try:
+        created = api_request(
+            base_url,
+            "/api/adapt-async",
+            method="POST",
+            payload={"title": "异步测试"},
+        )
+        assert created["ok"] is True
+        assert created["data"]["task"]["task_id"] == "task-123"
+
+        polled = api_request(base_url, "/api/tasks/task-123")
+        assert polled["ok"] is True
+        assert polled["data"]["status"] == "completed"
+        assert polled["data"]["final_version_id"] == "v0002"
+    finally:
+        stop_server(server, thread)
+
+
+def test_web_server_can_delete_version_and_remove_files(tmp_path) -> None:
+    version_root = tmp_path / ".novel2script"
+    seed_project(version_root)
+    server, thread, base_url = start_server(version_root)
+    try:
+        version_payload = api_request(base_url, "/api/projects/web-demo/versions/v0001")
+        yaml_text = version_payload["data"]["yaml_text"] + "\n"
+        saved = api_request(
+            base_url,
+            "/api/projects/web-demo/versions/v0001/save",
+            method="POST",
+            payload={"yaml_text": yaml_text, "note": "edited in web"},
+        )
+        assert saved["ok"] is True
+        assert (version_root / "web-demo" / "versions" / "v0001").exists()
+        assert (version_root / "web-demo" / "versions" / "v0002").exists()
+
+        deleted = api_request(
+            base_url,
+            "/api/projects/web-demo/versions/v0001/delete",
+            method="DELETE",
+        )
+        assert deleted["ok"] is True
+        assert deleted["data"]["project_exists"] is True
+        assert [item["version_id"] for item in deleted["data"]["versions"]] == ["v0002"]
+        assert not (version_root / "web-demo" / "versions" / "v0001").exists()
+        assert (version_root / "web-demo" / "versions" / "v0002").exists()
+    finally:
+        stop_server(server, thread)
+
+
+def test_web_server_delete_last_version_removes_project(tmp_path) -> None:
+    version_root = tmp_path / ".novel2script"
+    seed_project(version_root)
+    server, thread, base_url = start_server(version_root)
+    try:
+        deleted = api_request(
+            base_url,
+            "/api/projects/web-demo/versions/v0001/delete",
+            method="DELETE",
+        )
+        assert deleted["ok"] is True
+        assert deleted["data"]["project_exists"] is False
+        assert deleted["data"]["versions"] == []
+
+        projects = api_request(base_url, "/api/projects")
+        assert projects["ok"] is True
+        assert projects["data"]["projects"] == []
+        assert not (version_root / "web-demo").exists()
     finally:
         stop_server(server, thread)

@@ -31,8 +31,12 @@ def test_pipeline_generates_document_and_version(tmp_path) -> None:
 
     result = engine.run(sample_novel_path(), request, note="initial")
 
+    assert result.document.schema_version == "2.0"
     assert result.document.source.chapter_count == 3
-    assert len(result.document.script.acts) == 3
+    assert len(result.document.script.acts) == 1
+    assert result.document.script.acts[0].act_id == "main"
+    assert result.document.outline.acts[0].act_id == "main"
+    assert result.document.extensions["ingestion"]["minimum_required_chapters"] == 3
     assert any(act.scenes for act in result.document.script.acts)
     assert result.version is not None
     assert result.version.version_id == "v0001"
@@ -58,6 +62,7 @@ def test_yaml_roundtrip_and_schema_export(tmp_path) -> None:
     loaded = load_yaml(yaml_path)
     schema_path = write_schema(tmp_path / "screenplay.schema.json")
 
+    assert loaded.schema_version == "2.0"
     assert loaded.meta.title == "老街回声"
+    assert loaded.extensions["production_notes"]["draft_stage"] == "first_pass"
     assert schema_path.exists()
-

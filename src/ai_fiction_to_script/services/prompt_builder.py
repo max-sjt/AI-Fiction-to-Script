@@ -185,6 +185,48 @@ class PromptBuilder:
         return system, user
 
     @staticmethod
+    def screenplay_scene_text(
+        scene_plan: ScenePlan,
+        story_bible: StoryBible,
+        chapter: ParsedChapter,
+        request: AdaptationRequest,
+    ) -> tuple[str, str]:
+        system = (
+            "你是小说改编编剧。"
+            "请创作单场景纯文本剧本，不要输出 JSON，不要输出 YAML，不要解释。"
+        )
+        user = (
+            f"项目标题：{request.title}\n"
+            f"目标剧本类型：{request.target_format}\n"
+            f"改编目标：{request.adaptation_goal}\n"
+            f"整体语气：{request.tone}\n"
+            f"对白风格：{request.style_guide.dialogue_style}\n"
+            f"叙述风格：{request.style_guide.narration_style}\n"
+            f"节奏风格：{request.style_guide.pacing_style}\n"
+            f"剧本类型执行要点：{build_script_type_instruction(request.target_format)}\n"
+            f"语气执行要点：{build_tone_instruction(request.tone)}\n"
+            "请按下面格式输出单场景纯文本剧本，本地程序会再转换成 YAML 结构：\n"
+            f"SCENE {scene_plan.scene_id} | {scene_plan.title}\n"
+            "TIME: day/night\n"
+            "SUMMARY: 一句话概括本场戏\n"
+            "ACTION: 动作或画面\n"
+            "c001: 角色台词\n"
+            "NARRATION: 旁白或说明\n"
+            "TRANSITION: 转场提示\n"
+            "END SCENE\n\n"
+            "规则：\n"
+            "- 只能输出这一场，不要新增场次。\n"
+            "- 台词行优先使用 Story Bible 中的 character_id，例如 c001: 台词内容。\n"
+            "- 每场最多 4 条 ACTION / 台词 / NARRATION 主体内容。\n"
+            "- 不要输出 markdown 代码块。\n"
+            "- 如果 Scene Plan 的 objective 或 notes 带有本次修改要求，必须优先执行。\n\n"
+            f"场景上下文：\n{_scene_plan_context(scene_plan)}\n\n"
+            f"Story Bible 摘要：\n{_story_bible_scene_context(story_bible)}\n\n"
+            f"来源章节：\n{_chapter_scene_context(chapter)}"
+        )
+        return system, user
+
+    @staticmethod
     def full_script(
         outline: Outline,
         story_bible: StoryBible,
@@ -212,6 +254,58 @@ class PromptBuilder:
             "如果输出 speaker_ref 或 location_ref，必须使用 Story Bible 中已有的 ID，不要输出人物名或地点名。\n"
             "不要新增场次，不要遗漏场次，不要把章节标题直接复制为场景标题。\n\n"
             f"Outline：\n{_json(outline.model_dump())}\n\n"
+            f"Story Bible 摘要：\n{_story_bible_scene_context(story_bible)}\n\n"
+            f"章节摘要：\n{_chapters_context(chapters)}"
+        )
+        return system, user
+
+    @staticmethod
+    def screenplay_text(
+        outline: Outline,
+        story_bible: StoryBible,
+        chapters: list[ParsedChapter],
+        request: AdaptationRequest,
+    ) -> tuple[str, str]:
+        system = (
+            "你是小说改编编剧。"
+            "请先创作纯文本剧本，不要输出 JSON，不要输出 YAML，不要解释。"
+        )
+        scene_lines = []
+        for scene_plan in outline.scene_plans:
+            scene_lines.append(
+                "\n".join(
+                    [
+                        f"SCENE {scene_plan.scene_id} | {scene_plan.title}",
+                        f"目标：{scene_plan.objective}",
+                        f"焦点：{scene_plan.focus_event or scene_plan.notes}",
+                    ]
+                )
+            )
+        user = (
+            f"项目标题：{request.title}\n"
+            f"目标剧本类型：{request.target_format}\n"
+            f"改编目标：{request.adaptation_goal}\n"
+            f"整体语气：{request.tone}\n"
+            f"对白风格：{request.style_guide.dialogue_style}\n"
+            f"叙述风格：{request.style_guide.narration_style}\n"
+            f"节奏风格：{request.style_guide.pacing_style}\n"
+            f"剧本类型执行要点：{build_script_type_instruction(request.target_format)}\n"
+            f"语气执行要点：{build_tone_instruction(request.tone)}\n"
+            "请按下面格式输出纯文本剧本，本地程序会再转换成 YAML 结构：\n"
+            "SCENE s001 | 场景标题\n"
+            "TIME: day/night\n"
+            "SUMMARY: 一句话概括本场戏\n"
+            "ACTION: 动作或画面\n"
+            "c001: 角色台词\n"
+            "NARRATION: 旁白或说明\n"
+            "TRANSITION: 转场提示\n"
+            "END SCENE\n\n"
+            "规则：\n"
+            "- 必须严格覆盖待生成场景清单里的全部 scene_id，并按原顺序返回。\n"
+            "- 台词行优先使用 Story Bible 中的 character_id，例如 c001: 台词内容。\n"
+            "- 每场最多 4 条 ACTION / 台词 / NARRATION 主体内容。\n"
+            "- 不要新增场次，不要遗漏场次，不要输出 markdown 代码块。\n\n"
+            f"待生成场景清单：\n{chr(10).join(scene_lines)}\n\n"
             f"Story Bible 摘要：\n{_story_bible_scene_context(story_bible)}\n\n"
             f"章节摘要：\n{_chapters_context(chapters)}"
         )

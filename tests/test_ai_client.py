@@ -76,6 +76,34 @@ def test_normalize_scene_refs_maps_names_aliases_and_unknown_values() -> None:
     assert normalized.beats[2].speaker_ref is None
 
 
+def test_normalize_scene_refs_demotes_narrative_dialogue_with_dirty_speaker() -> None:
+    story_bible = StoryBible(
+        logline="logline",
+        synopsis="synopsis",
+        characters=[CharacterCard(character_id="c001", name="林默", role="protagonist")],
+    )
+    scene = Scene(
+        scene_id="s001",
+        title="Scene",
+        chapter_refs=["ch001"],
+        objective="Push the conflict",
+        beats=[
+            Beat(
+                beat_id="b001",
+                type="dialogue",
+                text="林默没有回答，只是盯着那枚怀表。",
+                speaker_ref="默没有回",
+            )
+        ],
+        source_refs=[SourceRef(chapter_id="ch001", excerpt_id="p001")],
+    )
+
+    normalized = _normalize_scene_refs(scene, story_bible)
+
+    assert normalized.beats[0].type == "action"
+    assert normalized.beats[0].speaker_ref is None
+
+
 def test_qwen_streaming_chat_collects_content_deltas(monkeypatch) -> None:
     payload = {
         "title": "Scene 1",

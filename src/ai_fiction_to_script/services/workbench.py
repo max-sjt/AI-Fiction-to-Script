@@ -506,26 +506,13 @@ class WorkbenchService:
             raise ValueError("YAML bundle must deserialize into an object.")
 
         meta = raw_payload.get("meta")
-        source = raw_payload.get("source")
-        if not isinstance(meta, dict) or not isinstance(source, dict):
-            raise ValueError("YAML bundle must contain meta and source sections.")
+        if not isinstance(meta, dict):
+            raise ValueError("YAML bundle must contain a meta section.")
 
-        chapters = source.get("chapters")
-        if not isinstance(chapters, list) or not chapters:
-            raise ValueError("YAML bundle must contain source.chapters[].")
-
-        chapter_blocks: list[str] = []
-        for index, chapter in enumerate(chapters, start=1):
-            if not isinstance(chapter, dict):
-                continue
-            title = str(chapter.get("title") or f"Chapter {index}").strip()
-            text = str(chapter.get("text") or "").strip()
-            if not text:
-                raise ValueError("Every source chapter in the YAML bundle must include text.")
-            chapter_blocks.append(f"{title}\n\n{text}")
+        chapter_blocks = self._extract_yaml_bundle_chapter_blocks(raw_payload)
 
         if len(chapter_blocks) < 3:
-            raise ValueError("YAML bundle must contain at least 3 source chapters.")
+            raise ValueError("YAML bundle must contain at least 3 source chapters or 3 screenplay scenes.")
 
         return {
             "title": payload.get("title") or meta.get("title") or "未命名剧本",
@@ -540,6 +527,73 @@ class WorkbenchService:
             "novel_text": "\n\n".join(chapter_blocks),
             "note": payload.get("note") or "regenerated from yaml bundle",
         }
+
+    def _extract_yaml_bundle_chapter_blocks(self, raw_payload: dict) -> list[str]:
+        source = raw_payload.get("source")
+        if isinstance(source, dict):
+            chapters = source.get("chapters")
+            chapter_blocks = self._chapter_blocks_from_yaml_chapters(chapters)
+            if chapter_blocks:
+                return chapter_blocks
+
+        appendix = raw_payload.get("appendix")
+        if isinstance(appendix, dict):
+            chapter_blocks = self._chapter_blocks_from_yaml_chapters(appendix.get("source_chapters"))
+            if chapter_blocks:
+                return chapter_blocks
+
+        return self._chapter_blocks_from_screenplay_scenes(raw_payload.get("scenes"))
+
+    def _chapter_blocks_from_yaml_chapters(self, chapters) -> list[str]:
+        if not isinstance(chapters, list) or not chapters:
+            return []
+        chapter_blocks: list[str] = []
+        for index, chapter in enumerate(chapters, start=1):
+            if not isinstance(chapter, dict):
+                continue
+            title = str(chapter.get("title") or f"Chapter {index}").strip()
+            text = str(chapter.get("text") or "").strip()
+            if not text:
+                raise ValueError("Every source chapter in the YAML bundle must include text.")
+            chapter_blocks.append(f"{title}\n\n{text}")
+        return chapter_blocks
+
+    def _chapter_blocks_from_screenplay_scenes(self, scenes) -> list[str]:
+        if not isinstance(scenes, list) or not scenes:
+            raise ValueError("YAML bundle must contain appendix.source_chapters, source.chapters, or scenes[].")
+
+        chapter_blocks: list[str] = []
+        for index, scene in enumerate(scenes, start=1):
+            if not isinstance(scene, dict):
+                continue
+            title = str(scene.get("title") or scene.get("scene_id") or f"Scene {index}").strip()
+            setting = scene.get("setting") if isinstance(scene.get("setting"), dict) else {}
+            summary = str(scene.get("summary") or "").strip()
+            objective = str(scene.get("objective") or "").strip()
+            location = str(setting.get("location") or "").strip()
+            time_of_day = str(setting.get("time_of_day") or "").strip()
+            lines = scene.get("lines")
+            scene_lines: list[str] = []
+            if isinstance(lines, list):
+                for line in lines:
+                    if not isinstance(line, dict):
+                        continue
+                    kind = str(line.get("kind") or "").strip()
+                    speaker = str(line.get("speaker") or "").strip()
+                    text = str(line.get("text") or "").strip()
+                    if not text:
+                        continue
+                    if kind == "dialogue" and speaker:
+                        scene_lines.append(f"{speaker}：{text}")
+                    else:
+                        scene_lines.append(text)
+            chapter_text_parts = [item for item in [summary, objective, f"时间：{time_of_day}" if time_of_day else "", f"地点：{location}" if location else ""] if item]
+            chapter_text_parts.extend(scene_lines)
+            chapter_text = "\n".join(part for part in chapter_text_parts if part).strip()
+            if not chapter_text:
+                raise ValueError("Every screenplay scene in the YAML bundle must include summary, objective, or lines.")
+            chapter_blocks.append(f"{title}\n\n{chapter_text}")
+        return chapter_blocks
 
     def _scene_options(self, document: ScreenplayDocument) -> list[dict]:
         options: list[dict] = []

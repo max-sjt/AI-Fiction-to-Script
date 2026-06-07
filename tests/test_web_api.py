@@ -5,6 +5,8 @@ import threading
 from pathlib import Path
 from urllib.request import Request, urlopen
 
+import yaml
+
 from ai_fiction_to_script import __version__
 from ai_fiction_to_script.models.runtime import AdaptationRequest
 from ai_fiction_to_script.pipeline.engine import AdaptationEngine
@@ -286,11 +288,14 @@ def test_web_server_exports_compact_yaml_bundle(tmp_path) -> None:
     try:
         exported = api_request(base_url, "/api/projects/web-demo/versions/v0001/export-yaml")
         assert exported["ok"] is True
-        yaml_text = exported["data"]["yaml_text"]
-        assert "story_bible:" not in yaml_text
-        assert "outline:" not in yaml_text
-        assert "text:" in yaml_text
-        assert "scenes:" in yaml_text
+        bundle = yaml.safe_load(exported["data"]["yaml_text"])
+        assert bundle["schema_version"] == "screenplay-project-1.0"
+        assert "characters" in bundle
+        assert "scenes" in bundle
+        assert "appendix" in bundle
+        assert "source_chapters" in bundle["appendix"]
+        assert "story_bible" not in bundle
+        assert "outline" not in bundle
     finally:
         stop_server(server, thread)
 

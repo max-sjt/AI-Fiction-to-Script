@@ -1131,6 +1131,59 @@ def _infer_speaker_ref_from_text(text: str, story_bible: StoryBible) -> str | No
     return None
 
 
+def _speaker_name_from_ref(story_bible: StoryBible, speaker_ref: str | None) -> str:
+    if not speaker_ref:
+        return ""
+    for character in story_bible.characters:
+        if character.character_id == speaker_ref:
+            return _normalize_text_field(character.name)
+    return _normalize_text_field(speaker_ref)
+
+
+def _looks_like_narrative_dialogue_text(text: str, speaker_name: str) -> bool:
+    content = _normalize_text_field(text)
+    if not content:
+        return True
+    if speaker_name:
+        dialogue_prefixes = (
+            f"{speaker_name}：",
+            f"{speaker_name}:",
+            f"{speaker_name}说",
+            f"{speaker_name}问",
+            f"{speaker_name}喊",
+            f"{speaker_name}答",
+            f"{speaker_name}道",
+        )
+        if any(content.startswith(prefix) for prefix in dialogue_prefixes):
+            return False
+        if content.startswith(speaker_name):
+            narrative_prefixes = (
+                "没有",
+                "未",
+                "只是",
+                "看",
+                "盯",
+                "望",
+                "转",
+                "抬",
+                "低",
+                "走",
+                "站",
+                "坐",
+                "拿",
+                "放",
+                "沉默",
+                "点头",
+                "摇头",
+                "皱",
+            )
+            suffix = content[len(speaker_name) :]
+            if any(suffix.startswith(prefix) for prefix in narrative_prefixes):
+                return True
+    narrative_markers = ("镜头", "画面", "特写", "动作", "转身", "走入", "放在", "抬眼", "盯着", "看着", "没有回答")
+    return any(marker in content for marker in narrative_markers)
+
+
 def _normalize_scene_refs(scene: Scene, story_bible: StoryBible) -> Scene:
     character_lookup = _build_character_lookup(story_bible)
     location_lookup = _build_entity_lookup(story_bible.locations, "location_id", "name")
@@ -1148,8 +1201,15 @@ def _normalize_scene_refs(scene: Scene, story_bible: StoryBible) -> Scene:
             )
         if resolved_speaker_ref is None and beat.type == "dialogue":
             resolved_speaker_ref = _infer_speaker_ref_from_text(beat.text, story_bible)
-        if resolved_speaker_ref != beat.speaker_ref:
-            normalized_beats.append(beat.model_copy(update={"speaker_ref": resolved_speaker_ref}))
+        beat_updates: dict[str, Any] = {}
+        speaker_name = _speaker_name_from_ref(story_bible, resolved_speaker_ref or beat.speaker_ref)
+        if beat.type == "dialogue" and _looks_like_narrative_dialogue_text(beat.text, speaker_name):
+            beat_updates["type"] = "action"
+            beat_updates["speaker_ref"] = None
+        elif resolved_speaker_ref != beat.speaker_ref:
+            beat_updates["speaker_ref"] = resolved_speaker_ref
+        if beat_updates:
+            normalized_beats.append(beat.model_copy(update=beat_updates))
             beats_changed = True
         else:
             normalized_beats.append(beat)

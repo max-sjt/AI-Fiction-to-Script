@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import difflib
 import json
+import shutil
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
@@ -94,6 +95,27 @@ class VersionStore:
             lineterm="",
         )
         return "\n".join(diff)
+
+    def delete_version(self, project_id: str, version_id: str) -> None:
+        index = self._load_index(project_id)
+        remaining_versions = [record for record in index.versions if record.version_id != version_id]
+        if len(remaining_versions) == len(index.versions):
+            raise ValueError(f"Version not found: {project_id}/{version_id}")
+
+        version_dir = self._project_dir(project_id) / "versions" / version_id
+        if version_dir.exists():
+            shutil.rmtree(version_dir)
+
+        index.versions = remaining_versions
+        index.latest_version = remaining_versions[-1].version_id if remaining_versions else None
+
+        project_dir = self._project_dir(project_id)
+        if not remaining_versions:
+            if project_dir.exists():
+                shutil.rmtree(project_dir)
+            return
+
+        self._write_index(index)
 
     def _project_dir(self, project_id: str) -> Path:
         return self.root / project_id

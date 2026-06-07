@@ -13,7 +13,7 @@ from ai_fiction_to_script.utils.text import make_excerpt_map, normalize_text
 
 
 CHAPTER_HEADING_RE = re.compile(
-    r"^\s*(第[0-9一二三四五六七八九十百千万零两]+[章节回卷部篇集].*|Chapter\s+\d+.*|CHAPTER\s+\d+.*|##\s+.+)$",
+    r"^\s*(第[0-9一二三四五六七八九十百千万零两]+[章节回卷部篇幕集][^\n]*|Chapter\s+\d+[^\n]*|CHAPTER\s+\d+[^\n]*|##\s+.+)$",
     re.MULTILINE,
 )
 
@@ -102,7 +102,7 @@ class ChapterParser:
             return False
         if re.match(r"^(序章|楔子|引子|终章|尾声)$", line):
             return True
-        return bool(re.match(r"^(第?[0-9一二三四五六七八九十百千万零两]+[章节回卷部篇集幕折话])", line))
+        return bool(re.match(r"^(第?[0-9一二三四五六七八九十百千万零两]+[章节回卷部篇幕集折话])", line))
 
     def _read_supported_text(self, path: Path) -> str:
         suffix = path.suffix.lower()

@@ -18,7 +18,6 @@
         </p>
       </div>
       <div class="hero-controls">
-        <div id="buildBadge" class="build-badge">server unknown</div>
         <label class="language-switcher">
           <span data-i18n="languageLabel">界面语言</span>
           <select id="languageSelect">
@@ -37,7 +36,10 @@
       <aside class="sidebar card">
         <div class="section-heading">
           <h2 data-i18n="projectsHeading">项目</h2>
-          <button id="refreshProjectsButton" class="ghost-button" data-i18n="refreshButton">刷新</button>
+          <div class="section-actions">
+            <button id="resetProjectsButton" class="ghost-button" data-i18n="resetButton">重置</button>
+            <button id="refreshProjectsButton" class="ghost-button" data-i18n="refreshButton">刷新</button>
+          </div>
         </div>
         <div id="projectsList" class="project-list"></div>
       </aside>
@@ -83,6 +85,10 @@
               <span data-i18n="toneLabel">语气风格</span>
               <select id="tone"></select>
             </label>
+            <label>
+              <span data-i18n="speedModeLabel">生成速度</span>
+              <select id="speedMode"></select>
+            </label>
             <label class="full-width">
               <span data-i18n="pasteTextLabel">直接粘贴小说文本</span>
               <textarea
@@ -123,7 +129,7 @@
             <div class="panel-heading">
               <h3 data-i18n="finalScriptHeading">最终生成剧本</h3>
             </div>
-            <pre id="scriptPreview" class="script-preview" data-i18n="scriptPreviewPlaceholder">请选择一个版本查看生成结果。</pre>
+            <pre id="scriptPreview" class="script-preview" data-i18n="scriptPreviewPlaceholder">请上传小说后等待 Qwen 生成剧本</pre>
           </div>
         </section>
 

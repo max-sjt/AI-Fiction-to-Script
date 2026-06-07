@@ -1,4 +1,4 @@
-from __future__ import annotations
+﻿from __future__ import annotations
 
 from ai_fiction_to_script.models.runtime import AdaptationRequest, ChapterAnalysis, ParsedChapter, ParsedExcerpt
 from ai_fiction_to_script.models.schema import ScenePlan, StoryBible
@@ -59,6 +59,8 @@ def test_scene_prompt_includes_script_type_and_tone_instructions() -> None:
     assert "主要角色：" in user
     assert "beats 最多 4 条" in user
     assert "Story Bible：\n{" not in user
+    assert "character_id / location_id" in user
+    assert "场景上下文：" in user
 
 
 def test_outline_prompt_explicitly_requires_format_and_tone_execution() -> None:
@@ -78,3 +80,5 @@ def test_outline_prompt_explicitly_requires_format_and_tone_execution() -> None:
     assert f"剧本类型执行要点：{build_script_type_instruction('audio_drama')}" in user
     assert f"语气执行要点：{build_tone_instruction('suspenseful')}" in user
     assert "必须真正体现目标剧本类型与语气" in user
+    assert "不要使用 A1/A2/A3" in user
+    assert "最终 YAML 只是对最终剧本结果的结构化落盘" in user

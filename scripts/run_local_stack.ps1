@@ -18,6 +18,18 @@ New-Item -ItemType Directory -Force -Path $tempRoot | Out-Null
 New-Item -ItemType Directory -Force -Path $memuraiData | Out-Null
 
 $sourceNginxRoot = Join-Path $runtimeRoot "nginx\nginx-1.31.1"
+$existingNginx = Get-NetTCPConnection -LocalPort $nginxPort -State Listen -ErrorAction SilentlyContinue
+if ($existingNginx) {
+    Stop-Process -Id $existingNginx.OwningProcess -Force
+    Start-Sleep -Seconds 1
+}
+
+$stagedNginx = Get-Process | Where-Object { $_.ProcessName -eq "nginx" -and $_.Path -like "$nginxRoot*" }
+if ($stagedNginx) {
+    $stagedNginx | ForEach-Object { Stop-Process -Id $_.Id -Force }
+    Start-Sleep -Seconds 1
+}
+
 if (Test-Path $nginxRoot) {
     Remove-Item -Recurse -Force -LiteralPath $nginxRoot
 }
@@ -26,11 +38,6 @@ Copy-Item -Recurse -Force -LiteralPath $sourceNginxRoot -Destination $nginxRoot
 $existingApp = Get-NetTCPConnection -LocalPort $appPort -State Listen -ErrorAction SilentlyContinue
 if ($existingApp) {
     Stop-Process -Id $existingApp.OwningProcess -Force
-}
-
-$existingNginx = Get-NetTCPConnection -LocalPort $nginxPort -State Listen -ErrorAction SilentlyContinue
-if ($existingNginx) {
-    Stop-Process -Id $existingNginx.OwningProcess -Force
 }
 
 $existingRedis = Get-NetTCPConnection -LocalPort $redisPort -State Listen -ErrorAction SilentlyContinue

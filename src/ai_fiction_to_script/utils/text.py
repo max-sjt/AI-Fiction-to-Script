@@ -5,8 +5,8 @@ import re
 from collections import Counter
 
 
-SENTENCE_SPLIT_RE = re.compile(r"(?<=[。！？!?])\s+")
-CHINESE_TERM_RE = re.compile(r"[\u4e00-\u9fff]{2,4}")
+SENTENCE_SPLIT_RE = re.compile(r"(?<=[。！？!?])")
+CHINESE_TERM_RE = re.compile(r"[\u4e00-\u9fff]{2,6}")
 
 STOP_TERMS = {
     "一个",
@@ -21,8 +21,8 @@ STOP_TERMS = {
     "这里",
     "那里",
     "时候",
-    "时候",
     "出来",
+    "时候",
 }
 
 
@@ -37,6 +37,7 @@ def split_sentences(text: str) -> list[str]:
     compact = normalize_text(text)
     if not compact:
         return []
+    compact = re.sub(r"\n+", " ", compact)
     parts = SENTENCE_SPLIT_RE.split(compact)
     return [part.strip() for part in parts if part.strip()]
 
@@ -59,7 +60,7 @@ def extract_candidate_terms(text: str, limit: int = 6) -> list[str]:
     counter: Counter[str] = Counter()
     for match in CHINESE_TERM_RE.finditer(text):
         term = match.group(0)
-        if term in STOP_TERMS:
+        if term in STOP_TERMS or re.fullmatch(r"第[一二三四五六七八九十百千万零两0-9]+[章节回卷部篇幕集]", term):
             continue
         counter[term] += 1
     return [term for term, _ in counter.most_common(limit)]
@@ -67,8 +68,8 @@ def extract_candidate_terms(text: str, limit: int = 6) -> list[str]:
 
 def extract_character_candidates(text: str, limit: int = 6) -> list[str]:
     patterns = [
-        re.compile(r"([\u4e00-\u9fff]{2,3})(?=说|问|看|想|听|走|跑|笑|道)"),
-        re.compile(r"([\u4e00-\u9fff]{2,3})(?=抬头|低头|转身|停下)"),
+        re.compile(r"(?:店主|记者|男人|女人|少年|少女|老人|老妇人|先生|女士)?([\u4e00-\u9fff]{2,4})(?=说|问|答|喊|叫|道|想|看|听|转身|抬头|低头|走向|来到)"),
+        re.compile(r"([\u4e00-\u9fff]{2,4})(?=正|正在|忽然|缓缓|猛地|突然|站在|坐在)"),
     ]
     results: list[str] = []
     for pattern in patterns:
@@ -77,8 +78,9 @@ def extract_character_candidates(text: str, limit: int = 6) -> list[str]:
         results = extract_candidate_terms(text, limit=limit)
     deduped: list[str] = []
     for item in results:
-        if item not in deduped:
-            deduped.append(item)
+        cleaned = item.strip()
+        if cleaned and cleaned not in STOP_TERMS and cleaned not in deduped:
+            deduped.append(cleaned)
         if len(deduped) >= limit:
             break
     return deduped
@@ -86,9 +88,11 @@ def extract_character_candidates(text: str, limit: int = 6) -> list[str]:
 
 def extract_location_candidates(text: str, limit: int = 4) -> list[str]:
     patterns = [
-        re.compile(r"在([\u4e00-\u9fff]{2,8})"),
-        re.compile(r"来到([\u4e00-\u9fff]{2,8})"),
-        re.compile(r"走进([\u4e00-\u9fff]{2,8})"),
+        re.compile(
+            r"([\u4e00-\u9fff]{2,12}(?:古董店|钟楼|仓库|天台|咖啡馆|车站|站台|房间|大厅|走廊|办公室|医院|学校|教室|庭院|街|巷|楼|河堤|码头))"
+        ),
+        re.compile(r"(?:来到|走进|回到|赶到|推开)([\u4e00-\u9fff]{2,12})"),
+        re.compile(r"在([\u4e00-\u9fff]{2,12})(?:里|内|中|上|旁|前|后)"),
     ]
     results: list[str] = []
     for pattern in patterns:
@@ -97,8 +101,8 @@ def extract_location_candidates(text: str, limit: int = 4) -> list[str]:
         results = extract_candidate_terms(text, limit=limit)
     deduped: list[str] = []
     for item in results:
-        cleaned = item[:8]
-        if cleaned not in deduped:
+        cleaned = item[:12].strip()
+        if cleaned and cleaned not in deduped:
             deduped.append(cleaned)
         if len(deduped) >= limit:
             break
@@ -115,4 +119,3 @@ def strip_code_fences(text: str) -> str:
 def parse_json_object(text: str) -> dict:
     cleaned = strip_code_fences(text)
     return json.loads(cleaned)
-

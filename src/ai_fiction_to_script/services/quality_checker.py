@@ -60,4 +60,3 @@ class QualityChecker:
                 reference_consistency=reference_consistency,
             ),
         )
-

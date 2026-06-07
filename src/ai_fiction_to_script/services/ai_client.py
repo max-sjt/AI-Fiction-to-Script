@@ -1,9 +1,9 @@
-from __future__ import annotations
+﻿from __future__ import annotations
 
 import json
+import re
 from abc import ABC, abstractmethod
-from collections import defaultdict
-from typing import Any
+from typing import Any, Callable
 
 import httpx
 
@@ -181,46 +181,15 @@ class MockAIClient(BaseAIClient):
         story_bible: StoryBible,
         request: AdaptationRequest,
     ) -> Outline:
-        act_templates = [
-            ("a1", "开端", "建立人物关系与触发事件"),
-            ("a2", "发展", "升级冲突并推进调查"),
-            ("a3", "结局", "收束核心矛盾并给出阶段答案"),
+        scene_plans = _build_continuous_scene_plans(analyses, request)
+        acts = [
+            {
+                "act_id": "main",
+                "name": "正文",
+                "purpose": "按小说内容连续推进剧情，而不是套用机械三幕标签。",
+                "scene_count": len(scene_plans),
+            }
         ]
-        total_scenes = len(analyses)
-        act_scene_buckets: dict[str, list[ScenePlan]] = defaultdict(list)
-        scene_plans: list[ScenePlan] = []
-
-        for index, analysis in enumerate(analyses, start=1):
-            if total_scenes == 1:
-                act_id = "a1"
-            elif index == 1:
-                act_id = "a1"
-            elif index == total_scenes:
-                act_id = "a3"
-            else:
-                act_id = "a2"
-            scene_plan = ScenePlan(
-                scene_id=make_id("s", index),
-                act_id=act_id,
-                title=analysis.title.replace("第", "场 "),
-                objective=analysis.conflicts[0] if analysis.conflicts else "推进核心冲突",
-                chapter_refs=[analysis.chapter_id],
-                conflict=analysis.conflicts[0] if analysis.conflicts else "",
-                notes=analysis.summary,
-            )
-            scene_plans.append(scene_plan)
-            act_scene_buckets[act_id].append(scene_plan)
-
-        acts = []
-        for act_id, name, purpose in act_templates:
-            acts.append(
-                {
-                    "act_id": act_id,
-                    "name": name,
-                    "purpose": purpose,
-                    "scene_count": len(act_scene_buckets[act_id]),
-                }
-            )
         return Outline.model_validate({"structure_type": request.structure_type, "acts": acts, "scene_plans": scene_plans})
 
     def generate_scene(
@@ -233,26 +202,22 @@ class MockAIClient(BaseAIClient):
         sentences = split_sentences(chapter.raw_text)
         primary_character = story_bible.characters[0].character_id if story_bible.characters else None
         beats: list[Beat] = []
-        beat_texts = sentences[:3] or [chapter.raw_text[:80]]
-        for index, text in enumerate(beat_texts, start=1):
-            beat_type = "action"
-            speaker_ref = None
-            if index == 2 and primary_character:
-                beat_type = "dialogue"
-                speaker_ref = primary_character
-                text = f"{story_bible.characters[0].name}说：{scene_plan.objective}"
+        beat_specs = _build_mock_beat_specs(scene_plan, chapter, primary_character)
+        for index, (beat_type, text, speaker_ref) in enumerate(beat_specs, start=1):
             beats.append(
                 Beat(
                     beat_id=make_id("b", index),
                     type=beat_type,
                     text=text,
                     speaker_ref=speaker_ref,
-                    emotion="紧张" if "紧张" in text or "秘密" in text else "",
+                    emotion=_infer_beat_emotion(text),
                 )
             )
 
         location_ref = story_bible.locations[0].location_id if story_bible.locations else None
         source_refs = [SourceRef(chapter_id=chapter.chapter_id, excerpt_id=excerpt.excerpt_id) for excerpt in chapter.excerpts[:2]]
+        if not source_refs:
+            source_refs = [SourceRef(chapter_id=chapter.chapter_id, excerpt_id="p001")]
         time_of_day = "night" if any(token in chapter.raw_text for token in ("夜", "深夜", "晚上")) else "day"
         return Scene(
             scene_id=scene_plan.scene_id,
@@ -261,9 +226,12 @@ class MockAIClient(BaseAIClient):
             location_ref=location_ref,
             time_of_day=time_of_day,
             objective=scene_plan.objective,
-            summary=summarize_text(chapter.raw_text),
+            summary=_build_scene_summary(scene_plan, chapter),
             beats=beats,
-            transitions=SceneTransition(next_scene_hint=scene_plan.conflict or "进入下一场戏", transition_type="cut"),
+            transitions=SceneTransition(
+                next_scene_hint=scene_plan.bridge_out or scene_plan.conflict or "切入下一场戏",
+                transition_type="cut",
+            ),
             source_refs=source_refs,
         )
 
@@ -371,8 +339,82 @@ class QwenAIClient(BaseAIClient):
             text = str(content)
         return parse_json_object(text)
 
+    def _chat_json_stream(
+        self,
+        model: str,
+        system: str,
+        user: str,
+        temperature: float,
+        on_delta: Callable[[str, str], None] | None = None,
+    ) -> dict[str, Any]:
+        url = f"{self._settings.base_url.rstrip('/')}/chat/completions"
+        payload = {
+            "model": model,
+            "messages": [
+                {"role": "system", "content": system},
+                {"role": "user", "content": user},
+            ],
+            "temperature": temperature,
+            "response_format": {"type": "json_object"},
+            "stream": True,
+            "stream_options": {"include_usage": True},
+        }
+        headers = {
+            "Authorization": f"Bearer {self._settings.api_key}",
+            "Content-Type": "application/json",
+        }
+        chunks: list[str] = []
+        try:
+            with httpx.stream(
+                "POST",
+                url,
+                headers=headers,
+                json=payload,
+                timeout=httpx.Timeout(self._settings.timeout_seconds, connect=15.0),
+            ) as response:
+                if response.is_error:
+                    raise ValueError(self._format_dashscope_error(response, model, url))
+                for raw_line in response.iter_lines():
+                    line = raw_line.strip()
+                    if not line or not line.startswith("data:"):
+                        continue
+                    data = line.removeprefix("data:").strip()
+                    if not data or data == "[DONE]":
+                        continue
+                    try:
+                        chunk_payload = json.loads(data)
+                    except json.JSONDecodeError as exc:
+                        raise ValueError(f"DashScope streaming chunk was not valid JSON for model `{model}`: {data[:200]}") from exc
+                    choices = chunk_payload.get("choices") or []
+                    if not choices:
+                        continue
+                    delta = choices[0].get("delta") or {}
+                    content = delta.get("content")
+                    if isinstance(content, list):
+                        text_delta = "".join(part.get("text", "") for part in content if isinstance(part, dict))
+                    elif content is None:
+                        text_delta = ""
+                    else:
+                        text_delta = str(content)
+                    if not text_delta:
+                        continue
+                    chunks.append(text_delta)
+                    if on_delta is not None:
+                        on_delta("".join(chunks), text_delta)
+        except httpx.ReadTimeout as exc:
+            raise ValueError(
+                f"DashScope request timed out after {self._settings.timeout_seconds} seconds for model `{model}`。"
+                "当前已启用流式模式；如果仍然超时，通常说明当前模型响应过慢、网络不稳定，或账号所在地域与 Base URL 不匹配。"
+            ) from exc
+        except httpx.HTTPError as exc:
+            raise ValueError(f"DashScope request failed for model `{model}`: {exc}") from exc
+        return parse_json_object("".join(chunks))
+
     def _format_dashscope_error(self, response: httpx.Response, model: str, url: str) -> str:
-        detail = response.text.strip()
+        try:
+            detail = response.text.strip()
+        except httpx.ResponseNotRead:
+            detail = response.read().decode("utf-8", errors="ignore").strip()
         try:
             payload = response.json()
         except ValueError:
@@ -487,23 +529,26 @@ class QwenAIClient(BaseAIClient):
         for index, act in enumerate(_normalize_named_mapping_list(payload.get("acts"), fallback_key="name"), start=1):
             normalized["acts"].append(
                 {
-                    "act_id": _normalize_text_field(act.get("act_id")) or make_id("a", index, width=1),
-                    "name": _normalize_text_field(act.get("name")) or f"第{index}幕",
+                    "act_id": _normalize_text_field(act.get("act_id")) or ("main" if index == 1 else make_id("a", index, width=1)),
+                    "name": _normalize_text_field(act.get("name")) or ("正文" if index == 1 else f"第{index}幕"),
                     "purpose": _normalize_text_field(act.get("purpose")),
                     "scene_count": _normalize_int(act.get("scene_count"), 0),
                 }
             )
         for index, scene in enumerate(_normalize_named_mapping_list(payload.get("scene_plans"), fallback_key="title"), start=1):
-            fallback_act_id = normalized["acts"][min(index - 1, len(normalized["acts"]) - 1)]["act_id"] if normalized["acts"] else "a1"
+            fallback_act_id = normalized["acts"][min(index - 1, len(normalized["acts"]) - 1)]["act_id"] if normalized["acts"] else "main"
             normalized["scene_plans"].append(
                 {
                     "scene_id": _normalize_text_field(scene.get("scene_id")) or make_id("s", index),
                     "act_id": _normalize_text_field(scene.get("act_id")) or fallback_act_id,
-                    "title": _normalize_text_field(scene.get("title")) or f"场景{index}",
+                    "title": _normalize_scene_title(_normalize_text_field(scene.get("title")), index),
                     "objective": _normalize_text_field(scene.get("objective")) or "推进核心冲突",
                     "chapter_refs": _ensure_str_list(scene.get("chapter_refs")),
                     "conflict": _normalize_text_field(scene.get("conflict")),
                     "notes": _normalize_text_field(scene.get("notes")),
+                    "focus_event": _normalize_text_field(scene.get("focus_event")),
+                    "bridge_in": _normalize_text_field(scene.get("bridge_in")),
+                    "bridge_out": _normalize_text_field(scene.get("bridge_out")),
                 }
             )
         return Outline.model_validate(normalized)
@@ -543,7 +588,7 @@ class QwenAIClient(BaseAIClient):
             )
             for item in _normalize_named_mapping_list(payload.get("source_refs"), fallback_key="excerpt_id")
         ]
-        return Scene(
+        scene = Scene(
             scene_id=scene_plan.scene_id,
             title=_normalize_text_field(payload.get("title")) or scene_plan.title,
             chapter_refs=scene_plan.chapter_refs,
@@ -552,9 +597,66 @@ class QwenAIClient(BaseAIClient):
             objective=_normalize_text_field(payload.get("objective")) or scene_plan.objective,
             summary=_normalize_text_field(payload.get("summary")),
             beats=beats,
-            transitions=SceneTransition.model_validate(_normalize_mapping(payload.get("transitions"))) if payload.get("transitions") else None,
+            transitions=_normalize_transition(payload.get("transitions")),
             source_refs=source_refs,
         )
+        return _normalize_scene_refs(scene, story_bible)
+
+    def generate_scene_stream(
+        self,
+        scene_plan: ScenePlan,
+        story_bible: StoryBible,
+        chapter: ParsedChapter,
+        request: AdaptationRequest,
+        on_delta: Callable[[str, str], None] | None = None,
+    ) -> Scene:
+        system, user = PromptBuilder.scene(scene_plan, story_bible, chapter, request)
+        payload = self._chat_json_stream(
+            request.model_routing.generation_model,
+            system,
+            user,
+            request.temperature,
+            on_delta=on_delta,
+        )
+        beats = []
+        for index, beat in enumerate(_normalize_named_mapping_list(payload.get("beats"), fallback_key="text"), start=1):
+            beats.append(
+                Beat(
+                    beat_id=_normalize_beat_id(beat.get("beat_id"), index),
+                    type=_normalize_beat_type(beat.get("type")),
+                    text=_normalize_text_field(beat.get("text")) or scene_plan.objective,
+                    speaker_ref=_normalize_optional_str(beat.get("speaker_ref")),
+                    emotion=_normalize_text_field(beat.get("emotion")),
+                )
+            )
+        if not beats:
+            beats.append(
+                Beat(
+                    beat_id=make_id("b", 1),
+                    type="action",
+                    text=payload.get("summary") or scene_plan.objective,
+                )
+            )
+        source_refs = [
+            SourceRef(
+                chapter_id=_normalize_text_field(item.get("chapter_id")) or chapter.chapter_id,
+                excerpt_id=_normalize_text_field(item.get("excerpt_id")) or "p001",
+            )
+            for item in _normalize_named_mapping_list(payload.get("source_refs"), fallback_key="excerpt_id")
+        ]
+        scene = Scene(
+            scene_id=scene_plan.scene_id,
+            title=_normalize_text_field(payload.get("title")) or scene_plan.title,
+            chapter_refs=scene_plan.chapter_refs,
+            location_ref=_normalize_optional_str(payload.get("location_ref")),
+            time_of_day=_normalize_text_field(payload.get("time_of_day")),
+            objective=_normalize_text_field(payload.get("objective")) or scene_plan.objective,
+            summary=_normalize_text_field(payload.get("summary")),
+            beats=beats,
+            transitions=_normalize_transition(payload.get("transitions")),
+            source_refs=source_refs,
+        )
+        return _normalize_scene_refs(scene, story_bible)
 
     def review_document(
         self,
@@ -614,6 +716,30 @@ def _normalize_relation_list(value: Any) -> list[dict[str, Any]]:
     return relations
 
 
+def _normalize_transition(value: Any) -> SceneTransition | None:
+    if value is None:
+        return None
+    if isinstance(value, str):
+        text = value.strip()
+        if not text:
+            return None
+        return SceneTransition(next_scene_hint=text, transition_type="cut")
+
+    payload = _normalize_mapping(value)
+    if not payload:
+        return None
+
+    next_scene_hint = _normalize_text_field(
+        payload.get("next_scene_hint")
+        or payload.get("entry")
+        or payload.get("exit")
+        or payload.get("transition")
+        or payload.get("text")
+    )
+    transition_type = _normalize_text_field(payload.get("transition_type")) or "cut"
+    return SceneTransition(next_scene_hint=next_scene_hint, transition_type=transition_type)
+
+
 def _normalize_text_field(value: Any) -> str:
     if value is None:
         return ""
@@ -650,9 +776,305 @@ def _normalize_int(value: Any, default: int) -> int:
         return default
 
 
+def _compact_text(value: Any, limit: int = 32) -> str:
+    text = _normalize_text_field(value)
+    if not text:
+        return ""
+    text = re.sub(r"\s+", " ", text).strip("，。！？；：:,. ")
+    if len(text) <= limit:
+        return text
+    return text[:limit].rstrip("，。！？；：:,. ") + "…"
+
+
+def _build_segment_title(base_title: str, focus_event: str, segment_index: int) -> str:
+    if segment_index == 0:
+        return base_title
+    event_label = _compact_text(focus_event, limit=10)
+    if not event_label or event_label in base_title:
+        return f"{base_title}（续）"
+    return f"{base_title}·{event_label}"
+
+
+def _plan_analysis_segments(analysis: ChapterAnalysis, max_scenes_per_chapter: int) -> list[dict[str, str]]:
+    base_title = _normalize_scene_title(analysis.title, 1)
+    candidate_events = _dedupe(
+        [item for item in analysis.key_events if _normalize_text_field(item)]
+        + [item for item in analysis.conflicts if _normalize_text_field(item)]
+    )
+    if not candidate_events:
+        candidate_events = [analysis.summary or base_title]
+
+    scene_count = min(max_scenes_per_chapter, 2 if len(candidate_events) >= 2 else 1)
+    segments: list[dict[str, str]] = []
+    for segment_index in range(scene_count):
+        focus_event = candidate_events[min(segment_index, len(candidate_events) - 1)]
+        conflict = analysis.conflicts[min(segment_index, len(analysis.conflicts) - 1)] if analysis.conflicts else focus_event
+        segments.append(
+            {
+                "title": _build_segment_title(base_title, focus_event, segment_index),
+                "objective": _compact_text(conflict or focus_event, limit=24) or "推进当前冲突",
+                "focus_event": _compact_text(focus_event, limit=64),
+                "conflict": _compact_text(conflict, limit=48),
+                "notes": _compact_text(analysis.summary, limit=120),
+            }
+        )
+    return segments
+
+
+def _build_continuous_scene_plans(analyses: list[ChapterAnalysis], request: AdaptationRequest) -> list[ScenePlan]:
+    scene_plans: list[ScenePlan] = []
+    for chapter_index, analysis in enumerate(analyses):
+        segments = _plan_analysis_segments(analysis, request.max_scenes_per_chapter)
+        previous_summary = analyses[chapter_index - 1].summary if chapter_index > 0 else ""
+        next_summary = analyses[chapter_index + 1].summary if chapter_index + 1 < len(analyses) else ""
+        for segment_index, segment in enumerate(segments):
+            prior_focus = segments[segment_index - 1]["focus_event"] if segment_index > 0 else _compact_text(previous_summary, limit=48)
+            next_focus = (
+                segments[segment_index + 1]["focus_event"]
+                if segment_index + 1 < len(segments)
+                else _compact_text(next_summary, limit=48)
+            )
+            scene_plans.append(
+                ScenePlan(
+                    scene_id=make_id("s", len(scene_plans) + 1),
+                    act_id="main",
+                    title=segment["title"],
+                    objective=segment["objective"],
+                    chapter_refs=[analysis.chapter_id],
+                    conflict=segment["conflict"],
+                    notes=segment["notes"],
+                    focus_event=segment["focus_event"],
+                    bridge_in=prior_focus,
+                    bridge_out=next_focus,
+                )
+            )
+    return scene_plans
+
+
+def _build_mock_beat_specs(
+    scene_plan: ScenePlan,
+    chapter: ParsedChapter,
+    primary_character: str | None,
+) -> list[tuple[str, str, str | None]]:
+    sentences = split_sentences(chapter.raw_text)
+    beat_specs: list[tuple[str, str, str | None]] = []
+
+    if scene_plan.bridge_in:
+        beat_specs.append(("narration", scene_plan.bridge_in, None))
+    if scene_plan.focus_event:
+        beat_specs.append(("action", scene_plan.focus_event, None))
+    if primary_character and scene_plan.objective:
+        beat_specs.append(("dialogue", scene_plan.objective, primary_character))
+
+    for sentence in sentences:
+        beat_specs.append(("action", _compact_text(sentence, limit=72), None))
+
+    normalized_specs: list[tuple[str, str, str | None]] = []
+    seen_texts: set[str] = set()
+    for beat_type, text, speaker_ref in beat_specs:
+        cleaned = _compact_text(text, limit=96)
+        if not cleaned or cleaned in seen_texts:
+            continue
+        seen_texts.add(cleaned)
+        normalized_specs.append((beat_type, cleaned, speaker_ref))
+        if len(normalized_specs) >= 4:
+            break
+
+    if not normalized_specs:
+        fallback_text = _compact_text(chapter.raw_text[:96], limit=96) or "场景开始。"
+        normalized_specs.append(("action", fallback_text, None))
+    return normalized_specs
+
+
+def _build_scene_summary(scene_plan: ScenePlan, chapter: ParsedChapter) -> str:
+    summary_parts = [
+        _compact_text(scene_plan.notes, limit=72),
+        _compact_text(scene_plan.focus_event, limit=48),
+    ]
+    summary = " ".join(part for part in summary_parts if part).strip()
+    return summary or summarize_text(chapter.raw_text)
+
+
+def _infer_beat_emotion(text: str) -> str:
+    if any(token in text for token in ("紧张", "追", "逼", "惊", "突", "危", "险")):
+        return "紧张"
+    if any(token in text for token in ("哭", "痛", "失", "伤", "泪")):
+        return "伤感"
+    if any(token in text for token in ("怒", "吼", "喝", "质问")):
+        return "激烈"
+    return ""
+
+
+def _normalize_scene_title(value: Any, index: int) -> str:
+    title = _normalize_text_field(value)
+    if not title:
+        return f"场景{index}"
+    title = title.strip()
+    title = re.sub(r"^第[一二三四五六七八九十百千0-9零两]+[章节幕回集卷篇]\s*[:：]?\s*", "", title)
+    title = re.sub(r"^场(?:景)?\s*[一二三四五六七八九十百千0-9零两]+\s*[章节幕回集卷篇]\s*[:：]?\s*", "", title)
+    title = re.sub(r"^A[1-9][0-9]*\s*(?:开端|发展|结局)?\s*[:：-]?\s*", "", title, flags=re.IGNORECASE)
+    title = title.strip("：: ").strip()
+    return title or f"场景{index}"
+
+
 def _dedupe(items: list[str]) -> list[str]:
     output: list[str] = []
     for item in items:
         if item and item not in output:
             output.append(item)
     return output
+
+
+def _normalize_lookup_key(value: Any) -> str:
+    return str(value or "").strip().casefold()
+
+
+def _build_entity_lookup(items: list[Any], id_attr: str, name_attr: str) -> dict[str, str]:
+    lookup: dict[str, str] = {}
+    for item in items:
+        entity_id = _normalize_text_field(getattr(item, id_attr, ""))
+        entity_name = _normalize_text_field(getattr(item, name_attr, ""))
+        for raw_key in (entity_id, entity_name):
+            key = _normalize_lookup_key(raw_key)
+            if key:
+                lookup[key] = entity_id
+    return lookup
+
+
+def _character_aliases(character: CharacterCard) -> set[str]:
+    name = _normalize_text_field(character.name)
+    role = _normalize_text_field(character.role)
+    aliases: set[str] = {name, role}
+
+    male_aliases = {
+        "来客",
+        "客人",
+        "男人",
+        "男子",
+        "黑衣人",
+        "黑衣男人",
+        "黑衣男子",
+        "神秘人",
+        "神秘来客",
+    }
+    female_aliases = {
+        "女人",
+        "女子",
+        "女士",
+        "夫人",
+        "女孩",
+        "少女",
+        "守钟人之女",
+    }
+    elder_female_aliases = {
+        "老妇人",
+        "老夫人",
+        "老太太",
+        "老人",
+        "女士",
+    }
+
+    if any(token in name for token in male_aliases):
+        aliases.update(male_aliases)
+    if any(token in name for token in female_aliases):
+        aliases.update(female_aliases)
+    if any(token in name for token in elder_female_aliases):
+        aliases.update(elder_female_aliases)
+
+    aliases.discard("")
+    return aliases
+
+
+def _build_character_lookup(story_bible: StoryBible) -> dict[str, str]:
+    lookup = _build_entity_lookup(story_bible.characters, "character_id", "name")
+    alias_map: dict[str, set[str]] = {}
+    for character in story_bible.characters:
+        for alias in _character_aliases(character):
+            key = _normalize_lookup_key(alias)
+            if key:
+                alias_map.setdefault(key, set()).add(character.character_id)
+    for key, ids in alias_map.items():
+        if len(ids) == 1 and key not in lookup:
+            lookup[key] = next(iter(ids))
+    return lookup
+
+
+def _resolve_lookup_ref(value: str | None, lookup: dict[str, str]) -> str | None:
+    key = _normalize_lookup_key(value)
+    if not key:
+        return None
+    return lookup.get(key)
+
+
+def _resolve_unique_partial_ref(value: str | None, items: list[Any], id_attr: str, name_attr: str) -> str | None:
+    key = _normalize_lookup_key(value)
+    if not key:
+        return None
+    matches: list[str] = []
+    for item in items:
+        entity_id = _normalize_text_field(getattr(item, id_attr, ""))
+        entity_name = _normalize_text_field(getattr(item, name_attr, ""))
+        name_key = _normalize_lookup_key(entity_name)
+        if name_key and (key in name_key or name_key in key):
+            matches.append(entity_id)
+    unique = list(dict.fromkeys(matches))
+    if len(unique) == 1:
+        return unique[0]
+    return None
+
+
+def _infer_speaker_ref_from_text(text: str, story_bible: StoryBible) -> str | None:
+    content = _normalize_text_field(text)
+    if not content:
+        return None
+    sorted_characters = sorted(story_bible.characters, key=lambda item: len(item.name), reverse=True)
+    for character in sorted_characters:
+        name = _normalize_text_field(character.name)
+        if not name:
+            continue
+        if any(content.startswith(f"{name}{marker}") for marker in ("：", ":", "说", "问", "喊", "答", "道")):
+            return character.character_id
+    return None
+
+
+def _normalize_scene_refs(scene: Scene, story_bible: StoryBible) -> Scene:
+    character_lookup = _build_character_lookup(story_bible)
+    location_lookup = _build_entity_lookup(story_bible.locations, "location_id", "name")
+
+    normalized_beats: list[Beat] = []
+    beats_changed = False
+    for beat in scene.beats:
+        resolved_speaker_ref = _resolve_lookup_ref(beat.speaker_ref, character_lookup)
+        if resolved_speaker_ref is None:
+            resolved_speaker_ref = _resolve_unique_partial_ref(
+                beat.speaker_ref,
+                story_bible.characters,
+                "character_id",
+                "name",
+            )
+        if resolved_speaker_ref is None and beat.type == "dialogue":
+            resolved_speaker_ref = _infer_speaker_ref_from_text(beat.text, story_bible)
+        if resolved_speaker_ref != beat.speaker_ref:
+            normalized_beats.append(beat.model_copy(update={"speaker_ref": resolved_speaker_ref}))
+            beats_changed = True
+        else:
+            normalized_beats.append(beat)
+
+    resolved_location_ref = _resolve_lookup_ref(scene.location_ref, location_lookup)
+    if resolved_location_ref is None:
+        resolved_location_ref = _resolve_unique_partial_ref(
+            scene.location_ref,
+            story_bible.locations,
+            "location_id",
+            "name",
+        )
+
+    update_payload: dict[str, Any] = {}
+    if beats_changed:
+        update_payload["beats"] = normalized_beats
+    if resolved_location_ref != scene.location_ref:
+        update_payload["location_ref"] = resolved_location_ref
+
+    if not update_payload:
+        return scene
+    return scene.model_copy(update=update_payload)

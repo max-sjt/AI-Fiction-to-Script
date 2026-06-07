@@ -26,11 +26,11 @@ def test_parser_can_infer_chapters_from_pasted_text_blocks(tmp_path) -> None:
 def test_parser_accepts_indented_chapter_headings(tmp_path) -> None:
     novel_path = tmp_path / "indented.txt"
     novel_path.write_text(
-        "  第一章 雨夜来信\n林然收到匿名短信。\n\n  第二章 旧仓库灯光\n沈青递来录音笔。\n\n  第三章 屋顶对峙\n陈默提出交换条件。",
+        "  第一章：雨夜来信\n林然收到匿名短信。\n\n  第二章：旧仓库灯光\n沈青递来录音笔。\n\n  第三章：天台对峙\n陈默提出交换条件。",
         encoding="utf-8",
     )
 
     chapters = ChapterParser().parse(novel_path)
 
     assert len(chapters) == 3
-    assert chapters[0].title.strip() == "第一章 雨夜来信"
+    assert chapters[0].title.strip() == "第一章：雨夜来信"

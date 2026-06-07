@@ -1,44 +1,95 @@
-# AI 小说转剧本工具 - YAML Schema 规范
+# AI-小说转剧本工具 YAML Schema 规范
 
-## 1. 文档目的
+## 1. 文档目标
 
-本文档用于定义“AI 小说转剧本工具”输出剧本初稿的 YAML 数据结构规范。该规范的目标是让小说改编结果具备：
+本文档定义 `AI-小说转剧本工具` 的标准输出格式：将 **3 个章节及以上** 的小说文本自动转换为 **结构化剧本 YAML**。
 
-- **结构化**：便于程序解析、校验与渲染
-- **可编辑**：便于作者进行人工修改
-- **可追溯**：便于回溯原小说章节与片段
-- **可扩展**：便于支持不同剧种与未来功能演进
-- **可校验**：便于自动检查结构合法性与一致性
+本规范服务于三个直接目标：
 
-该 Schema 适用于小说文本达到 **3 个章节及以上** 的改编任务，输出对象为可编辑的剧本初稿，而非最终定稿。
+1. 让模型输出的剧本可以被程序稳定解析。
+2. 让编辑人员可以在 YAML 上直接做人工修改和版本管理。
+3. 让每一场戏都能追溯到原小说章节，方便复核、重生成和质量控制。
 
----
+本文档同时说明 Schema 的设计原因，而不是只给字段清单。
 
-## 2. 设计原则
+## 2. 适用范围
 
-### 2.1 分层表达
-将“小说理解”“改编规划”“剧本正文”“质量控制”拆分为不同层级，避免把所有信息混在一处。
+本 Schema 适用于以下场景：
 
-### 2.2 引用优先
-人物、地点、场景、事件统一使用 ID 引用，而不是仅靠名称匹配。
+- 输入为同一部小说的连续文本，且章节数 `>= 3`
+- 输出目标为可编辑的剧本初稿，而不是拍摄定稿
+- 输出格式为 YAML
+- 需要支持后续的局部修订、场景重写、质量校验和版本保存
 
-### 2.3 可追溯
-每个场景、节拍、台词尽量保留来源章节或原文引用信息。
+不适用的场景：
 
-### 2.4 可扩展
-预留 `extensions` 字段，支持不同业务场景的自定义扩展。
+- 单章文本摘要
+- 最终拍摄用分镜脚本
+- 自动生成视频镜头表
 
-### 2.5 可校验
-所有核心字段均应有明确类型与约束，便于程序进行结构校验。
+## 3. 设计原则
 
----
+### 3.1 分层，而不是把所有信息压平
 
-## 3. 顶层结构
+小说转剧本不是“一次吐出全文”这么简单，而是至少包含四层结果：
 
-建议顶层结构如下：
+1. `source`：原始输入被切成哪些章节
+2. `story_bible`：全局故事知识库
+3. `outline`：改编后的结构规划
+4. `script`：真正的剧本正文
+
+这样设计的原因：
+
+- 便于复用中间结果
+- 便于只重跑某一层，而不是整条链路重来
+- 便于在结构审阅通过后再进入正文生成
+
+### 3.2 所有关键对象都必须有稳定 ID
+
+人物、地点、章节、场景、节拍都必须使用 ID，而不是只靠中文名称。
+
+这样设计的原因：
+
+- 名称可能修改
+- 名称可能重复
+- 局部重生成、差异对比、引用校验都依赖稳定 ID
+
+### 3.3 每场戏都要可追溯到原文
+
+`chapter_refs` 和 `source_refs` 不是可选装饰，而是核心字段。
+
+这样设计的原因：
+
+- 编辑人员需要确认改编是否忠于原文
+- 局部重生成时必须知道这场戏来自哪些章节
+- 质量检查时需要定位问题来源
+
+### 3.4 Schema 要优先服务“初稿生产”
+
+本工具的目标不是直接输出最终拍摄文本，而是输出：
+
+- 可读
+- 可编辑
+- 可校验
+- 可重生成
+
+所以本 Schema 会保留 `quality`、`extensions`、`style_guide` 等工程字段。
+
+### 3.5 YAML 优于 JSON
+
+选择 YAML 而不是 JSON 的原因：
+
+- 更适合人工阅读
+- 更适合多行文本
+- 更适合版本 diff
+- 更适合在同一个文件中做人工修订
+
+## 4. 顶层结构
+
+标准剧本 YAML 由以下顶层字段组成：
 
 ```yaml
-schema_version: "1.0"
+schema_version: "2.0"
 meta: {}
 source: {}
 adaptation: {}
@@ -49,520 +100,314 @@ quality: {}
 extensions: {}
 ```
 
----
+## 5. 顶层字段定义
 
-## 4. 顶层字段定义
+### 5.1 `schema_version`
 
-## 4.1 `schema_version`
+类型：`string`
 
-### 类型
-`string`
+作用：标识当前 YAML 规范版本。
 
-### 说明
-用于标识当前 YAML Schema 的版本号。
+设计原因：
 
-### 示例
-```yaml
-schema_version: "1.0"
-```
+- 未来字段一定会演进
+- 版本号是兼容处理的入口
+- 可以支持旧数据迁移
 
-### 设计原因
-- 便于未来升级 Schema
-- 避免字段变更导致旧数据失效
-- 支持版本迁移与兼容处理
-
----
-
-## 4.2 `meta`
-
-### 类型
-`object`
-
-### 说明
-记录项目基础信息、输出目标与模型信息。
-
-### 推荐字段
-```yaml
-meta:
-  project_id: "novel2script_001"
-  title: "老街回声"
-  original_novel_title: "老街回声"
-  original_author: "某某"
-  target_format: "tv_drama"
-  language: "zh-CN"
-  genre: ["悬疑", "成长"]
-  tone: "克制"
-  created_at: "2026-06-05T10:00:00Z"
-  model_provider: "qwen"
-  model_name: "qwen-max"
-```
-
-### 设计原因
-- 便于项目管理和版本追踪
-- 便于根据剧种选择不同输出模板
-- 便于记录模型来源与生成上下文
-
----
-
-## 4.3 `source`
-
-### 类型
-`object`
-
-### 说明
-记录小说原文来源与章节信息。
-
-### 推荐字段
-```yaml
-source:
-  chapter_count: 5
-  chapters:
-    - chapter_id: "ch01"
-      title: "第一章"
-      raw_text_ref: "source/ch01.txt"
-      summary: "本章摘要"
-    - chapter_id: "ch02"
-      title: "第二章"
-      raw_text_ref: "source/ch02.txt"
-      summary: "本章摘要"
-```
-
-### 设计原因
-- 支持原文追溯
-- 支持章节级重生成
-- 支持判断输入是否满足“3 章以上”要求
-
----
-
-## 4.4 `adaptation`
-
-### 类型
-`object`
-
-### 说明
-记录改编策略与风格规则。
-
-### 推荐字段
-```yaml
-adaptation:
-  adaptation_goal: "将小说改编为可编辑剧本初稿"
-  compression_strategy: "merge_minor_events"
-  pacing_policy: "preserve_key_conflicts"
-  style_guide:
-    dialogue_style: "自然口语化"
-    narration_style: "简洁"
-```
-
-### 设计原因
-- 不同小说可采用不同改编策略
-- 显式记录改编目标，方便 AI 按要求生成
-- 便于后续调整整体风格，而不是重新设计整套系统
-
----
-
-## 4.5 `story_bible`
-
-### 类型
-`object`
-
-### 说明
-全书统一知识底座，记录人物、地点、时间线、主题等全局信息。
-
-### 推荐字段
-```yaml
-story_bible:
-  logline: "一句话故事概述"
-  synopsis: "全书梗概"
-  theme: ["亲情", "真相", "成长"]
-  characters:
-    - character_id: "c001"
-      name: "林然"
-      role: "protagonist"
-      traits: ["倔强", "克制"]
-      goal: "寻找姐姐失踪的真相"
-      conflict: "既想追查真相，又害怕揭开家庭秘密"
-      arc: "从逃避到面对"
-      voice: "短句、克制、略带自嘲"
-      relations:
-        - target_character_id: "c002"
-          relation: "朋友"
-  locations:
-    - location_id: "l001"
-      name: "老街咖啡馆"
-      description: "狭长空间，灯光昏黄"
-      mood: "安静、压抑"
-  timeline:
-    - event_id: "e001"
-      time_order: 1
-      summary: "林然得知姐姐失踪"
-```
-
-### 设计原因
-- 保证跨章节、跨场景一致性
-- 统一人物口吻与行为逻辑
-- 支撑场景生成与质量校验
-
----
-
-## 4.6 `outline`
-
-### 类型
-`object`
-
-### 说明
-记录剧本结构骨架，如三幕式、五场式或分集结构。
-
-### 推荐字段
-```yaml
-outline:
-  structure_type: "three_act"
-  acts:
-    - act_id: "a1"
-      name: "开端"
-      purpose: "建立人物关系与核心冲突"
-      scene_count: 3
-    - act_id: "a2"
-      name: "发展"
-      purpose: "冲突升级"
-      scene_count: 5
-    - act_id: "a3"
-      name: "结局"
-      purpose: "解决主要矛盾"
-      scene_count: 2
-```
-
-### 设计原因
-- 剧本改编需要先搭骨架，再填内容
-- 便于作者快速理解全局节奏
-- 方便后续结构重排
-
----
-
-## 4.7 `script`
-
-### 类型
-`object`
-
-### 说明
-剧本正文主体，按幕、场景、节拍组织。
-
-### 推荐层级
-- Act（幕）
-- Scene（场景）
-- Beat（戏剧节拍）
-- Dialogue / Action / Transition（具体内容）
-
-### 推荐字段示例
-```yaml
-script:
-  acts:
-    - act_id: "a1"
-      title: "开端"
-      scenes:
-        - scene_id: "s001"
-          title: "咖啡馆初见"
-          chapter_refs: ["ch01", "ch02"]
-          location_ref: "l001"
-          time_of_day: "night"
-          objective: "触发主角行动"
-          summary: "林然在咖啡馆收到匿名信息。"
-          beats:
-            - beat_id: "b001"
-              type: "action"
-              text: "林然推门进入咖啡馆，四下张望。"
-            - beat_id: "b002"
-              type: "dialogue"
-              speaker_ref: "c001"
-              text: "你到底知道什么？"
-            - beat_id: "b003"
-              type: "action"
-              text: "手机震动，一条匿名短信跳出。"
-          transitions:
-            next_scene_hint: "林然开始追查短信来源"
-          source_refs:
-            - chapter_id: "ch01"
-              excerpt_id: "p014"
-            - chapter_id: "ch02"
-              excerpt_id: "p006"
-```
-
-### 设计原因
-- 场景级结构便于局部修改和再生成
-- Beat 级结构适合控制节奏与戏剧冲突
-- `source_refs` 让改编结果可回溯原文
-
----
-
-## 4.8 `quality`
-
-### 类型
-`object`
-
-### 说明
-记录质量评估结果、一致性检查结果与修复建议。
-
-### 推荐字段
-```yaml
-quality:
-  confidence: 0.86
-  warnings:
-    - "人物B在第二场与第三场称谓不一致"
-    - "第5场地点跳转较快，建议补充过场"
-  continuity_checks:
-    character_consistency: true
-    timeline_consistency: true
-    location_consistency: true
-  revision_suggestions:
-    - "加强主角与反派首次对话的冲突感"
-```
-
-### 设计原因
-- 让 AI 输出“可用但可修”的初稿
-- 显式暴露潜在问题，便于作者优先处理
-- 便于后续自动修复或人工二次打磨
-
----
-
-## 4.9 `extensions`
-
-### 类型
-`object`
-
-### 说明
-预留扩展字段，用于业务自定义或未来功能扩展。
-
-### 示例
-```yaml
-extensions:
-  custom_tags:
-    adaptation_mode: "fast_draft"
-    target_platform: "web_novel"
-```
-
-### 设计原因
-- 降低 Schema 频繁变更的成本
-- 支持不同剧种、不同业务场景的扩展需求
-- 保持兼容性与长期演进能力
-
----
-
-## 5. 字段关系说明
-
-### 5.1 `source` 与 `script`
-`source` 负责记录小说原始来源，`script` 负责记录改编后的场景内容。两者之间通过 `chapter_refs`、`source_refs` 形成映射关系。
-
-### 5.2 `story_bible` 与 `script`
-`story_bible` 统一定义人物、地点、时间线等全局信息，`script` 中通过 ID 引用这些对象，避免重复定义与前后不一致。
-
-### 5.3 `outline` 与 `script`
-`outline` 是剧本结构骨架，`script` 是具体填充内容。两者分离后便于先调整结构，再生成正文。
-
-### 5.4 `quality` 与其余字段
-`quality` 不是单独输出的附属内容，而是对前面所有阶段的检测结果汇总，帮助用户快速发现问题。
-
----
-
-## 6. 字段命名规范
-
-### 6.1 命名风格
-- 使用小写英文 + 下划线或驼峰风格保持一致
-- 建议整体采用 `snake_case`
-
-### 6.2 ID 规范
-- 所有实体 ID 必须稳定、唯一、可读
-- 建议前缀区分类型：
-  - `ch01`：章节
-  - `c001`：角色
-  - `l001`：地点
-  - `a1`：幕
-  - `s001`：场景
-  - `b001`：节拍
-
-### 6.3 文本规范
-- 字符串字段应尽量简洁明确
-- 对白字段应避免夹带结构说明
-- 描述字段应与剧情直接相关
-
----
-
-## 7. 校验规则建议
-
-### 7.1 必填项校验
-至少需要检查以下字段是否存在：
-- `schema_version`
-- `meta.title`
-- `source.chapter_count`
-- `story_bible.characters`
-- `outline.acts`
-- `script.acts`
-
-### 7.2 类型校验
-- 字符串字段必须是 string
-- 数组字段必须是 array
-- 对象字段必须是 object
-- 布尔值字段必须是 boolean
-- 数值字段必须是 number
-
-### 7.3 引用校验
-- `speaker_ref` 必须能在 `story_bible.characters` 中找到
-- `location_ref` 必须能在 `story_bible.locations` 中找到
-- `chapter_refs` 必须存在于 `source.chapters` 中
-
-### 7.4 一致性校验
-- 人物名称不能前后不一致
-- 时间线不能出现明显冲突
-- 同一场景的地点不应无理由跳变
-- 场景目标应与节拍内容一致
-
----
-
-## 8. 推荐扩展字段
-
-可根据业务需要在 `extensions` 中扩展：
+建议值：
 
 ```yaml
-extensions:
-  target_audience: "young_adult"
-  platform_constraints:
-    max_scene_length: 1200
-  style_reference: "现实主义悬疑"
-  manual_review_required: true
+schema_version: "2.0"
 ```
 
-扩展字段的原则是：**不破坏主 Schema 的兼容性**。
+### 5.2 `meta`
 
----
+类型：`object`
 
-## 9. 完整示例
+作用：记录本次剧本生成的基础项目信息。
 
-```yaml
-schema_version: "1.0"
-meta:
-  project_id: "novel2script_001"
-  title: "老街回声"
-  original_novel_title: "老街回声"
-  original_author: "某某"
-  target_format: "tv_drama"
-  language: "zh-CN"
-  genre: ["悬疑", "成长"]
-  tone: "克制"
-  created_at: "2026-06-05T10:00:00Z"
-  model_provider: "qwen"
-  model_name: "qwen-max"
+推荐字段：
 
-source:
-  chapter_count: 3
-  chapters:
-    - chapter_id: "ch01"
-      title: "第一章"
-      raw_text_ref: "source/ch01.txt"
-      summary: "主角得知姐姐失踪。"
-    - chapter_id: "ch02"
-      title: "第二章"
-      raw_text_ref: "source/ch02.txt"
-      summary: "主角追查线索。"
-    - chapter_id: "ch03"
-      title: "第三章"
-      raw_text_ref: "source/ch03.txt"
-      summary: "主角进入旧街区。"
+| 字段 | 类型 | 必填 | 说明 |
+|---|---|---:|---|
+| `project_id` | string | 是 | 项目标识 |
+| `title` | string | 是 | 剧本标题 |
+| `original_novel_title` | string | 是 | 原小说标题 |
+| `original_author` | string | 是 | 原作者 |
+| `target_format` | string | 是 | 剧本类型，如 `film`、`tv_drama` |
+| `language` | string | 是 | 语言，默认 `zh-CN` |
+| `genre` | list[string] | 否 | 题材标签 |
+| `tone` | string | 否 | 语气风格 |
+| `created_at` | string | 是 | ISO 8601 时间 |
+| `model_provider` | string | 否 | 模型提供方 |
+| `model_name` | string | 否 | 模型名称 |
 
-adaptation:
-  adaptation_goal: "将小说改编为可编辑剧本初稿"
-  compression_strategy: "merge_minor_events"
-  pacing_policy: "preserve_key_conflicts"
-  style_guide:
-    dialogue_style: "自然口语化"
-    narration_style: "简洁"
+设计原因：
 
-story_bible:
-  logline: "一个年轻人追查姐姐失踪真相，逐步揭开家庭秘密。"
-  synopsis: "林然在追查姐姐失踪真相的过程中，逐渐发现家族秘密与旧街区中的隐秘联系。"
-  theme: ["亲情", "真相", "成长"]
-  characters:
-    - character_id: "c001"
-      name: "林然"
-      role: "protagonist"
-      traits: ["倔强", "克制"]
-      goal: "寻找姐姐失踪的真相"
-      conflict: "既想追查真相，又害怕面对家庭秘密"
-      arc: "从逃避到面对"
-      voice: "短句、克制、略带自嘲"
-  locations:
-    - location_id: "l001"
-      name: "老街咖啡馆"
-      description: "狭长空间，灯光昏黄"
-      mood: "安静、压抑"
-  timeline:
-    - event_id: "e001"
-      time_order: 1
-      summary: "林然得知姐姐失踪"
+- 方便版本管理
+- 方便区分输出目标
+- 方便记录生成上下文
 
-outline:
-  structure_type: "three_act"
-  acts:
-    - act_id: "a1"
-      name: "开端"
-      purpose: "建立人物关系与核心冲突"
-      scene_count: 1
+### 5.3 `source`
 
-script:
-  acts:
-    - act_id: "a1"
-      title: "开端"
-      scenes:
-        - scene_id: "s001"
-          title: "咖啡馆初见"
-          chapter_refs: ["ch01", "ch02"]
-          location_ref: "l001"
-          time_of_day: "night"
-          objective: "触发主角行动"
-          summary: "林然在咖啡馆收到匿名信息。"
-          beats:
-            - beat_id: "b001"
-              type: "action"
-              text: "林然推门进入咖啡馆，四下张望。"
-            - beat_id: "b002"
-              type: "dialogue"
-              speaker_ref: "c001"
-              text: "你到底知道什么？"
-          source_refs:
-            - chapter_id: "ch01"
-              excerpt_id: "p014"
+类型：`object`
 
-quality:
-  confidence: 0.91
-  warnings: []
-  continuity_checks:
-    character_consistency: true
-    timeline_consistency: true
-    location_consistency: true
-  revision_suggestions:
-    - "补充林然与匿名信息之间的情绪过渡"
+作用：记录原始输入与章节拆分结果。
 
-extensions:
-  target_audience: "young_adult"
-  platform_constraints:
-    max_scene_length: 1200
-  style_reference: "现实主义悬疑"
-  manual_review_required: true
-```
+推荐字段：
 
----
+| 字段 | 类型 | 必填 | 说明 |
+|---|---|---:|---|
+| `chapter_count` | integer | 是 | 章节总数，业务要求必须 `>= 3` |
+| `chapters` | list[object] | 是 | 章节列表 |
 
-## 10. 总结
+每个 `chapters[]` 元素建议包含：
 
-本 Schema 的核心是把小说改编过程拆分为“理解、规划、生成、校验”四个层次，并通过 YAML 的结构化表达方式，将剧本初稿做成**可编辑、可追溯、可扩展、可验证**的数据对象。
+| 字段 | 类型 | 必填 | 说明 |
+|---|---|---:|---|
+| `chapter_id` | string | 是 | 章节 ID |
+| `title` | string | 是 | 章节标题 |
+| `raw_text_ref` | string | 是 | 原文引用路径或定位符 |
+| `summary` | string | 否 | 章节摘要 |
+| `excerpt_count` | integer | 否 | 章节切片数量 |
 
-这样既方便作者直接修改，也方便后续系统化处理，例如：
-- 局部重生成
-- 版本对比
-- 自动校验
-- 场景级重写
-- 扩展到不同剧种
+设计原因：
 
-如果后续需要更强的兼容性，可在 v2 中继续增加：
-- 分集结构
-- 分镜扩展
-- 角色关系图谱
-- 风格模板引用
-- 多版本并行管理
+- 这是“3 章以上输入”的直接校验入口
+- 章节是局部重生成的最小上游单位
+- 后续场景必须建立在章节引用之上
+
+### 5.4 `adaptation`
+
+类型：`object`
+
+作用：描述这次改编的策略，而不是只描述结果。
+
+推荐字段：
+
+| 字段 | 类型 | 必填 | 说明 |
+|---|---|---:|---|
+| `adaptation_goal` | string | 是 | 改编目标 |
+| `compression_strategy` | string | 否 | 压缩策略 |
+| `pacing_policy` | string | 否 | 节奏策略 |
+| `structure_type` | string | 否 | 结构类型，如 `three_act` |
+| `style_guide` | object | 否 | 风格要求 |
+
+`style_guide` 推荐包含：
+
+- `dialogue_style`
+- `narration_style`
+- `pacing_style`
+
+设计原因：
+
+- 同一部小说可以有多种改编版本
+- 改编策略必须显式记录，才能复现和比较
+- 后续场景重写时需要继承这层约束
+
+### 5.5 `story_bible`
+
+类型：`object`
+
+作用：承载跨章节、跨场景的统一故事知识。
+
+推荐字段：
+
+| 字段 | 类型 | 必填 | 说明 |
+|---|---|---:|---|
+| `logline` | string | 是 | 一句话故事概述 |
+| `synopsis` | string | 是 | 故事总梗概 |
+| `theme` | list[string] | 否 | 主题列表 |
+| `characters` | list[object] | 是 | 人物卡 |
+| `locations` | list[object] | 否 | 地点卡 |
+| `timeline` | list[object] | 否 | 时间线事件 |
+| `props` | list[string] | 否 | 关键道具 |
+
+设计原因：
+
+- 人物一致性不能靠模型临场记忆
+- 地点和时间线是跨场景 continuity 的基础
+- `story_bible` 是生成正文前最关键的全局约束
+
+### 5.6 `outline`
+
+类型：`object`
+
+作用：定义剧本结构规划。
+
+推荐字段：
+
+| 字段 | 类型 | 必填 | 说明 |
+|---|---|---:|---|
+| `structure_type` | string | 是 | 结构类型 |
+| `acts` | list[object] | 是 | 幕结构 |
+| `scene_plans` | list[object] | 是 | 场景规划 |
+
+每个 `scene_plans[]` 至少应包含：
+
+| 字段 | 类型 | 必填 | 说明 |
+|---|---|---:|---|
+| `scene_id` | string | 是 | 场景 ID |
+| `act_id` | string | 是 | 所属幕 ID |
+| `title` | string | 是 | 场景标题 |
+| `objective` | string | 是 | 该场戏的戏剧目标 |
+| `chapter_refs` | list[string] | 是 | 章节引用 |
+| `conflict` | string | 否 | 场景冲突 |
+| `notes` | string | 否 | 生成备注 |
+
+设计原因：
+
+- 正文生成前必须先有结构骨架
+- 编辑人员通常先改结构，再改文本
+- 局部重生成应以 `scene_plan` 为输入，而不是裸文本
+
+### 5.7 `script`
+
+类型：`object`
+
+作用：承载真正的剧本正文。
+
+推荐层级：
+
+1. `acts`
+2. `scenes`
+3. `beats`
+
+每个 `scene` 推荐字段：
+
+| 字段 | 类型 | 必填 | 说明 |
+|---|---|---:|---|
+| `scene_id` | string | 是 | 场景 ID |
+| `title` | string | 是 | 场景标题 |
+| `chapter_refs` | list[string] | 是 | 来自哪些章节 |
+| `location_ref` | string | 否 | 地点引用 |
+| `time_of_day` | string | 否 | 时间段 |
+| `objective` | string | 是 | 戏剧目标 |
+| `summary` | string | 否 | 场景摘要 |
+| `beats` | list[object] | 是 | 场景节拍 |
+| `transitions` | object | 否 | 转场信息 |
+| `source_refs` | list[object] | 是 | 原文追溯引用 |
+
+每个 `beat` 推荐字段：
+
+| 字段 | 类型 | 必填 | 说明 |
+|---|---|---:|---|
+| `beat_id` | string | 是 | 节拍 ID |
+| `type` | enum | 是 | `action` / `dialogue` / `narration` / `transition` |
+| `text` | string | 是 | 节拍文本 |
+| `speaker_ref` | string | 否 | 对白说话人 |
+| `emotion` | string | 否 | 情绪标签 |
+
+设计原因：
+
+- 场景级结构方便重写某一场戏
+- `beat` 级结构方便细调节奏
+- 对白与动作拆分后，便于后续导出其他格式
+
+### 5.8 `quality`
+
+类型：`object`
+
+作用：记录当前草稿的质量结论。
+
+推荐字段：
+
+| 字段 | 类型 | 必填 | 说明 |
+|---|---|---:|---|
+| `confidence` | float | 否 | 模型置信度 |
+| `warnings` | list[string] | 否 | 风险提示 |
+| `revision_suggestions` | list[string] | 否 | 修订建议 |
+| `continuity_checks` | object | 否 | 连续性检查结果 |
+
+设计原因：
+
+- AI 初稿天然存在不确定性
+- 问题必须显式暴露，而不是藏在文本里
+- 便于人工优先处理高风险位置
+
+### 5.9 `extensions`
+
+类型：`object`
+
+作用：预留给业务扩展，不影响核心结构。
+
+适合放：
+
+- 上传来源信息
+- 切章策略
+- 目标集数建议
+- 生产状态标签
+
+设计原因：
+
+- 核心 Schema 要稳定
+- 业务字段会持续变化
+- 用 `extensions` 隔离非核心信息最稳妥
+
+## 6. 关键约束
+
+本工具的业务约束建议明确写入实现和测试：
+
+1. `source.chapter_count >= 3`
+2. `len(source.chapters) == source.chapter_count`
+3. 所有 `chapter_id` 唯一
+4. 所有 `scene_id` 唯一
+5. `outline.scene_plans[].chapter_refs` 不能为空
+6. `script.acts[].act_id` 必须能在 `outline.acts` 中找到
+7. `scene.chapter_refs` 必须是 `source.chapters[].chapter_id` 的子集
+8. `source_refs` 至少能指向一个上游章节
+9. `speaker_ref` 必须能在 `story_bible.characters` 中找到
+10. `location_ref` 必须能在 `story_bible.locations` 中找到
+
+## 7. 设计原因总结
+
+这套 Schema 的核心，不是“把剧本写成 YAML”这么简单，而是解决下面几个工程问题：
+
+### 7.1 为什么一定要求 3 章以上
+
+- 单章文本不足以稳定抽取人物关系和故事走向
+- 3 章以上更适合建立 `story_bible`
+- 多章节输入才能真正体现自动改编的结构规划价值
+
+### 7.2 为什么 `story_bible` 和 `script` 分开
+
+- `story_bible` 是全局知识
+- `script` 是局部文本
+- 分开后，修改人物设定不必直接改正文
+
+### 7.3 为什么 `outline` 独立存在
+
+- 先规划结构，再生成正文，效果更稳定
+- 结构问题和文本问题是两类问题，必须分开处理
+
+### 7.4 为什么保留 `quality`
+
+- 工具输出的是“可编辑初稿”
+- 既然不是定稿，就要把风险和建议一起交付
+
+### 7.5 为什么保留 `extensions`
+
+- 以后会出现新的业务字段
+- 不应该每次都破坏核心 Schema
+
+## 8. 交付建议
+
+建议该工具至少交付两份产物：
+
+1. 一份 Markdown 文档：解释 YAML Schema 设计与约束
+2. 一份实际 YAML 样例：证明 Schema 足以承载真实三章小说改编结果
+
+当前仓库内建议对应为：
+
+- 规范文档：`AI-小说转剧本工具-YAML Schema规范.md`
+- 样例 YAML：`output/laojiehuisheng_screenplay_v2.yaml`
+
+## 9. 样例说明
+
+本规范配套的 YAML 样例基于已上传小说《老街回声》的三章文本生成，重点体现：
+
+- 章节数满足 `>= 3`
+- 每场戏可追溯到原章节
+- 人物、地点、道具、时间线被抽取到 `story_bible`
+- `outline` 与 `script` 独立存在
+- `quality` 和 `extensions` 可以承载工程信息

@@ -20,6 +20,11 @@ const toneOptions = [
   { value: "uplifting", zh: "振奋", en: "Uplifting" },
 ];
 
+const speedOptions = [
+  { value: "fast", zh: "快速", en: "Fast" },
+  { value: "balanced", zh: "平衡", en: "Balanced" },
+];
+
 const translations = {
   zh: {
     htmlLang: "zh-CN",
@@ -28,7 +33,9 @@ const translations = {
     languageLabel: "界面语言",
     loadingWorkspace: "正在加载工作区...",
     projectsHeading: "项目",
+    resetButton: "重置",
     refreshButton: "刷新",
+    deleteButton: "删除",
     noProjectsCard: "还没有项目。先生成一版剧本即可开始。",
     generateHeading: "生成剧本",
     qwenPill: "Qwen 生成",
@@ -45,6 +52,7 @@ const translations = {
     genreLabel: "题材",
     genrePlaceholder: "悬疑,成长",
     toneLabel: "语气风格",
+    speedModeLabel: "生成速度",
     pasteTextLabel: "直接粘贴小说文本",
     novelTextPlaceholder: "如果不上传文件，可以在这里粘贴一章或多章小说正文；多章生成会更稳定。",
     generateButton: "生成剧本",
@@ -55,7 +63,7 @@ const translations = {
     reloadButton: "重新加载",
     downloadYamlButton: "下载 YAML",
     finalScriptHeading: "最终生成剧本",
-    scriptPreviewPlaceholder: "请选择一个版本查看生成结果。",
+    scriptPreviewPlaceholder: "请上传小说后等待Qwen生成剧本",
     sceneRegenerationHeading: "场景重生成",
     targetedRewritePill: "定向重写",
     sceneLabel: "场景",
@@ -70,6 +78,11 @@ const translations = {
     comparisonPlaceholder: "重生成场景后，这里会显示修改前后对比。",
     refreshingProjectsStatus: "正在刷新项目列表...",
     noProjectsFoundStatus: "没有发现任何项目。",
+    selectProjectPlaceholder: "请选择项目",
+    selectProjectStatus: "请选择项目。",
+    selectionResetStatus: "已清空输入表单和工作区状态。",
+    deletingVersionStatus: "正在删除 {projectId}/{versionId}...",
+    deletedVersionStatus: "已删除 {projectId}/{versionId}",
     loadingVersionsStatus: "正在加载 {projectId} 的版本...",
     noVersionsStatus: "项目 {projectId} 还没有保存版本。",
     loadingVersionStatus: "正在加载 {projectId}/{versionId}...",
@@ -78,6 +91,9 @@ const translations = {
     generatedDraftStatus: "已生成 {projectId}/{versionId}",
     qwenGenerationPending: "Qwen 正在以极速草稿模式生成，单章通常会快很多；只有在整条流程完成后，工作区才会切换到新版本。",
     qwenRegenerationPending: "Qwen 正在以极速模式重生成场景；完成前工作区不会更新。",
+    localPreviewReady: "已先生成本地草稿 {projectId}/{versionId}，后台正在继续生成 Qwen 正式版。",
+    qwenFinalReady: "Qwen 正式版已完成：{projectId}/{versionId}",
+    backgroundTaskFailed: "后台 Qwen 任务失败：{error}",
     apiKeyRequired: "请输入 Qwen API Key。",
     inputRequired: "请上传小说文件，或直接粘贴小说文本。",
     selectVersionBeforeRegenerate: "请先选择一个项目版本再重生成场景。",
@@ -98,7 +114,9 @@ const translations = {
     languageLabel: "Interface language",
     loadingWorkspace: "Loading workspace...",
     projectsHeading: "Projects",
+    resetButton: "Reset",
     refreshButton: "Refresh",
+    deleteButton: "Delete",
     noProjectsCard: "No projects yet. Generate a screenplay to begin.",
     generateHeading: "Generate Screenplay",
     qwenPill: "Qwen Generation",
@@ -115,6 +133,7 @@ const translations = {
     genreLabel: "Genre",
     genrePlaceholder: "mystery,growth",
     toneLabel: "Tone style",
+    speedModeLabel: "Generation speed",
     pasteTextLabel: "Paste novel text directly",
     novelTextPlaceholder: "If you do not upload a file, paste one or more chapters of source text here. More chapters usually produce better results.",
     generateButton: "Generate Screenplay",
@@ -125,7 +144,7 @@ const translations = {
     reloadButton: "Reload",
     downloadYamlButton: "Download YAML",
     finalScriptHeading: "Final screenplay",
-    scriptPreviewPlaceholder: "Select a version to view the generated screenplay.",
+    scriptPreviewPlaceholder: "Upload a novel and wait for Qwen to generate the screenplay.",
     sceneRegenerationHeading: "Scene Regeneration",
     targetedRewritePill: "Targeted rewrite",
     sceneLabel: "Scene",
@@ -140,6 +159,11 @@ const translations = {
     comparisonPlaceholder: "The before-and-after comparison will appear here after scene regeneration.",
     refreshingProjectsStatus: "Refreshing projects...",
     noProjectsFoundStatus: "No projects found.",
+    selectProjectPlaceholder: "Select project",
+    selectProjectStatus: "Select a project.",
+    selectionResetStatus: "Form inputs and workspace state cleared.",
+    deletingVersionStatus: "Deleting {projectId}/{versionId}...",
+    deletedVersionStatus: "Deleted {projectId}/{versionId}",
     loadingVersionsStatus: "Loading versions for {projectId}...",
     noVersionsStatus: "Project {projectId} has no saved versions.",
     loadingVersionStatus: "Loading {projectId}/{versionId}...",
@@ -148,6 +172,9 @@ const translations = {
     generatedDraftStatus: "Generated {projectId}/{versionId}",
     qwenGenerationPending: "Qwen is generating in fast-draft mode. Single-chapter drafts should complete much faster, but the workspace updates only after the full pipeline finishes.",
     qwenRegenerationPending: "Qwen is regenerating the scene in fast mode. The workspace will not update until it finishes.",
+    localPreviewReady: "Local preview draft is ready: {projectId}/{versionId}. Qwen is still generating the final version in the background.",
+    qwenFinalReady: "Qwen final version is ready: {projectId}/{versionId}",
+    backgroundTaskFailed: "Background Qwen task failed: {error}",
     apiKeyRequired: "Enter a Qwen API key first.",
     inputRequired: "Upload a novel file or paste novel text first.",
     selectVersionBeforeRegenerate: "Select a project version before regenerating a scene.",
@@ -162,7 +189,6 @@ const translations = {
     unknownError: "An unexpected error occurred.",
   },
 };
-
 const state = {
   projects: [],
   selectedProjectId: "",
@@ -175,7 +201,15 @@ const state = {
     base64: "",
   },
   health: null,
+  activeTaskId: "",
+  activeTaskKind: "",
+  activeTaskStream: null,
 };
+
+const STREAM_FRAME_MS = 24;
+const STREAM_MIN_CHUNK = 2;
+const STREAM_MAX_CHUNK = 8;
+const streamRenderers = new WeakMap();
 
 const els = {
   languageSelect: document.getElementById("languageSelect"),
@@ -184,6 +218,7 @@ const els = {
   messageBanner: document.getElementById("messageBanner"),
   workspacePill: document.getElementById("workspacePill"),
   projectsList: document.getElementById("projectsList"),
+  resetProjectsButton: document.getElementById("resetProjectsButton"),
   refreshProjectsButton: document.getElementById("refreshProjectsButton"),
   apiKey: document.getElementById("apiKey"),
   uploadFile: document.getElementById("uploadFile"),
@@ -193,6 +228,7 @@ const els = {
   scriptType: document.getElementById("scriptType"),
   genre: document.getElementById("genre"),
   tone: document.getElementById("tone"),
+  speedMode: document.getElementById("speedMode"),
   novelText: document.getElementById("novelText"),
   generateButton: document.getElementById("generateButton"),
   projectSelect: document.getElementById("projectSelect"),
@@ -230,10 +266,11 @@ function applyTranslations() {
   renderStaticSelects();
   if (state.projects.length) {
     renderProjects();
+    renderProjectSelectOptions(state.selectedProjectId);
   }
   if (!state.selectedVersionPayload) {
     els.workspacePill.textContent = t("workspaceEmpty");
-    els.scriptPreview.textContent = t("scriptPreviewPlaceholder");
+    setElementText(els.scriptPreview, t("scriptPreviewPlaceholder"));
   }
   renderBuildBadge();
   renderSceneComparison(state.lastSceneComparison);
@@ -253,6 +290,13 @@ function renderStaticSelects() {
     (item) => item.value,
     (item) => (state.language === "zh" ? item.zh : item.en),
     els.tone.value || "balanced",
+  );
+  fillSelect(
+    els.speedMode,
+    speedOptions,
+    (item) => item.value,
+    (item) => (state.language === "zh" ? item.zh : item.en),
+    els.speedMode.value || "fast",
   );
 }
 
@@ -298,7 +342,85 @@ function setBanner(message, kind = "info") {
   els.messageBanner.className = `message-banner ${kind}`;
 }
 
+function stopElementStream(element) {
+  const renderer = streamRenderers.get(element);
+  if (renderer?.timer) {
+    window.clearInterval(renderer.timer);
+  }
+  if (renderer) {
+    renderer.timer = null;
+  }
+}
+
+function setElementText(element, text) {
+  stopElementStream(element);
+  element.textContent = text;
+}
+
+function commonPrefixLength(left, right) {
+  const limit = Math.min(left.length, right.length);
+  let index = 0;
+  while (index < limit && left[index] === right[index]) {
+    index += 1;
+  }
+  return index;
+}
+
+function streamTextToElement(element, targetText) {
+  const currentText = element.textContent || "";
+  const prefixLength = commonPrefixLength(currentText, targetText);
+  if (prefixLength < currentText.length) {
+    setElementText(element, currentText.slice(0, prefixLength));
+  }
+
+  const renderer = streamRenderers.get(element) || { timer: null, revision: 0 };
+  renderer.revision += 1;
+  const revision = renderer.revision;
+  stopElementStream(element);
+
+  let cursor = prefixLength;
+  if (cursor >= targetText.length) {
+    streamRenderers.set(element, renderer);
+    return;
+  }
+
+  renderer.timer = window.setInterval(() => {
+    const active = streamRenderers.get(element);
+    if (!active || active.revision !== revision) {
+      window.clearInterval(renderer.timer);
+      return;
+    }
+
+    const nextChar = targetText[cursor] || "";
+    const chunkSize = nextChar === "\n"
+      ? 1
+      : Math.max(
+          STREAM_MIN_CHUNK,
+          Math.min(STREAM_MAX_CHUNK, Math.ceil((targetText.length - cursor) / 120)),
+        );
+    cursor = Math.min(targetText.length, cursor + chunkSize);
+    element.textContent = targetText.slice(0, cursor);
+
+    if (cursor >= targetText.length) {
+      window.clearInterval(renderer.timer);
+      renderer.timer = null;
+    }
+  }, STREAM_FRAME_MS);
+
+  streamRenderers.set(element, renderer);
+}
+
+function stopTaskMonitor() {
+  if (state.activeTaskStream) {
+    state.activeTaskStream.close();
+    state.activeTaskStream = null;
+  }
+}
+
 function renderBuildBadge() {
+  if (!els.buildBadge) {
+    return;
+  }
   if (!state.health) {
     els.buildBadge.textContent = "server unknown";
     return;
@@ -317,16 +439,50 @@ function renderProjects() {
     return;
   }
   state.projects.forEach((project) => {
-    const card = document.createElement("button");
-    card.type = "button";
+    const card = document.createElement("section");
     card.className = `project-card ${project.project_id === state.selectedProjectId ? "active" : ""}`;
+    const versionsHtml = (project.versions || []).map((version) => `
+      <div class="project-version-row">
+        <button type="button" class="project-version-button" data-project-id="${escapeHtml(project.project_id)}" data-version-id="${escapeHtml(version.version_id)}">
+          ${escapeHtml(version.version_id)}
+        </button>
+        <button type="button" class="project-version-delete" data-project-id="${escapeHtml(project.project_id)}" data-version-id="${escapeHtml(version.version_id)}">
+          ${escapeHtml(t("deleteButton"))}
+        </button>
+      </div>
+    `).join("");
     card.innerHTML = `
-      <strong>${escapeHtml(project.project_id)}</strong>
-      <small>${escapeHtml(t("projectLatestLabel", { versionId: project.latest_version || "-" }))}</small>
-      <small>${escapeHtml(t("projectVersionCountLabel", { count: project.versions.length }))}</small>
+      <button type="button" class="project-card-main" data-project-id="${escapeHtml(project.project_id)}">
+        <strong>${escapeHtml(project.project_id)}</strong>
+        <small>${escapeHtml(t("projectLatestLabel", { versionId: project.latest_version || "-" }))}</small>
+        <small>${escapeHtml(t("projectVersionCountLabel", { count: project.versions.length }))}</small>
+      </button>
+      <div class="project-versions">
+        ${versionsHtml}
+      </div>
     `;
-    card.addEventListener("click", () => {
+    card.querySelector(".project-card-main")?.addEventListener("click", () => {
       selectProject(project.project_id).catch(handleError);
+    });
+    card.querySelectorAll(".project-version-button").forEach((button) => {
+      button.addEventListener("click", (event) => {
+        const target = event.currentTarget;
+        const versionId = target?.dataset?.versionId || "";
+        if (!versionId) {
+          return;
+        }
+        loadVersion(project.project_id, versionId).catch(handleError);
+      });
+    });
+    card.querySelectorAll(".project-version-delete").forEach((button) => {
+      button.addEventListener("click", (event) => {
+        const target = event.currentTarget;
+        const versionId = target?.dataset?.versionId || "";
+        if (!versionId) {
+          return;
+        }
+        deleteVersion(project.project_id, versionId).catch(handleError);
+      });
     });
     els.projectsList.appendChild(card);
   });
@@ -345,6 +501,67 @@ function fillSelect(select, items, getValue, getLabel, selectedValue = "") {
   });
 }
 
+function renderProjectSelectOptions(selectedValue = "") {
+  els.projectSelect.innerHTML = "";
+
+  const placeholder = document.createElement("option");
+  placeholder.value = "";
+  placeholder.textContent = t("selectProjectPlaceholder");
+  placeholder.selected = !selectedValue;
+  els.projectSelect.appendChild(placeholder);
+
+  state.projects.forEach((project) => {
+    const option = document.createElement("option");
+    option.value = project.project_id;
+    option.textContent = project.project_id;
+    if (option.value === selectedValue) {
+      option.selected = true;
+    }
+    els.projectSelect.appendChild(option);
+  });
+}
+
+function resetProjectSelection() {
+  state.selectedProjectId = "";
+  state.selectedVersionId = "";
+  state.selectedVersionPayload = null;
+  state.lastSceneComparison = null;
+  els.projectSelect.value = "";
+  els.versionSelect.innerHTML = "";
+  els.sceneSelect.innerHTML = "";
+  els.workspacePill.textContent = t("workspaceEmpty");
+  setElementText(els.scriptPreview, t("scriptPreviewPlaceholder"));
+  renderSceneComparison(null);
+  renderProjects();
+  setBanner("");
+  setStatus(t("selectionResetStatus"));
+}
+
+function resetFormAndWorkspace() {
+  stopTaskMonitor();
+  state.activeTaskId = "";
+  state.activeTaskKind = "";
+  state.upload = { name: "", base64: "" };
+  state.projects = [];
+
+  els.apiKey.value = "";
+  els.uploadFile.value = "";
+  els.title.value = "";
+  els.author.value = "";
+  els.originalTitle.value = "";
+  els.genre.value = "";
+  els.novelText.value = "";
+
+  renderStaticSelects();
+  els.scriptType.value = "tv_drama";
+  els.tone.value = "balanced";
+  els.speedMode.value = "fast";
+  els.projectsList.innerHTML = "";
+  renderProjectSelectOptions("");
+
+  resetProjectSelection();
+}
+
 async function loadProjects(preferredProjectId = "") {
   setStatus(t("refreshingProjectsStatus"));
   setBanner("");
@@ -355,30 +572,23 @@ async function loadProjects(preferredProjectId = "") {
   const projectIds = state.projects.map((project) => project.project_id);
   const nextProjectId =
     preferredProjectId ||
-    (projectIds.includes(state.selectedProjectId) ? state.selectedProjectId : projectIds[0] || "");
+    (projectIds.includes(state.selectedProjectId) ? state.selectedProjectId : "");
 
-  fillSelect(
-    els.projectSelect,
-    state.projects,
-    (project) => project.project_id,
-    (project) => project.project_id,
-    nextProjectId,
-  );
+  renderProjectSelectOptions(nextProjectId);
 
   if (nextProjectId) {
     await selectProject(nextProjectId);
   } else {
-    els.versionSelect.innerHTML = "";
-    els.sceneSelect.innerHTML = "";
-    els.scriptPreview.textContent = t("scriptPreviewPlaceholder");
-    state.lastSceneComparison = null;
-    renderSceneComparison(null);
-    els.workspacePill.textContent = t("workspaceEmpty");
-    setStatus(t("noProjectsFoundStatus"));
+    resetProjectSelection();
+    setStatus(state.projects.length ? t("selectProjectStatus") : t("noProjectsFoundStatus"));
   }
 }
 
 async function selectProject(projectId, preferredVersionId = "") {
+  if (!projectId) {
+    resetProjectSelection();
+    return;
+  }
   state.selectedProjectId = projectId;
   renderProjects();
   els.projectSelect.value = projectId;
@@ -419,9 +629,33 @@ async function loadVersion(projectId, versionId) {
   state.selectedVersionPayload = data;
 
   els.workspacePill.textContent = `${projectId} · ${versionId}`;
-  els.scriptPreview.textContent = data.rendered_script || t("scriptPreviewPlaceholder");
+  setElementText(els.scriptPreview, data.rendered_script || t("scriptPreviewPlaceholder"));
   renderSceneOptions(data.scene_options);
   setStatus(t("loadedVersionStatus", { projectId, versionId }));
+}
+
+async function deleteVersion(projectId, versionId) {
+  setStatus(t("deletingVersionStatus", { projectId, versionId }));
+  setBanner("");
+  const deleted = await api(
+    `/api/projects/${encodeURIComponent(projectId)}/versions/${encodeURIComponent(versionId)}/delete`,
+    { method: "DELETE" },
+  );
+
+  const deletedSelectedVersion = state.selectedProjectId === projectId && state.selectedVersionId === versionId;
+  const deletingSelectedProject = state.selectedProjectId === projectId;
+  const nextProjectId = deleted.project_exists && deletingSelectedProject ? projectId : state.selectedProjectId;
+
+  await loadProjects(nextProjectId);
+
+  if (!deleted.project_exists && deletingSelectedProject) {
+    resetProjectSelection();
+  } else if (deletedSelectedVersion && projectId === state.selectedProjectId && !state.selectedVersionId) {
+    await selectProject(projectId);
+  }
+
+  setBanner(t("deletedVersionStatus", { projectId, versionId }), "info");
+  setStatus(t("deletedVersionStatus", { projectId, versionId }));
 }
 
 function renderSceneOptions(sceneOptions) {
@@ -434,18 +668,44 @@ function renderSceneOptions(sceneOptions) {
   });
 }
 
-function renderSceneComparison(comparison) {
+function resolveSceneComparisonInstruction(comparison = null) {
+  const draftInstruction = els.regenInstruction.value.trim();
+  if (draftInstruction) {
+    return draftInstruction;
+  }
+  if (comparison?.instruction) {
+    return comparison.instruction;
+  }
+  if (comparison?.scene_id) {
+    return comparison.scene_id;
+  }
+  return t("comparisonPlaceholder");
+}
+
+function syncSceneComparisonInstruction(comparison = state.lastSceneComparison) {
+  setElementText(els.sceneComparisonInstruction, resolveSceneComparisonInstruction(comparison));
+}
+
+function renderSceneComparison(comparison, options = {}) {
   if (!comparison) {
     const placeholder = t("comparisonPlaceholder");
-    els.sceneComparisonInstruction.textContent = placeholder;
-    els.sceneBeforePreview.textContent = placeholder;
-    els.sceneAfterPreview.textContent = placeholder;
+    syncSceneComparisonInstruction(null);
+    setElementText(els.sceneBeforePreview, placeholder);
+    setElementText(els.sceneAfterPreview, placeholder);
     return;
   }
 
-  els.sceneComparisonInstruction.textContent = comparison.instruction || comparison.scene_id || "";
-  els.sceneBeforePreview.textContent = comparison.before?.rendered || "";
-  els.sceneAfterPreview.textContent = comparison.after?.rendered || "";
+  syncSceneComparisonInstruction(comparison);
+  setElementText(els.sceneBeforePreview, comparison.before?.rendered || "");
+  if (options.streamAfter) {
+    if (options.directStream) {
+      setElementText(els.sceneAfterPreview, comparison.after?.rendered || "");
+      return;
+    }
+    streamTextToElement(els.sceneAfterPreview, comparison.after?.rendered || "");
+    return;
+  }
+  setElementText(els.sceneAfterPreview, comparison.after?.rendered || "");
 }
 
 async function generateDraft() {
@@ -457,7 +717,7 @@ async function generateDraft() {
   }
   setStatus(t("generatingDraftStatus"));
   setBanner(t("qwenGenerationPending"), "info");
-  const data = await api("/api/adapt", {
+  const data = await api("/api/adapt-async", {
     method: "POST",
     body: JSON.stringify({
       api_key: els.apiKey.value.trim(),
@@ -468,15 +728,20 @@ async function generateDraft() {
       script_type: els.scriptType.value,
       genre: els.genre.value,
       tone: els.tone.value,
+      speed_mode: els.speedMode.value,
       novel_text: els.novelText.value,
       upload_name: state.upload.name,
       upload_base64: state.upload.base64,
     }),
   });
-  await loadProjects(data.project_id);
-  await loadVersion(data.project_id, data.version.version_id);
-  setBanner(t("generatedDraftStatus", { projectId: data.project_id, versionId: data.version.version_id }), "info");
-  setStatus(t("generatedDraftStatus", { projectId: data.project_id, versionId: data.version.version_id }));
+  const preview = data.preview;
+  state.activeTaskId = data.task.task_id;
+  state.activeTaskKind = data.task.kind;
+  setElementText(els.scriptPreview, "");
+  state.lastSceneComparison = null;
+  renderSceneComparison(null);
+  els.workspacePill.textContent = t("workspaceEmpty");
+  monitorTask(data.task.task_id, preview.project_id);
 }
 
 async function regenerateScene() {
@@ -487,28 +752,28 @@ async function regenerateScene() {
     throw new Error(t("apiKeyRequired"));
   }
   const sceneId = els.sceneSelect.value;
+  const instruction = els.regenInstruction.value.trim();
   setStatus(t("regeneratingSceneStatus", { sceneId }));
   setBanner(t("qwenRegenerationPending"), "info");
   const data = await api(
-    `/api/projects/${encodeURIComponent(state.selectedProjectId)}/versions/${encodeURIComponent(state.selectedVersionId)}/regenerate-scene`,
+    `/api/projects/${encodeURIComponent(state.selectedProjectId)}/versions/${encodeURIComponent(state.selectedVersionId)}/regenerate-scene-async`,
     {
       method: "POST",
       body: JSON.stringify({
         scene_id: sceneId,
-        instruction: els.regenInstruction.value,
+        instruction,
         provider: "qwen",
         api_key: els.apiKey.value.trim(),
         tone: els.tone.value,
       }),
     },
   );
-  els.regenInstruction.value = "";
-  await loadProjects(state.selectedProjectId);
-  await loadVersion(state.selectedProjectId, data.version.version_id);
-  state.lastSceneComparison = data.scene_comparison || null;
+  const preview = data.preview;
+  state.activeTaskId = data.task.task_id;
+  state.activeTaskKind = data.task.kind;
+  state.lastSceneComparison = preview?.scene_comparison || null;
   renderSceneComparison(state.lastSceneComparison);
-  setBanner(t("regeneratedSceneStatus", { versionId: data.version.version_id }), "info");
-  setStatus(t("regeneratedSceneStatus", { versionId: data.version.version_id }));
+  monitorTask(data.task.task_id, state.selectedProjectId);
 }
 
 async function loadHealth() {
@@ -516,18 +781,135 @@ async function loadHealth() {
   renderBuildBadge();
 }
 
-function downloadYaml() {
+function renderStreamingTask(task) {
+  const result = task.result;
+  if (!result) {
+    return;
+  }
+  const isModelChunkStream = result.stream_source === "model_chunk";
+  if (result.rendered_script) {
+    if (isModelChunkStream) {
+      setElementText(els.scriptPreview, result.rendered_script);
+    } else {
+      streamTextToElement(els.scriptPreview, result.rendered_script);
+    }
+    if (result.project_id && result.version?.version_id) {
+      els.workspacePill.textContent = `${result.project_id} · ${result.version.version_id}`;
+    }
+  }
+  if (typeof result.completed_scenes === "number" && typeof result.total_scenes === "number" && result.total_scenes > 0) {
+    const sceneLabel = result.active_scene_id ? ` ${result.active_scene_id}` : "";
+    setStatus(`Qwen streaming${sceneLabel} ${result.completed_scenes}/${result.total_scenes}`);
+  }
+  if (result.scene_comparison) {
+    state.lastSceneComparison = result.scene_comparison;
+    renderSceneComparison(result.scene_comparison, {
+      streamAfter: task.kind === "regenerate_scene",
+      directStream: isModelChunkStream,
+    });
+  }
+}
+
+async function finalizeTask(task, projectId) {
+  const result = task.result;
+  if (!result) {
+    return;
+  }
+  state.activeTaskId = "";
+  stopTaskMonitor();
+  await loadProjects(projectId || result.project_id);
+  await loadVersion(result.project_id, result.version.version_id);
+  if (result.scene_comparison) {
+    state.lastSceneComparison = result.scene_comparison;
+    renderSceneComparison(state.lastSceneComparison);
+  }
+  setBanner(t("qwenFinalReady", { projectId: result.project_id, versionId: result.version.version_id }), "info");
+  if (task.kind === "regenerate_scene") {
+    setStatus(t("regeneratedSceneStatus", { versionId: result.version.version_id }));
+    return;
+  }
+  setStatus(t("generatedDraftStatus", { projectId: result.project_id, versionId: result.version.version_id }));
+}
+
+function handleTaskFailure(task) {
+  state.activeTaskId = "";
+  stopTaskMonitor();
+  setBanner(t("backgroundTaskFailed", { error: task.error || t("unknownError") }), "error");
+  setStatus(task.error || t("unknownError"));
+}
+
+async function consumeTaskUpdate(task, projectId) {
+  if (task.result?.mode === "streaming") {
+    renderStreamingTask(task);
+  }
+  if (task.status === "completed") {
+    await finalizeTask(task, projectId);
+    return;
+  }
+  if (task.status === "failed") {
+    handleTaskFailure(task);
+  }
+}
+
+async function monitorTaskByPolling(taskId, projectId) {
+  for (;;) {
+    if (state.activeTaskId !== taskId) {
+      return;
+    }
+    const task = await api(`/api/tasks/${encodeURIComponent(taskId)}`);
+    if (state.activeTaskId !== taskId) {
+      return;
+    }
+    await consumeTaskUpdate(task, projectId);
+    if (task.status === "completed" || task.status === "failed") {
+      return;
+    }
+    await new Promise((resolve) => setTimeout(resolve, 1500));
+  }
+}
+
+function monitorTask(taskId, projectId) {
+  state.activeTaskId = taskId;
+  stopTaskMonitor();
+  if (typeof window.EventSource !== "function") {
+    monitorTaskByPolling(taskId, projectId).catch(handleError);
+    return;
+  }
+
+  const stream = new EventSource(`/api/tasks/${encodeURIComponent(taskId)}/stream`);
+  state.activeTaskStream = stream;
+  stream.addEventListener("task", (event) => {
+    if (state.activeTaskId !== taskId) {
+      return;
+    }
+    const task = JSON.parse(event.data);
+    consumeTaskUpdate(task, projectId).catch(handleError);
+  });
+  stream.onerror = () => {
+    if (state.activeTaskId !== taskId) {
+      return;
+    }
+    stopTaskMonitor();
+    monitorTaskByPolling(taskId, projectId).catch(handleError);
+  };
+}
+
+async function downloadYaml() {
   if (!state.selectedVersionPayload) {
     return;
   }
-  const yamlText = state.selectedVersionPayload.yaml_text || "";
+  const latest = await api(
+    `/api/projects/${encodeURIComponent(state.selectedProjectId)}/versions/${encodeURIComponent(state.selectedVersionId)}`,
+  );
+  state.selectedVersionPayload = latest;
+  const yamlText = latest.yaml_text || "";
   const blob = new Blob([yamlText], { type: "text/yaml;charset=utf-8" });
   const url = URL.createObjectURL(blob);
   const anchor = document.createElement("a");
   anchor.href = url;
   anchor.download = t("downloadYamlFilename", {
-    projectId: state.selectedVersionPayload.project_id,
-    versionId: state.selectedVersionPayload.version.version_id,
+    projectId: latest.project_id,
+    versionId: latest.version.version_id,
   });
   anchor.click();
   URL.revokeObjectURL(url);
@@ -568,6 +950,9 @@ function registerEvents() {
     localStorage.setItem("workbench.language", state.language);
     applyTranslations();
   });
+  els.resetProjectsButton.addEventListener("click", () => {
+    resetFormAndWorkspace();
+  });
   els.refreshProjectsButton.addEventListener("click", () => {
     loadProjects().catch(handleError);
   });
@@ -591,7 +976,12 @@ function registerEvents() {
   els.reloadVersionButton.addEventListener("click", () => {
     loadVersion(state.selectedProjectId, state.selectedVersionId).catch(handleError);
   });
-  els.downloadYamlButton.addEventListener("click", downloadYaml);
+  els.downloadYamlButton.addEventListener("click", () => {
+    downloadYaml().catch(handleError);
+  });
+  els.regenInstruction.addEventListener("input", () => {
+    syncSceneComparisonInstruction();
+  });
   els.regenerateButton.addEventListener("click", () => {
     regenerateScene().catch(handleError);
   });

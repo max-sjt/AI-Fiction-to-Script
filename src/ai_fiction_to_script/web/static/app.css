@@ -190,6 +190,51 @@ h1 {
   display: block;
 }
 
+.project-card-main {
+  width: 100%;
+  border: 0;
+  background: transparent;
+  text-align: left;
+  padding: 0;
+  cursor: pointer;
+}
+
+.project-card-main strong,
+.project-card-main small {
+  display: block;
+}
+
+.project-versions {
+  display: grid;
+  gap: 0.45rem;
+  margin-top: 0.8rem;
+}
+
+.project-version-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.project-version-button,
+.project-version-delete {
+  border-radius: 999px;
+  padding: 0.45rem 0.8rem;
+  border: 1px solid var(--line);
+  background: rgba(255, 255, 255, 0.72);
+  cursor: pointer;
+}
+
+.project-version-button {
+  text-align: left;
+}
+
+.project-version-delete {
+  color: #8a1f1f;
+  background: rgba(144, 22, 22, 0.08);
+}
+
 .content {
   display: grid;
   gap: 1.2rem;
@@ -234,6 +279,12 @@ h1 {
 
 .section-heading {
   margin-bottom: 1rem;
+}
+
+.section-actions {
+  display: inline-flex;
+  gap: 0.65rem;
+  align-items: center;
 }
 
 .pill {

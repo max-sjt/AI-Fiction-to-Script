@@ -1,4 +1,4 @@
-from __future__ import annotations
+﻿from __future__ import annotations
 
 from typing import Literal
 
@@ -55,7 +55,7 @@ class AdaptationRequest(RuntimeModel):
     adaptation_goal: str = "将小说改编为可编辑剧本初稿"
     compression_strategy: str = "merge_minor_events"
     pacing_policy: str = "preserve_key_conflicts"
-    structure_type: str = "three_act"
+    structure_type: str = "continuous_sequence"
     style_guide: StyleGuide = Field(default_factory=StyleGuide)
     provider: Literal["qwen", "mock"] = "mock"
     model_routing: ModelRouting = Field(default_factory=ModelRouting)

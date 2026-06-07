@@ -80,6 +80,7 @@ def test_web_server_lists_projects_and_serves_html(tmp_path) -> None:
         assert 'id="resetProjectsButton"' in html
         assert 'id="uploadYamlFile"' in html
         assert 'id="regenerateFromYamlButton"' in html
+        assert 'id="downloadRegeneratedYamlButton"' in html
         assert "中文" in html
         assert cache_control == "no-store, max-age=0"
     finally:
@@ -95,6 +96,7 @@ def test_web_server_serves_frontend_yaml_workflow_wiring(tmp_path) -> None:
             app_js = response.read().decode("utf-8")
         assert "uploadYamlFile" in app_js
         assert "regenerateFromYamlButton" in app_js
+        assert "downloadRegeneratedYamlButton" in app_js
         assert "/api/regenerate-from-yaml-async" in app_js
         assert "/export-yaml" in app_js
     finally:
@@ -289,13 +291,15 @@ def test_web_server_exports_compact_yaml_bundle(tmp_path) -> None:
         exported = api_request(base_url, "/api/projects/web-demo/versions/v0001/export-yaml")
         assert exported["ok"] is True
         bundle = yaml.safe_load(exported["data"]["yaml_text"])
-        assert bundle["schema_version"] == "screenplay-project-1.0"
-        assert "characters" in bundle
-        assert "scenes" in bundle
-        assert "appendix" in bundle
-        assert "source_chapters" in bundle["appendix"]
-        assert "story_bible" not in bundle
-        assert "outline" not in bundle
+        assert bundle["schema_version"] == "2.0"
+        assert "meta" in bundle
+        assert "source" in bundle
+        assert "adaptation" in bundle
+        assert "story_bible" in bundle
+        assert "outline" in bundle
+        assert "script" in bundle
+        assert "extensions" in bundle
+        assert "regeneration_bundle" in bundle["extensions"]
     finally:
         stop_server(server, thread)
 
@@ -331,7 +335,7 @@ def test_web_server_supports_async_regeneration_from_yaml_bundle(tmp_path) -> No
             base_url,
             "/api/regenerate-from-yaml-async",
             method="POST",
-            payload={"yaml_text": "schema_version: compact-1.0"},
+            payload={"yaml_text": "schema_version: \"2.0\""},
         )
         assert response["ok"] is True
         assert response["data"]["task"]["task_id"] == "task-yaml-123"

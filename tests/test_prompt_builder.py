@@ -61,6 +61,9 @@ def test_scene_prompt_includes_script_type_and_tone_instructions() -> None:
     assert "Story Bible：\n{" not in user
     assert "character_id / location_id" in user
     assert "场景上下文：" in user
+    assert "不要使用 [VO]" in user
+    assert "不要使用 [SFX]" in user
+    assert "Scene Plan：\n{" not in user
 
 
 def test_outline_prompt_explicitly_requires_format_and_tone_execution() -> None:

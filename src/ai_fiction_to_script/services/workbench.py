@@ -529,6 +529,14 @@ class WorkbenchService:
         }
 
     def _extract_yaml_bundle_chapter_blocks(self, raw_payload: dict) -> list[str]:
+        extensions = raw_payload.get("extensions")
+        if isinstance(extensions, dict):
+            regeneration_bundle = extensions.get("regeneration_bundle")
+            if isinstance(regeneration_bundle, dict):
+                chapter_blocks = self._chapter_blocks_from_yaml_chapters(regeneration_bundle.get("source_chapters"))
+                if chapter_blocks:
+                    return chapter_blocks
+
         source = raw_payload.get("source")
         if isinstance(source, dict):
             chapters = source.get("chapters")
@@ -554,7 +562,10 @@ class WorkbenchService:
             title = str(chapter.get("title") or f"Chapter {index}").strip()
             text = str(chapter.get("text") or "").strip()
             if not text:
-                raise ValueError("Every source chapter in the YAML bundle must include text.")
+                summary = str(chapter.get("summary") or "").strip()
+                if not summary:
+                    raise ValueError("Every source chapter in the YAML bundle must include text or summary.")
+                text = summary
             chapter_blocks.append(f"{title}\n\n{text}")
         return chapter_blocks
 

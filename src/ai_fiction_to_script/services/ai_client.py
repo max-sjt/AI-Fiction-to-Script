@@ -1131,6 +1131,17 @@ def _infer_speaker_ref_from_text(text: str, story_bible: StoryBible) -> str | No
     return None
 
 
+def _strip_audio_markup(text: str) -> tuple[str, str, str]:
+    content = _normalize_text_field(text)
+    match = re.match(r"^\[(?P<tag>[A-Za-z]+|旁白)(?:[\/|／｜](?P<speaker>[^\]]+))?\]\s*(?P<text>.+)$", content)
+    if not match:
+        return "", "", content
+    tag = match.group("tag").strip().upper() if match.group("tag") != "旁白" else "旁白"
+    speaker = _normalize_text_field(match.group("speaker"))
+    cleaned_text = _normalize_text_field(match.group("text"))
+    return tag, speaker, cleaned_text
+
+
 def _speaker_name_from_ref(story_bible: StoryBible, speaker_ref: str | None) -> str:
     if not speaker_ref:
         return ""
@@ -1184,6 +1195,16 @@ def _looks_like_narrative_dialogue_text(text: str, speaker_name: str) -> bool:
     return any(marker in content for marker in narrative_markers)
 
 
+def _resolve_speaker_ref_from_name(speaker_name: str, story_bible: StoryBible) -> str | None:
+    if not speaker_name:
+        return None
+    character_lookup = _build_character_lookup(story_bible)
+    resolved = _resolve_lookup_ref(speaker_name, character_lookup)
+    if resolved is not None:
+        return resolved
+    return _resolve_unique_partial_ref(speaker_name, story_bible.characters, "character_id", "name")
+
+
 def _normalize_scene_refs(scene: Scene, story_bible: StoryBible) -> Scene:
     character_lookup = _build_character_lookup(story_bible)
     location_lookup = _build_entity_lookup(story_bible.locations, "location_id", "name")
@@ -1191,6 +1212,7 @@ def _normalize_scene_refs(scene: Scene, story_bible: StoryBible) -> Scene:
     normalized_beats: list[Beat] = []
     beats_changed = False
     for beat in scene.beats:
+        audio_tag, audio_speaker, cleaned_text = _strip_audio_markup(beat.text)
         resolved_speaker_ref = _resolve_lookup_ref(beat.speaker_ref, character_lookup)
         if resolved_speaker_ref is None:
             resolved_speaker_ref = _resolve_unique_partial_ref(
@@ -1199,11 +1221,26 @@ def _normalize_scene_refs(scene: Scene, story_bible: StoryBible) -> Scene:
                 "character_id",
                 "name",
             )
+        if resolved_speaker_ref is None and audio_speaker:
+            resolved_speaker_ref = _resolve_speaker_ref_from_name(audio_speaker, story_bible)
         if resolved_speaker_ref is None and beat.type == "dialogue":
-            resolved_speaker_ref = _infer_speaker_ref_from_text(beat.text, story_bible)
+            resolved_speaker_ref = _infer_speaker_ref_from_text(cleaned_text, story_bible)
         beat_updates: dict[str, Any] = {}
         speaker_name = _speaker_name_from_ref(story_bible, resolved_speaker_ref or beat.speaker_ref)
-        if beat.type == "dialogue" and _looks_like_narrative_dialogue_text(beat.text, speaker_name):
+        normalized_type = beat.type
+        if audio_tag in {"SFX", "BGM", "FX"}:
+            normalized_type = "action"
+            resolved_speaker_ref = None
+        elif audio_tag in {"VO", "OS", "旁白"} and normalized_type == "dialogue" and not resolved_speaker_ref and audio_speaker:
+            resolved_speaker_ref = _resolve_speaker_ref_from_name(audio_speaker, story_bible)
+            if resolved_speaker_ref is None:
+                cleaned_text = f"{audio_speaker}：{cleaned_text}"
+
+        if cleaned_text != beat.text:
+            beat_updates["text"] = cleaned_text
+        if normalized_type != beat.type:
+            beat_updates["type"] = normalized_type
+        if normalized_type == "dialogue" and _looks_like_narrative_dialogue_text(cleaned_text, speaker_name):
             beat_updates["type"] = "action"
             beat_updates["speaker_ref"] = None
         elif resolved_speaker_ref != beat.speaker_ref:

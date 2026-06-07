@@ -64,6 +64,7 @@ const translations = {
     currentVersionLabel: "当前版本",
     reloadButton: "重新加载",
     downloadYamlButton: "下载 YAML",
+    downloadRegeneratedYamlButton: "下载修改后 YAML",
     finalScriptHeading: "最终生成剧本",
     scriptPreviewPlaceholder: "请上传小说后等待Qwen生成剧本",
     sceneRegenerationHeading: "场景重生成",
@@ -150,6 +151,7 @@ const translations = {
     currentVersionLabel: "Current version",
     reloadButton: "Reload",
     downloadYamlButton: "Download YAML",
+    downloadRegeneratedYamlButton: "Download Regenerated YAML",
     finalScriptHeading: "Final screenplay",
     scriptPreviewPlaceholder: "Upload a novel and wait for Qwen to generate the screenplay.",
     sceneRegenerationHeading: "Scene Regeneration",
@@ -214,6 +216,8 @@ const state = {
     name: "",
     base64: "",
   },
+  lastRegeneratedVersionId: "",
+  lastRegeneratedProjectId: "",
   health: null,
   activeTaskId: "",
   activeTaskKind: "",
@@ -251,6 +255,7 @@ const els = {
   versionSelect: document.getElementById("versionSelect"),
   reloadVersionButton: document.getElementById("reloadVersionButton"),
   downloadYamlButton: document.getElementById("downloadYamlButton"),
+  downloadRegeneratedYamlButton: document.getElementById("downloadRegeneratedYamlButton"),
   scriptPreview: document.getElementById("scriptPreview"),
   sceneSelect: document.getElementById("sceneSelect"),
   regenInstruction: document.getElementById("regenInstruction"),
@@ -542,12 +547,15 @@ function resetProjectSelection() {
   state.selectedVersionId = "";
   state.selectedVersionPayload = null;
   state.lastSceneComparison = null;
+  state.lastRegeneratedProjectId = "";
+  state.lastRegeneratedVersionId = "";
   els.projectSelect.value = "";
   els.versionSelect.innerHTML = "";
   els.sceneSelect.innerHTML = "";
   els.workspacePill.textContent = t("workspaceEmpty");
   setElementText(els.scriptPreview, t("scriptPreviewPlaceholder"));
   renderSceneComparison(null);
+  syncRegeneratedYamlButton();
   renderProjects();
   setBanner("");
   setStatus(t("selectionResetStatus"));
@@ -726,6 +734,13 @@ function renderSceneComparison(comparison, options = {}) {
   setElementText(els.sceneAfterPreview, comparison.after?.rendered || "");
 }
 
+function syncRegeneratedYamlButton() {
+  if (!els.downloadRegeneratedYamlButton) {
+    return;
+  }
+  els.downloadRegeneratedYamlButton.disabled = !state.lastRegeneratedProjectId || !state.lastRegeneratedVersionId;
+}
+
 async function generateDraft() {
   if (!els.apiKey.value.trim()) {
     throw new Error(t("apiKeyRequired"));
@@ -757,7 +772,10 @@ async function generateDraft() {
   state.activeTaskKind = data.task.kind;
   setElementText(els.scriptPreview, "");
   state.lastSceneComparison = null;
+  state.lastRegeneratedProjectId = "";
+  state.lastRegeneratedVersionId = "";
   renderSceneComparison(null);
+  syncRegeneratedYamlButton();
   els.workspacePill.textContent = t("workspaceEmpty");
   monitorTask(data.task.task_id, preview.project_id);
 }
@@ -791,7 +809,10 @@ async function regenerateDraftFromYaml() {
   state.activeTaskKind = data.task.kind;
   setElementText(els.scriptPreview, "");
   state.lastSceneComparison = null;
+  state.lastRegeneratedProjectId = "";
+  state.lastRegeneratedVersionId = "";
   renderSceneComparison(null);
+  syncRegeneratedYamlButton();
   els.workspacePill.textContent = t("workspaceEmpty");
   monitorTask(data.task.task_id, preview.project_id);
 }
@@ -824,6 +845,9 @@ async function regenerateScene() {
   state.activeTaskId = data.task.task_id;
   state.activeTaskKind = data.task.kind;
   state.lastSceneComparison = preview?.scene_comparison || null;
+  state.lastRegeneratedProjectId = "";
+  state.lastRegeneratedVersionId = "";
+  syncRegeneratedYamlButton();
   renderSceneComparison(state.lastSceneComparison);
   monitorTask(data.task.task_id, state.selectedProjectId);
 }
@@ -877,6 +901,9 @@ async function finalizeTask(task, projectId) {
   }
   setBanner(t("qwenFinalReady", { projectId: result.project_id, versionId: result.version.version_id }), "info");
   if (task.kind === "regenerate_scene") {
+    state.lastRegeneratedProjectId = result.project_id;
+    state.lastRegeneratedVersionId = result.version.version_id;
+    syncRegeneratedYamlButton();
     setStatus(t("regeneratedSceneStatus", { versionId: result.version.version_id }));
     return;
   }
@@ -946,12 +973,12 @@ function monitorTask(taskId, projectId) {
   };
 }
 
-async function downloadYaml() {
-  if (!state.selectedVersionPayload) {
+async function downloadVersionYaml(projectId, versionId) {
+  if (!projectId || !versionId) {
     return;
   }
   const latest = await api(
-    `/api/projects/${encodeURIComponent(state.selectedProjectId)}/versions/${encodeURIComponent(state.selectedVersionId)}/export-yaml`,
+    `/api/projects/${encodeURIComponent(projectId)}/versions/${encodeURIComponent(versionId)}/export-yaml`,
   );
   const yamlText = latest.yaml_text || "";
   const blob = new Blob([yamlText], { type: "text/yaml;charset=utf-8" });
@@ -964,6 +991,20 @@ async function downloadYaml() {
   });
   anchor.click();
   URL.revokeObjectURL(url);
+}
+
+async function downloadYaml() {
+  if (!state.selectedVersionPayload) {
+    return;
+  }
+  await downloadVersionYaml(state.selectedProjectId, state.selectedVersionId);
+}
+
+async function downloadRegeneratedYaml() {
+  if (!state.lastRegeneratedProjectId || !state.lastRegeneratedVersionId) {
+    return;
+  }
+  await downloadVersionYaml(state.lastRegeneratedProjectId, state.lastRegeneratedVersionId);
 }
 
 async function handleFileUpload(file) {
@@ -1050,6 +1091,11 @@ function registerEvents() {
   els.downloadYamlButton.addEventListener("click", () => {
     downloadYaml().catch(handleError);
   });
+  if (els.downloadRegeneratedYamlButton) {
+    els.downloadRegeneratedYamlButton.addEventListener("click", () => {
+      downloadRegeneratedYaml().catch(handleError);
+    });
+  }
   els.regenInstruction.addEventListener("input", () => {
     syncSceneComparisonInstruction();
   });
@@ -1066,5 +1112,6 @@ function handleError(error) {
 }
 
 applyTranslations();
+syncRegeneratedYamlButton();
 registerEvents();
 Promise.all([loadHealth(), loadProjects()]).catch(handleError);

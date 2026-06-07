@@ -20,11 +20,6 @@ const toneOptions = [
   { value: "uplifting", zh: "振奋", en: "Uplifting" },
 ];
 
-const speedOptions = [
-  { value: "fast", zh: "快速", en: "Fast" },
-  { value: "balanced", zh: "平衡", en: "Balanced" },
-];
-
 const translations = {
   zh: {
     htmlLang: "zh-CN",
@@ -44,16 +39,15 @@ const translations = {
     uploadLabel: "上传小说文件（txt / doc / docx）",
     yamlBundleLabel: "上传剧本 YAML（.yaml / .yml）",
     titleLabel: "剧本标题",
-    titlePlaceholder: "老街回声",
+    titlePlaceholder: "",
     authorLabel: "原著作者",
-    authorPlaceholder: "测试作者",
+    authorPlaceholder: "",
     originalTitleLabel: "原著标题",
-    originalTitlePlaceholder: "老街回声",
+    originalTitlePlaceholder: "",
     scriptTypeLabel: "生成剧本类型",
     genreLabel: "题材",
-    genrePlaceholder: "悬疑,成长",
+    genrePlaceholder: "",
     toneLabel: "语气风格",
-    speedModeLabel: "生成速度",
     pasteTextLabel: "直接粘贴小说文本",
     novelTextPlaceholder: "如果不上传文件，可以在这里粘贴一章或多章小说正文；多章生成会更稳定。",
     generateButton: "生成剧本",
@@ -131,16 +125,15 @@ const translations = {
     uploadLabel: "Upload novel file (txt / doc / docx)",
     yamlBundleLabel: "Upload screenplay YAML (.yaml / .yml)",
     titleLabel: "Screenplay title",
-    titlePlaceholder: "Old Street Echo",
+    titlePlaceholder: "",
     authorLabel: "Original author",
-    authorPlaceholder: "Demo Author",
+    authorPlaceholder: "",
     originalTitleLabel: "Original title",
-    originalTitlePlaceholder: "Old Street Echo",
+    originalTitlePlaceholder: "",
     scriptTypeLabel: "Screenplay type",
     genreLabel: "Genre",
-    genrePlaceholder: "mystery,growth",
+    genrePlaceholder: "",
     toneLabel: "Tone style",
-    speedModeLabel: "Generation speed",
     pasteTextLabel: "Paste novel text directly",
     novelTextPlaceholder: "If you do not upload a file, paste one or more chapters of source text here. More chapters usually produce better results.",
     generateButton: "Generate Screenplay",
@@ -247,7 +240,6 @@ const els = {
   scriptType: document.getElementById("scriptType"),
   genre: document.getElementById("genre"),
   tone: document.getElementById("tone"),
-  speedMode: document.getElementById("speedMode"),
   novelText: document.getElementById("novelText"),
   generateButton: document.getElementById("generateButton"),
   regenerateFromYamlButton: document.getElementById("regenerateFromYamlButton"),
@@ -311,13 +303,6 @@ function renderStaticSelects() {
     (item) => item.value,
     (item) => (state.language === "zh" ? item.zh : item.en),
     els.tone.value || "balanced",
-  );
-  fillSelect(
-    els.speedMode,
-    speedOptions,
-    (item) => item.value,
-    (item) => (state.language === "zh" ? item.zh : item.en),
-    els.speedMode.value || "fast",
   );
 }
 
@@ -581,7 +566,6 @@ function resetFormAndWorkspace() {
   renderStaticSelects();
   els.scriptType.value = "tv_drama";
   els.tone.value = "balanced";
-  els.speedMode.value = "fast";
   els.projectsList.innerHTML = "";
   renderProjectSelectOptions("");
 
@@ -761,7 +745,6 @@ async function generateDraft() {
       script_type: els.scriptType.value,
       genre: els.genre.value,
       tone: els.tone.value,
-      speed_mode: els.speedMode.value,
       novel_text: els.novelText.value,
       upload_name: state.upload.name,
       upload_base64: state.upload.base64,
@@ -800,7 +783,6 @@ async function regenerateDraftFromYaml() {
       script_type: els.scriptType.value,
       genre: els.genre.value,
       tone: els.tone.value,
-      speed_mode: els.speedMode.value,
       upload_base64: state.yamlUpload.base64,
     }),
   });

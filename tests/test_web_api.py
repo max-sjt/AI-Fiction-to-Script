@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import re
 import threading
 from pathlib import Path
 from urllib.request import Request, urlopen
@@ -85,6 +86,10 @@ def test_web_server_lists_projects_and_serves_html(tmp_path) -> None:
         assert "hero-controls" not in html
         assert 'class="sidebar-controls"' in html
         assert html.index('class="sidebar-controls"') < html.index('data-i18n="projectsHeading"')
+        for field_id in ("title", "author", "originalTitle", "genre"):
+            assert re.search(rf'id="{field_id}"[^>]*placeholder=""', html)
+        assert 'id="speedMode"' not in html
+        assert 'data-i18n="speedModeLabel"' not in html
         assert cache_control == "no-store, max-age=0"
     finally:
         stop_server(server, thread)
@@ -102,6 +107,8 @@ def test_web_server_serves_frontend_yaml_workflow_wiring(tmp_path) -> None:
         assert "downloadRegeneratedYamlButton" in app_js
         assert "/api/regenerate-from-yaml-async" in app_js
         assert "/export-yaml" in app_js
+        assert "speedMode" not in app_js
+        assert "speedOptions" not in app_js
     finally:
         stop_server(server, thread)
 

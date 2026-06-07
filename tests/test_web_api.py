@@ -87,7 +87,10 @@ def test_web_server_lists_projects_and_serves_html(tmp_path) -> None:
         assert 'class="sidebar-controls"' in html
         assert html.index('class="sidebar-controls"') < html.index('data-i18n="projectsHeading"')
         for field_id in ("title", "author", "originalTitle", "genre"):
-            assert re.search(rf'id="{field_id}"[^>]*placeholder=""', html)
+            field = re.search(rf'<input id="{field_id}"[^>]*>', html)
+            assert field
+            assert "placeholder" not in field.group(0)
+            assert "data-i18n-placeholder" not in field.group(0)
         assert 'id="speedMode"' not in html
         assert 'data-i18n="speedModeLabel"' not in html
         assert cache_control == "no-store, max-age=0"
@@ -107,6 +110,13 @@ def test_web_server_serves_frontend_yaml_workflow_wiring(tmp_path) -> None:
         assert "downloadRegeneratedYamlButton" in app_js
         assert "/api/regenerate-from-yaml-async" in app_js
         assert "/export-yaml" in app_js
+        for placeholder_key in (
+            "titlePlaceholder",
+            "authorPlaceholder",
+            "originalTitlePlaceholder",
+            "genrePlaceholder",
+        ):
+            assert placeholder_key not in app_js
         assert "speedMode" not in app_js
         assert "speedOptions" not in app_js
     finally:

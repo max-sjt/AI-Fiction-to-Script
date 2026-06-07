@@ -19,6 +19,8 @@ from ai_fiction_to_script.models.schema import (
     Scene,
     ScenePlan,
     SceneTransition,
+    Script,
+    ScriptAct,
     SourceRef,
     StoryBible,
     TimelineEvent,
@@ -235,6 +237,39 @@ class MockAIClient(BaseAIClient):
             source_refs=source_refs,
         )
 
+    def generate_script(
+        self,
+        outline: Outline,
+        story_bible: StoryBible,
+        chapters: list[ParsedChapter],
+        request: AdaptationRequest,
+    ) -> Script:
+        chapter_map = {chapter.chapter_id: chapter for chapter in chapters}
+        scenes_by_act: dict[str, list[Scene]] = {}
+        for scene_plan in outline.scene_plans:
+            chapter = next((chapter_map[item] for item in scene_plan.chapter_refs if item in chapter_map), chapters[0])
+            scenes_by_act.setdefault(scene_plan.act_id, []).append(
+                self.generate_scene(scene_plan, story_bible, chapter, request)
+            )
+        return Script(
+            acts=[
+                ScriptAct(act_id=act.act_id, title=act.name, scenes=scenes_by_act.get(act.act_id, []))
+                for act in outline.acts
+            ]
+        )
+
+    def generate_script_stream(
+        self,
+        outline: Outline,
+        story_bible: StoryBible,
+        chapters: list[ParsedChapter],
+        request: AdaptationRequest,
+        on_delta: Callable[[str, str], None] | None = None,
+    ) -> Script:
+        if on_delta is not None:
+            on_delta("正在生成整篇剧本预览...", "正在生成整篇剧本预览...")
+        return self.generate_script(outline, story_bible, chapters, request)
+
     def review_document(
         self,
         document: ScreenplayDocument,
@@ -293,6 +328,33 @@ class HybridAIClient(BaseAIClient):
         request: AdaptationRequest,
     ) -> tuple[list[str], list[str]]:
         return self._reviewer_client.review_document(document, request)
+
+    def generate_script(
+        self,
+        outline: Outline,
+        story_bible: StoryBible,
+        chapters: list[ParsedChapter],
+        request: AdaptationRequest,
+    ) -> Script:
+        generator = self._generator_client
+        if hasattr(generator, "generate_script"):
+            return generator.generate_script(outline, story_bible, chapters, request)
+        raise AttributeError("Generator client does not support generate_script.")
+
+    def generate_script_stream(
+        self,
+        outline: Outline,
+        story_bible: StoryBible,
+        chapters: list[ParsedChapter],
+        request: AdaptationRequest,
+        on_delta: Callable[[str, str], None] | None = None,
+    ) -> Script:
+        generator = self._generator_client
+        if hasattr(generator, "generate_script_stream"):
+            return generator.generate_script_stream(outline, story_bible, chapters, request, on_delta=on_delta)
+        if hasattr(generator, "generate_script"):
+            return generator.generate_script(outline, story_bible, chapters, request)
+        raise AttributeError("Generator client does not support generate_script_stream.")
 
 
 class QwenAIClient(BaseAIClient):
@@ -562,45 +624,7 @@ class QwenAIClient(BaseAIClient):
     ) -> Scene:
         system, user = PromptBuilder.scene(scene_plan, story_bible, chapter, request)
         payload = self._chat_json(request.model_routing.generation_model, system, user, request.temperature)
-        beats = []
-        for index, beat in enumerate(_normalize_named_mapping_list(payload.get("beats"), fallback_key="text"), start=1):
-            beats.append(
-                Beat(
-                    beat_id=_normalize_beat_id(beat.get("beat_id"), index),
-                    type=_normalize_beat_type(beat.get("type")),
-                    text=_normalize_text_field(beat.get("text")) or scene_plan.objective,
-                    speaker_ref=_normalize_optional_str(beat.get("speaker_ref")),
-                    emotion=_normalize_text_field(beat.get("emotion")),
-                )
-            )
-        if not beats:
-            beats.append(
-                Beat(
-                    beat_id=make_id("b", 1),
-                    type="action",
-                    text=payload.get("summary") or scene_plan.objective,
-                )
-            )
-        source_refs = [
-            SourceRef(
-                chapter_id=_normalize_text_field(item.get("chapter_id")) or chapter.chapter_id,
-                excerpt_id=_normalize_text_field(item.get("excerpt_id")) or "p001",
-            )
-            for item in _normalize_named_mapping_list(payload.get("source_refs"), fallback_key="excerpt_id")
-        ]
-        scene = Scene(
-            scene_id=scene_plan.scene_id,
-            title=_normalize_text_field(payload.get("title")) or scene_plan.title,
-            chapter_refs=scene_plan.chapter_refs,
-            location_ref=_normalize_optional_str(payload.get("location_ref")),
-            time_of_day=_normalize_text_field(payload.get("time_of_day")),
-            objective=_normalize_text_field(payload.get("objective")) or scene_plan.objective,
-            summary=_normalize_text_field(payload.get("summary")),
-            beats=beats,
-            transitions=_normalize_transition(payload.get("transitions")),
-            source_refs=source_refs,
-        )
-        return _normalize_scene_refs(scene, story_bible)
+        return _build_scene_from_payload(payload, scene_plan, chapter, story_bible)
 
     def generate_scene_stream(
         self,
@@ -618,45 +642,36 @@ class QwenAIClient(BaseAIClient):
             request.temperature,
             on_delta=on_delta,
         )
-        beats = []
-        for index, beat in enumerate(_normalize_named_mapping_list(payload.get("beats"), fallback_key="text"), start=1):
-            beats.append(
-                Beat(
-                    beat_id=_normalize_beat_id(beat.get("beat_id"), index),
-                    type=_normalize_beat_type(beat.get("type")),
-                    text=_normalize_text_field(beat.get("text")) or scene_plan.objective,
-                    speaker_ref=_normalize_optional_str(beat.get("speaker_ref")),
-                    emotion=_normalize_text_field(beat.get("emotion")),
-                )
-            )
-        if not beats:
-            beats.append(
-                Beat(
-                    beat_id=make_id("b", 1),
-                    type="action",
-                    text=payload.get("summary") or scene_plan.objective,
-                )
-            )
-        source_refs = [
-            SourceRef(
-                chapter_id=_normalize_text_field(item.get("chapter_id")) or chapter.chapter_id,
-                excerpt_id=_normalize_text_field(item.get("excerpt_id")) or "p001",
-            )
-            for item in _normalize_named_mapping_list(payload.get("source_refs"), fallback_key="excerpt_id")
-        ]
-        scene = Scene(
-            scene_id=scene_plan.scene_id,
-            title=_normalize_text_field(payload.get("title")) or scene_plan.title,
-            chapter_refs=scene_plan.chapter_refs,
-            location_ref=_normalize_optional_str(payload.get("location_ref")),
-            time_of_day=_normalize_text_field(payload.get("time_of_day")),
-            objective=_normalize_text_field(payload.get("objective")) or scene_plan.objective,
-            summary=_normalize_text_field(payload.get("summary")),
-            beats=beats,
-            transitions=_normalize_transition(payload.get("transitions")),
-            source_refs=source_refs,
+        return _build_scene_from_payload(payload, scene_plan, chapter, story_bible)
+
+    def generate_script(
+        self,
+        outline: Outline,
+        story_bible: StoryBible,
+        chapters: list[ParsedChapter],
+        request: AdaptationRequest,
+    ) -> Script:
+        system, user = PromptBuilder.full_script(outline, story_bible, chapters, request)
+        payload = self._chat_json(request.model_routing.generation_model, system, user, request.temperature)
+        return _build_script_from_payload(payload, outline, chapters, story_bible)
+
+    def generate_script_stream(
+        self,
+        outline: Outline,
+        story_bible: StoryBible,
+        chapters: list[ParsedChapter],
+        request: AdaptationRequest,
+        on_delta: Callable[[str, str], None] | None = None,
+    ) -> Script:
+        system, user = PromptBuilder.full_script(outline, story_bible, chapters, request)
+        payload = self._chat_json_stream(
+            request.model_routing.generation_model,
+            system,
+            user,
+            request.temperature,
+            on_delta=on_delta,
         )
-        return _normalize_scene_refs(scene, story_bible)
+        return _build_script_from_payload(payload, outline, chapters, story_bible)
 
     def review_document(
         self,
@@ -738,6 +753,85 @@ def _normalize_transition(value: Any) -> SceneTransition | None:
     )
     transition_type = _normalize_text_field(payload.get("transition_type")) or "cut"
     return SceneTransition(next_scene_hint=next_scene_hint, transition_type=transition_type)
+
+
+def _build_scene_from_payload(
+    payload: dict[str, Any],
+    scene_plan: ScenePlan,
+    chapter: ParsedChapter,
+    story_bible: StoryBible,
+) -> Scene:
+    beats = []
+    for index, beat in enumerate(_normalize_named_mapping_list(payload.get("beats"), fallback_key="text"), start=1):
+        beats.append(
+            Beat(
+                beat_id=_normalize_beat_id(beat.get("beat_id"), index),
+                type=_normalize_beat_type(beat.get("type")),
+                text=_normalize_text_field(beat.get("text")) or scene_plan.objective,
+                speaker_ref=_normalize_optional_str(beat.get("speaker_ref")),
+                emotion=_normalize_text_field(beat.get("emotion")),
+            )
+        )
+    if not beats:
+        beats.append(
+            Beat(
+                beat_id=make_id("b", 1),
+                type="action",
+                text=_normalize_text_field(payload.get("summary")) or scene_plan.objective,
+            )
+        )
+    source_refs = [
+        SourceRef(
+            chapter_id=_normalize_text_field(item.get("chapter_id")) or chapter.chapter_id,
+            excerpt_id=_normalize_text_field(item.get("excerpt_id")) or "p001",
+        )
+        for item in _normalize_named_mapping_list(payload.get("source_refs"), fallback_key="excerpt_id")
+    ]
+    if not source_refs:
+        source_refs = [SourceRef(chapter_id=chapter.chapter_id, excerpt_id="p001")]
+    scene = Scene(
+        scene_id=scene_plan.scene_id,
+        title=_normalize_text_field(payload.get("title")) or scene_plan.title,
+        chapter_refs=scene_plan.chapter_refs,
+        location_ref=_normalize_optional_str(payload.get("location_ref")),
+        time_of_day=_normalize_text_field(payload.get("time_of_day")),
+        objective=_normalize_text_field(payload.get("objective")) or scene_plan.objective,
+        summary=_normalize_text_field(payload.get("summary")),
+        beats=beats,
+        transitions=_normalize_transition(payload.get("transitions")),
+        source_refs=source_refs,
+    )
+    return _normalize_scene_refs(scene, story_bible)
+
+
+def _build_script_from_payload(
+    payload: dict[str, Any],
+    outline: Outline,
+    chapters: list[ParsedChapter],
+    story_bible: StoryBible,
+) -> Script:
+    chapter_map = {chapter.chapter_id: chapter for chapter in chapters}
+    scene_plan_lookup = {scene_plan.scene_id: scene_plan for scene_plan in outline.scene_plans}
+    act_scene_buckets: dict[str, list[Scene]] = {act.act_id: [] for act in outline.acts}
+
+    for index, scene_payload in enumerate(_normalize_named_mapping_list(payload.get("scenes"), fallback_key="title"), start=1):
+        scene_id = _normalize_text_field(scene_payload.get("scene_id"))
+        scene_plan = scene_plan_lookup.get(scene_id or "")
+        if scene_plan is None:
+            scene_plan = outline.scene_plans[min(index - 1, len(outline.scene_plans) - 1)]
+        chapter = next((chapter_map[item] for item in scene_plan.chapter_refs if item in chapter_map), chapters[0])
+        scene = _build_scene_from_payload(scene_payload, scene_plan, chapter, story_bible)
+        act_scene_buckets.setdefault(scene_plan.act_id, []).append(scene)
+
+    if not any(act_scene_buckets.values()):
+        raise ValueError("Qwen did not return any scenes for the full-script generation path.")
+
+    return Script(
+        acts=[
+            ScriptAct(act_id=act.act_id, title=act.name, scenes=act_scene_buckets.get(act.act_id, []))
+            for act in outline.acts
+        ]
+    )
 
 
 def _normalize_text_field(value: Any) -> str:

@@ -72,6 +72,13 @@ class WorkbenchRequestHandler(BaseHTTPRequestHandler):
                 version_id = parts[4]
                 self._send_json({"ok": True, "data": self.service.get_version_payload(project_id, version_id)})
                 return
+            if len(parts) == 6 and parts[:2] == ["api", "projects"] and parts[3] == "versions" and parts[5] == "export-yaml":
+                project_id = parts[2]
+                version_id = parts[4]
+                self._send_json(
+                    {"ok": True, "data": {"project_id": project_id, "version_id": version_id, "yaml_text": self.service.export_version_yaml(project_id, version_id)}}
+                )
+                return
             if len(parts) == 4 and parts[:2] == ["api", "projects"] and parts[3] == "diff":
                 project_id = parts[2]
                 query = parse_qs(parsed.query)
@@ -125,6 +132,9 @@ class WorkbenchRequestHandler(BaseHTTPRequestHandler):
                 return
             if parsed.path == "/api/adapt-async":
                 self._send_json({"ok": True, "data": self.service.start_adapt_async(payload)}, status=HTTPStatus.CREATED)
+                return
+            if parsed.path == "/api/regenerate-from-yaml-async":
+                self._send_json({"ok": True, "data": self.service.start_regenerate_from_yaml_async(payload)}, status=HTTPStatus.CREATED)
                 return
 
             parts = self._path_parts(parsed.path)

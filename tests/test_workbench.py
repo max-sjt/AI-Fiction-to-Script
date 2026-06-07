@@ -6,7 +6,7 @@ from time import sleep
 import pytest
 
 from ai_fiction_to_script.models.runtime import ModelRouting
-from ai_fiction_to_script.models.schema import Beat, CharacterCard, Scene, SceneTransition, SourceRef
+from ai_fiction_to_script.models.schema import Beat, CharacterCard, Scene, SceneTransition, Script, ScriptAct, SourceRef
 from ai_fiction_to_script.services.ai_client import HybridAIClient, MockAIClient
 from ai_fiction_to_script.services.cache_store import InMemoryCacheStore
 from ai_fiction_to_script.services.workbench import WorkbenchService
@@ -115,7 +115,7 @@ def test_workbench_async_adapt_returns_preview_then_final(monkeypatch, tmp_path)
         }
     )
 
-    assert payload["preview"]["version"]["version_id"] == "v0001"
+    assert payload["preview"]["version"]["version_id"] == "preview"
     assert payload["preview"]["document"]["schema_version"] == "2.0"
     task_id = payload["task"]["task_id"]
 
@@ -127,8 +127,132 @@ def test_workbench_async_adapt_returns_preview_then_final(monkeypatch, tmp_path)
     else:
         raise AssertionError("async adapt task did not complete in time")
 
+    assert task["final_version_id"] == "v0001"
+    assert task["result"]["version"]["version_id"] == "v0001"
+    assert [item["version_id"] for item in service.list_versions(payload["preview"]["project_id"])] == ["v0001"]
+
+
+def test_workbench_fast_qwen_async_prefers_whole_script_generation(monkeypatch, tmp_path) -> None:
+    service = WorkbenchService(tmp_path / ".novel2script")
+    used_whole_script_path = {"value": False}
+
+    class FakeFastClient:
+        def generate_script_stream(self, outline, story_bible, chapters, request, on_delta=None):
+            used_whole_script_path["value"] = True
+            if on_delta is not None:
+                on_delta('{"scenes":[', '{"scenes":[')
+            scenes = []
+            for scene_plan in outline.scene_plans:
+                scenes.append(
+                    Scene(
+                        scene_id=scene_plan.scene_id,
+                        title=scene_plan.title,
+                        chapter_refs=scene_plan.chapter_refs,
+                        time_of_day="day",
+                        objective=scene_plan.objective,
+                        summary=scene_plan.notes or scene_plan.objective,
+                        beats=[Beat(beat_id="b001", type="action", text=scene_plan.focus_event or scene_plan.objective)],
+                        transitions=SceneTransition(next_scene_hint=scene_plan.bridge_out, transition_type="cut"),
+                        source_refs=[SourceRef(chapter_id=scene_plan.chapter_refs[0], excerpt_id="p001")],
+                    )
+                )
+            return Script(acts=[ScriptAct(act_id="main", title="正文", scenes=scenes)])
+
+        def review_document(self, document, request):
+            return [], []
+
+    monkeypatch.setattr(service, "_build_ai_client", lambda provider, api_key="": FakeFastClient())
+
+    payload = service.start_adapt_async(
+        {
+            "title": "fast-whole-script",
+            "original_author": "tester",
+            "original_title": "fast-whole-script",
+            "script_type": "film",
+            "tone": "serious",
+            "genre": "mystery",
+            "novel_text": sample_novel_text(),
+            "provider": "qwen",
+            "api_key": "demo-key",
+            "speed_mode": "fast",
+        }
+    )
+
+    task_id = payload["task"]["task_id"]
+    for _ in range(20):
+        task = service.get_task_status(task_id)
+        if task["status"] == "completed":
+            break
+        sleep(0.05)
+    else:
+        raise AssertionError("async adapt task did not complete in time")
+
+    assert used_whole_script_path["value"] is True
+    assert task["final_version_id"] == "v0001"
+
+
+def test_workbench_exports_compact_yaml_bundle_with_embedded_source_text(tmp_path) -> None:
+    service = WorkbenchService(tmp_path / ".novel2script")
+    payload = service.adapt(
+        {
+            "title": "yaml-export-demo",
+            "original_author": "tester",
+            "original_title": "yaml-export-demo",
+            "script_type": "film",
+            "tone": "balanced",
+            "genre": "mystery",
+            "novel_text": sample_novel_text(),
+            "provider": "mock",
+        }
+    )
+
+    yaml_text = service.export_version_yaml(payload["project_id"], payload["version"]["version_id"])
+
+    assert "story_bible:" not in yaml_text
+    assert "outline:" not in yaml_text
+    assert "quality:" not in yaml_text
+    assert "extensions:" not in yaml_text
+    assert "text:" in yaml_text
+    assert "scenes:" in yaml_text
+
+
+def test_workbench_can_regenerate_from_uploaded_yaml_bundle(monkeypatch, tmp_path) -> None:
+    service = WorkbenchService(tmp_path / ".novel2script")
+    initial = service.adapt(
+        {
+            "title": "yaml-regen-demo",
+            "original_author": "tester",
+            "original_title": "yaml-regen-demo",
+            "script_type": "film",
+            "tone": "balanced",
+            "genre": "mystery",
+            "novel_text": sample_novel_text(),
+            "provider": "mock",
+        }
+    )
+    bundle_yaml = service.export_version_yaml(initial["project_id"], initial["version"]["version_id"])
+    monkeypatch.setattr(service, "_build_ai_client", lambda provider, api_key="": MockAIClient())
+
+    payload = service.start_regenerate_from_yaml_async(
+        {
+            "yaml_text": bundle_yaml,
+            "provider": "qwen",
+            "api_key": "demo-key",
+            "speed_mode": "fast",
+        }
+    )
+
+    task_id = payload["task"]["task_id"]
+    for _ in range(20):
+        task = service.get_task_status(task_id)
+        if task["status"] == "completed":
+            break
+        sleep(0.05)
+    else:
+        raise AssertionError("yaml regeneration task did not complete in time")
+
     assert task["final_version_id"] == "v0002"
-    assert task["result"]["version"]["version_id"] == "v0002"
+    assert task["result"]["project_id"] == initial["project_id"]
 
 
 def test_workbench_async_regenerate_returns_preview_then_final(monkeypatch, tmp_path) -> None:

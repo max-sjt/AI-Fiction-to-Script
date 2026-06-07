@@ -61,6 +61,10 @@
               <span data-i18n="uploadLabel">上传小说文件（txt / doc / docx）</span>
               <input id="uploadFile" type="file" accept=".txt,.doc,.docx" />
             </label>
+            <label class="full-width">
+              <span data-i18n="yamlBundleLabel">上传剧本 YAML（.yaml / .yml）</span>
+              <input id="uploadYamlFile" type="file" accept=".yaml,.yml" />
+            </label>
             <label>
               <span data-i18n="titleLabel">剧本标题</span>
               <input id="title" type="text" data-i18n-placeholder="titlePlaceholder" placeholder="老街回声" />
@@ -101,6 +105,7 @@
           </div>
           <div class="action-row">
             <button id="generateButton" class="primary-button" data-i18n="generateButton">生成剧本</button>
+            <button id="regenerateFromYamlButton" class="secondary-button" data-i18n="regenerateFromYamlButton">根据 YAML 重生成</button>
           </div>
         </section>
 

@@ -11,16 +11,16 @@ from pathlib import Path
 
 import yaml
 
-from ai_fiction_to_script.models.runtime import AdaptationRequest, ModelRouting, ParsedChapter
+from ai_fiction_to_script.models.runtime import AdaptationRequest, ChapterAnalysis, ModelRouting, ParsedChapter
 from ai_fiction_to_script.models.schema import Outline, Scene, ScenePlan, ScreenplayDocument, Script, ScriptAct
-from ai_fiction_to_script.pipeline.engine import AdaptationEngine, synchronize_outline_with_script
+from ai_fiction_to_script.pipeline.engine import AdaptationEngine, AdaptationResult, synchronize_outline_with_script
 from ai_fiction_to_script.services.ai_client import HybridAIClient, MockAIClient, QwenAIClient, _normalize_scene_refs
 from ai_fiction_to_script.services.cache_store import CacheStore, NullCacheStore
 from ai_fiction_to_script.services.chapter_parser import ChapterParser
 from ai_fiction_to_script.services.presets import SCRIPT_TYPE_PRESETS, TONE_PRESETS, build_adaptation_goal, build_style_guide_for_tone
 from ai_fiction_to_script.services.quality_checker import QualityChecker
 from ai_fiction_to_script.services.version_store import VersionStore
-from ai_fiction_to_script.services.yaml_service import dump_yaml
+from ai_fiction_to_script.services.yaml_service import dump_public_yaml, dump_yaml
 from ai_fiction_to_script.settings import QwenSettings, WebCacheSettings
 
 
@@ -30,6 +30,10 @@ class AsyncTaskRecord:
     kind: str
     project_id: str
     preview_version_id: str
+    preview_document: ScreenplayDocument | None = None
+    preview_chapters: list[ParsedChapter] | None = None
+    preview_analyses: list[ChapterAnalysis] | None = None
+    request: AdaptationRequest | None = None
     status: str = "running"
     final_version_id: str = ""
     error: str = ""
@@ -128,12 +132,8 @@ class WorkbenchService:
         request = self._build_request_from_payload(payload)
         input_path = self._resolve_input_path(request.project_id, payload)
         preview_request = request.model_copy(update={"provider": "mock"})
-        preview_payload = self._run_adaptation(
-            input_path=input_path,
-            request=preview_request,
-            ai_client=MockAIClient(),
-            note=payload.get("note") or "local preview draft",
-        )
+        preview_result = self._build_preview_adaptation(input_path, preview_request)
+        preview_payload = self._build_preview_payload(request.project_id, preview_result.document)
         task = self._create_task(
             kind="adapt",
             project_id=request.project_id,
@@ -141,6 +141,10 @@ class WorkbenchService:
         )
         self._update_task(
             task.task_id,
+            preview_document=preview_result.document,
+            preview_chapters=preview_result.chapters,
+            preview_analyses=preview_result.analyses,
+            request=request,
             result=self._task_snapshot_payload(
                 project_id=request.project_id,
                 version_id=preview_payload["version"]["version_id"],
@@ -154,11 +158,8 @@ class WorkbenchService:
             target=self._finish_adapt_async,
             args=(
                 task.task_id,
-                input_path,
-                request,
                 payload.get("api_key", ""),
                 payload.get("note", ""),
-                preview_payload["version"]["version_id"],
             ),
             daemon=True,
         )
@@ -167,6 +168,11 @@ class WorkbenchService:
             "preview": preview_payload,
             "task": self._serialize_task(task),
         }
+
+    def start_regenerate_from_yaml_async(self, payload: dict) -> dict:
+        yaml_text = self._read_yaml_bundle_text(payload)
+        bundle_payload = self._build_payload_from_yaml_bundle(yaml_text, payload)
+        return self.start_adapt_async(bundle_payload)
 
     def save_edited_yaml(self, project_id: str, version_id: str, yaml_text: str, note: str = "") -> dict:
         payload = yaml.safe_load(yaml_text)
@@ -332,7 +338,27 @@ class WorkbenchService:
 
     def export_version_yaml(self, project_id: str, version_id: str) -> str:
         document = self.version_store.load_document(project_id, version_id)
-        return dump_yaml(document)
+        chapters = self._load_chapters(project_id, version_id)
+        return dump_public_yaml(document, chapters)
+
+    def _build_preview_adaptation(self, input_path: str | Path, request: AdaptationRequest) -> AdaptationResult:
+        engine = AdaptationEngine(
+            parser=ChapterParser(),
+            ai_client=MockAIClient(),
+            quality_checker=self.quality_checker,
+            version_store=None,
+        )
+        return engine.run(input_path=input_path, request=request, note="preview")
+
+    def _build_preview_payload(self, project_id: str, document: ScreenplayDocument) -> dict:
+        return {
+            "project_id": project_id,
+            "version": {"version_id": "preview"},
+            "document": document.model_dump(mode="json"),
+            "yaml_text": dump_yaml(document),
+            "rendered_script": self._render_screenplay(document),
+            "scene_options": self._scene_options(document),
+        }
 
     def _build_ai_client(self, provider: str, api_key: str = ""):
         if provider == "mock":
@@ -448,6 +474,126 @@ class WorkbenchService:
         except FileNotFoundError:
             pass
         return intermediates
+
+    def _build_generation_intermediates(
+        self,
+        request: AdaptationRequest,
+        chapters: list[ParsedChapter],
+        analyses: list[ChapterAnalysis],
+        document: ScreenplayDocument,
+    ) -> dict:
+        return {
+            "request": request.model_dump(mode="json"),
+            "chapters": [chapter.model_dump(mode="json") for chapter in chapters],
+            "chapter_analyses": [analysis.model_dump(mode="json") for analysis in analyses],
+            "story_bible": document.story_bible.model_dump(mode="json"),
+            "outline": document.outline.model_dump(mode="json"),
+            "document_snapshot": document.model_dump(mode="json"),
+        }
+
+    def _read_yaml_bundle_text(self, payload: dict) -> str:
+        yaml_text = str(payload.get("yaml_text") or "").strip()
+        upload_base64 = str(payload.get("upload_base64") or "").strip()
+        if yaml_text:
+            return yaml_text
+        if upload_base64:
+            return base64.b64decode(upload_base64).decode("utf-8")
+        raise ValueError("Provide yaml_text or upload_base64 for YAML regeneration.")
+
+    def _build_payload_from_yaml_bundle(self, yaml_text: str, payload: dict) -> dict:
+        raw_payload = yaml.safe_load(yaml_text)
+        if not isinstance(raw_payload, dict):
+            raise ValueError("YAML bundle must deserialize into an object.")
+
+        meta = raw_payload.get("meta")
+        if not isinstance(meta, dict):
+            raise ValueError("YAML bundle must contain a meta section.")
+
+        chapter_blocks = self._extract_yaml_bundle_chapter_blocks(raw_payload)
+
+        if len(chapter_blocks) < 3:
+            raise ValueError("YAML bundle must contain at least 3 source chapters or 3 screenplay scenes.")
+
+        return {
+            "title": payload.get("title") or meta.get("title") or "未命名剧本",
+            "original_author": payload.get("original_author") or meta.get("original_author") or "未知作者",
+            "original_title": payload.get("original_title") or meta.get("original_novel_title") or meta.get("title") or "未命名剧本",
+            "script_type": payload.get("script_type") or meta.get("target_format") or "tv_drama",
+            "genre": payload.get("genre") or meta.get("genre") or [],
+            "tone": payload.get("tone") or meta.get("tone") or "balanced",
+            "provider": payload.get("provider") or "qwen",
+            "api_key": payload.get("api_key") or "",
+            "speed_mode": payload.get("speed_mode") or "fast",
+            "novel_text": "\n\n".join(chapter_blocks),
+            "note": payload.get("note") or "regenerated from yaml bundle",
+        }
+
+    def _extract_yaml_bundle_chapter_blocks(self, raw_payload: dict) -> list[str]:
+        source = raw_payload.get("source")
+        if isinstance(source, dict):
+            chapters = source.get("chapters")
+            chapter_blocks = self._chapter_blocks_from_yaml_chapters(chapters)
+            if chapter_blocks:
+                return chapter_blocks
+
+        appendix = raw_payload.get("appendix")
+        if isinstance(appendix, dict):
+            chapter_blocks = self._chapter_blocks_from_yaml_chapters(appendix.get("source_chapters"))
+            if chapter_blocks:
+                return chapter_blocks
+
+        return self._chapter_blocks_from_screenplay_scenes(raw_payload.get("scenes"))
+
+    def _chapter_blocks_from_yaml_chapters(self, chapters) -> list[str]:
+        if not isinstance(chapters, list) or not chapters:
+            return []
+        chapter_blocks: list[str] = []
+        for index, chapter in enumerate(chapters, start=1):
+            if not isinstance(chapter, dict):
+                continue
+            title = str(chapter.get("title") or f"Chapter {index}").strip()
+            text = str(chapter.get("text") or "").strip()
+            if not text:
+                raise ValueError("Every source chapter in the YAML bundle must include text.")
+            chapter_blocks.append(f"{title}\n\n{text}")
+        return chapter_blocks
+
+    def _chapter_blocks_from_screenplay_scenes(self, scenes) -> list[str]:
+        if not isinstance(scenes, list) or not scenes:
+            raise ValueError("YAML bundle must contain appendix.source_chapters, source.chapters, or scenes[].")
+
+        chapter_blocks: list[str] = []
+        for index, scene in enumerate(scenes, start=1):
+            if not isinstance(scene, dict):
+                continue
+            title = str(scene.get("title") or scene.get("scene_id") or f"Scene {index}").strip()
+            setting = scene.get("setting") if isinstance(scene.get("setting"), dict) else {}
+            summary = str(scene.get("summary") or "").strip()
+            objective = str(scene.get("objective") or "").strip()
+            location = str(setting.get("location") or "").strip()
+            time_of_day = str(setting.get("time_of_day") or "").strip()
+            lines = scene.get("lines")
+            scene_lines: list[str] = []
+            if isinstance(lines, list):
+                for line in lines:
+                    if not isinstance(line, dict):
+                        continue
+                    kind = str(line.get("kind") or "").strip()
+                    speaker = str(line.get("speaker") or "").strip()
+                    text = str(line.get("text") or "").strip()
+                    if not text:
+                        continue
+                    if kind == "dialogue" and speaker:
+                        scene_lines.append(f"{speaker}：{text}")
+                    else:
+                        scene_lines.append(text)
+            chapter_text_parts = [item for item in [summary, objective, f"时间：{time_of_day}" if time_of_day else "", f"地点：{location}" if location else ""] if item]
+            chapter_text_parts.extend(scene_lines)
+            chapter_text = "\n".join(part for part in chapter_text_parts if part).strip()
+            if not chapter_text:
+                raise ValueError("Every screenplay scene in the YAML bundle must include summary, objective, or lines.")
+            chapter_blocks.append(f"{title}\n\n{chapter_text}")
+        return chapter_blocks
 
     def _scene_options(self, document: ScreenplayDocument) -> list[dict]:
         options: list[dict] = []
@@ -732,6 +878,124 @@ class WorkbenchService:
             return nested_generator.generate_scene_stream(scene_plan, story_bible, chapter, request, on_delta=on_delta)
         return ai_client.generate_scene(scene_plan, story_bible, chapter, request)
 
+    def _generate_script_with_optional_stream(
+        self,
+        ai_client,
+        outline: Outline,
+        story_bible,
+        chapters: list[ParsedChapter],
+        request: AdaptationRequest,
+        on_delta=None,
+    ):
+        if hasattr(ai_client, "generate_script_stream"):
+            return ai_client.generate_script_stream(outline, story_bible, chapters, request, on_delta=on_delta)
+        nested_generator = getattr(ai_client, "_generator_client", None)
+        if nested_generator is not None and hasattr(nested_generator, "generate_script_stream"):
+            return nested_generator.generate_script_stream(outline, story_bible, chapters, request, on_delta=on_delta)
+        if hasattr(ai_client, "generate_script"):
+            return ai_client.generate_script(outline, story_bible, chapters, request)
+        if nested_generator is not None and hasattr(nested_generator, "generate_script"):
+            return nested_generator.generate_script(outline, story_bible, chapters, request)
+        raise AttributeError("AI client does not support full-script generation.")
+
+    def _should_use_full_script_fast_path(self, request: AdaptationRequest, ai_client) -> bool:
+        if request.provider != "qwen":
+            return False
+        if request.max_scenes_per_chapter != 1:
+            return False
+        return hasattr(ai_client, "generate_script_stream") or hasattr(getattr(ai_client, "_generator_client", None), "generate_script_stream")
+
+    def _run_adaptation_progressive_full_script(
+        self,
+        task_id: str,
+        ai_client,
+        note: str,
+        preview_document: ScreenplayDocument,
+        chapters: list[ParsedChapter],
+        analyses: list[ChapterAnalysis],
+        request: AdaptationRequest,
+    ) -> dict:
+        total_scenes = max(1, len(preview_document.outline.scene_plans))
+
+        def on_script_delta(accumulated_text: str, _delta_text: str) -> None:
+            rendered_script = "\n".join(
+                self._screenplay_header_lines(preview_document)
+                + ["Qwen 正在生成整篇剧本...", "", accumulated_text.rstrip()]
+            ).strip()
+            self._update_task(
+                task_id,
+                result=self._task_snapshot_payload(
+                    project_id=request.project_id,
+                    version_id="preview",
+                    rendered_script=rendered_script,
+                    completed_scenes=0,
+                    total_scenes=total_scenes,
+                    mode="streaming",
+                    stream_source="model_chunk",
+                ),
+            )
+
+        generated_script = self._generate_script_with_optional_stream(
+            ai_client,
+            preview_document.outline,
+            preview_document.story_bible,
+            chapters,
+            request,
+            on_delta=on_script_delta,
+        )
+        updated_outline = synchronize_outline_with_script(preview_document.outline, generated_script)
+        updated_document = preview_document.model_copy(
+            update={
+                "meta": preview_document.meta.model_copy(
+                    update={
+                        "tone": request.tone,
+                        "model_provider": request.provider,
+                        "model_name": self._resolve_model_name(request),
+                    }
+                ),
+                "adaptation": preview_document.adaptation.model_copy(
+                    update={
+                        "adaptation_goal": request.adaptation_goal,
+                        "style_guide": request.style_guide,
+                    }
+                ),
+                "outline": updated_outline,
+                "script": generated_script,
+            }
+        )
+        self._update_task(
+            task_id,
+            result=self._task_snapshot_payload(
+                project_id=request.project_id,
+                version_id="preview",
+                rendered_script=self._render_screenplay(updated_document),
+                completed_scenes=total_scenes,
+                total_scenes=total_scenes,
+                mode="streaming",
+                stream_source="scene_snapshot",
+            ),
+        )
+
+        quality = self.quality_checker.review(updated_document)
+        ai_warnings, ai_suggestions = ai_client.review_document(updated_document, request)
+        quality.warnings = self._merge_unique(quality.warnings, ai_warnings)
+        quality.revision_suggestions = self._merge_unique(quality.revision_suggestions, ai_suggestions)
+        updated_document = updated_document.model_copy(update={"quality": quality})
+
+        saved = self.version_store.save(
+            request.project_id,
+            updated_document,
+            intermediates=self._build_generation_intermediates(
+                request=request,
+                chapters=chapters,
+                analyses=analyses,
+                document=updated_document,
+            ),
+            note=note,
+        )
+        self._invalidate_project_cache(request.project_id)
+        return self.get_version_payload(request.project_id, saved.version_id)
+
     def _run_adaptation(
         self,
         input_path: str | Path,
@@ -754,24 +1018,29 @@ class WorkbenchService:
     def _run_adaptation_progressive(
         self,
         task_id: str,
-        input_path: str | Path,
-        request: AdaptationRequest,
         ai_client,
         note: str,
-        preview_version_id: str,
+        preview_document: ScreenplayDocument,
+        chapters: list[ParsedChapter],
+        analyses: list[ChapterAnalysis],
+        request: AdaptationRequest,
     ) -> dict:
-        chapters = ChapterParser().parse(input_path)
-        if not chapters or not any(chapter.raw_text.strip() for chapter in chapters):
-            raise ValueError("输入小说正文为空，无法生成剧本。")
-        if len(chapters) < 3:
-            raise ValueError("输入小说章节数不足 3 章，无法生成符合 Schema 2.0 的结构化剧本。")
-
-        preview_document = self.version_store.load_document(request.project_id, preview_version_id)
         outline = preview_document.outline
         current_script = preview_document.script
         total_scenes = max(1, len(outline.scene_plans))
         completed_scenes = 0
         visible_scene_ids: set[str] = set()
+
+        if self._should_use_full_script_fast_path(request, ai_client):
+            return self._run_adaptation_progressive_full_script(
+                task_id=task_id,
+                ai_client=ai_client,
+                note=note,
+                preview_document=preview_document,
+                chapters=chapters,
+                analyses=analyses,
+                request=request,
+            )
 
         for scene_plan in outline.scene_plans:
             chapter = self._resolve_scene_source(scene_plan, chapters)
@@ -782,7 +1051,7 @@ class WorkbenchService:
                     task_id,
                     result=self._task_snapshot_payload(
                         project_id=request.project_id,
-                        version_id=preview_version_id,
+                        version_id="preview",
                         rendered_script=self._render_screenplay_progress(
                             preview_document,
                             current_script,
@@ -832,7 +1101,7 @@ class WorkbenchService:
                 task_id,
                 result=self._task_snapshot_payload(
                     project_id=request.project_id,
-                    version_id=preview_version_id,
+                    version_id="preview",
                     rendered_script=self._render_screenplay_progress(
                         partial_document,
                         current_script,
@@ -873,7 +1142,12 @@ class WorkbenchService:
         saved = self.version_store.save(
             request.project_id,
             updated_document,
-            intermediates=self._build_intermediates_from_document(request.project_id, preview_version_id, updated_document, request),
+            intermediates=self._build_generation_intermediates(
+                request=request,
+                chapters=chapters,
+                analyses=analyses,
+                document=updated_document,
+            ),
             note=note,
         )
         self._invalidate_project_cache(request.project_id)
@@ -943,20 +1217,22 @@ class WorkbenchService:
     def _finish_adapt_async(
         self,
         task_id: str,
-        input_path: Path,
-        request: AdaptationRequest,
         api_key: str,
         note: str,
-        preview_version_id: str,
     ) -> None:
         try:
+            with self._task_lock:
+                task = self._tasks[task_id]
+            if task.preview_document is None or task.preview_chapters is None or task.preview_analyses is None or task.request is None:
+                raise RuntimeError("Async adaptation task is missing preview context.")
             payload = self._run_adaptation_progressive(
                 task_id=task_id,
-                input_path=input_path,
-                request=request,
-                ai_client=self._build_ai_client(request.provider, api_key),
+                ai_client=self._build_ai_client(task.request.provider, api_key),
                 note=note or "qwen final draft",
-                preview_version_id=preview_version_id,
+                preview_document=task.preview_document,
+                chapters=task.preview_chapters,
+                analyses=task.preview_analyses,
+                request=task.request,
             )
             self._update_task(
                 task_id,

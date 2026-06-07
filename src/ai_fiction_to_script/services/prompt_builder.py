@@ -4,7 +4,7 @@ import json
 from typing import Any
 
 from ai_fiction_to_script.models.runtime import AdaptationRequest, ChapterAnalysis, ParsedChapter
-from ai_fiction_to_script.models.schema import ScenePlan, ScreenplayDocument, StoryBible
+from ai_fiction_to_script.models.schema import Outline, ScenePlan, ScreenplayDocument, StoryBible
 from ai_fiction_to_script.services.presets import build_script_type_instruction, build_tone_instruction
 
 
@@ -45,6 +45,21 @@ def _story_bible_scene_context(story_bible: StoryBible) -> str:
         f"主要角色：{character_names}\n"
         f"主要地点：{location_names}"
     )
+
+
+def _chapters_context(chapters: list[ParsedChapter]) -> str:
+    blocks: list[str] = []
+    for chapter in chapters:
+        blocks.append(
+            "\n".join(
+                [
+                    f"章节ID：{chapter.chapter_id}",
+                    f"章节标题：{chapter.title}",
+                    f"章节摘要：{_truncate_text(chapter.raw_text, limit=180)}",
+                ]
+            )
+        )
+    return "\n\n".join(blocks)
 
 
 def _scene_plan_context(scene_plan: ScenePlan) -> str:
@@ -166,6 +181,39 @@ class PromptBuilder:
             f"场景上下文：\n{_scene_plan_context(scene_plan)}\n\n"
             f"Story Bible 摘要：\n{_story_bible_scene_context(story_bible)}\n\n"
             f"来源章节：\n{_chapter_scene_context(chapter)}"
+        )
+        return system, user
+
+    @staticmethod
+    def full_script(
+        outline: Outline,
+        story_bible: StoryBible,
+        chapters: list[ParsedChapter],
+        request: AdaptationRequest,
+    ) -> tuple[str, str]:
+        system = (
+            "你是小说改编编剧。"
+            "请根据给定大纲与章节信息，一次性输出整部剧本的严格 JSON，不要解释，不要输出 YAML。"
+        )
+        user = (
+            f"项目标题：{request.title}\n"
+            f"目标剧本类型：{request.target_format}\n"
+            f"改编目标：{request.adaptation_goal}\n"
+            f"整体语气：{request.tone}\n"
+            f"对白风格：{request.style_guide.dialogue_style}\n"
+            f"叙述风格：{request.style_guide.narration_style}\n"
+            f"节奏风格：{request.style_guide.pacing_style}\n"
+            f"剧本类型执行要点：{build_script_type_instruction(request.target_format)}\n"
+            f"语气执行要点：{build_tone_instruction(request.tone)}\n"
+            "请输出字段：scenes。\n"
+            "scenes 必须严格覆盖 Outline 里的全部 scene_id，并按原顺序返回。\n"
+            "每个 scene 必须包含：scene_id, title, time_of_day, objective, summary, beats, transitions, source_refs。\n"
+            "beats 中每项必须包含：beat_id, type, text，可选 speaker_ref, emotion；每场 beats 最多 4 条。\n"
+            "如果输出 speaker_ref 或 location_ref，必须使用 Story Bible 中已有的 ID，不要输出人物名或地点名。\n"
+            "不要新增场次，不要遗漏场次，不要把章节标题直接复制为场景标题。\n\n"
+            f"Outline：\n{_json(outline.model_dump())}\n\n"
+            f"Story Bible 摘要：\n{_story_bible_scene_context(story_bible)}\n\n"
+            f"章节摘要：\n{_chapters_context(chapters)}"
         )
         return system, user
 

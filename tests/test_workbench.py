@@ -4,9 +4,10 @@ from pathlib import Path
 from time import sleep
 
 import pytest
+import yaml
 
 from ai_fiction_to_script.models.runtime import ModelRouting
-from ai_fiction_to_script.models.schema import Beat, CharacterCard, Scene, SceneTransition, SourceRef
+from ai_fiction_to_script.models.schema import Beat, CharacterCard, Scene, SceneTransition, Script, ScriptAct, SourceRef
 from ai_fiction_to_script.services.ai_client import HybridAIClient, MockAIClient
 from ai_fiction_to_script.services.cache_store import InMemoryCacheStore
 from ai_fiction_to_script.services.workbench import WorkbenchService
@@ -115,7 +116,7 @@ def test_workbench_async_adapt_returns_preview_then_final(monkeypatch, tmp_path)
         }
     )
 
-    assert payload["preview"]["version"]["version_id"] == "v0001"
+    assert payload["preview"]["version"]["version_id"] == "preview"
     assert payload["preview"]["document"]["schema_version"] == "2.0"
     task_id = payload["task"]["task_id"]
 
@@ -127,8 +128,269 @@ def test_workbench_async_adapt_returns_preview_then_final(monkeypatch, tmp_path)
     else:
         raise AssertionError("async adapt task did not complete in time")
 
+    assert task["final_version_id"] == "v0001"
+    assert task["result"]["version"]["version_id"] == "v0001"
+    assert [item["version_id"] for item in service.list_versions(payload["preview"]["project_id"])] == ["v0001"]
+
+
+def test_workbench_fast_qwen_async_prefers_whole_script_generation(monkeypatch, tmp_path) -> None:
+    service = WorkbenchService(tmp_path / ".novel2script")
+    used_whole_script_path = {"value": False}
+
+    class FakeFastClient:
+        def generate_script_stream(self, outline, story_bible, chapters, request, on_delta=None):
+            used_whole_script_path["value"] = True
+            if on_delta is not None:
+                on_delta('{"scenes":[', '{"scenes":[')
+            scenes = []
+            for scene_plan in outline.scene_plans:
+                scenes.append(
+                    Scene(
+                        scene_id=scene_plan.scene_id,
+                        title=scene_plan.title,
+                        chapter_refs=scene_plan.chapter_refs,
+                        time_of_day="day",
+                        objective=scene_plan.objective,
+                        summary=scene_plan.notes or scene_plan.objective,
+                        beats=[Beat(beat_id="b001", type="action", text=scene_plan.focus_event or scene_plan.objective)],
+                        transitions=SceneTransition(next_scene_hint=scene_plan.bridge_out, transition_type="cut"),
+                        source_refs=[SourceRef(chapter_id=scene_plan.chapter_refs[0], excerpt_id="p001")],
+                    )
+                )
+            return Script(acts=[ScriptAct(act_id="main", title="正文", scenes=scenes)])
+
+        def review_document(self, document, request):
+            return [], []
+
+    monkeypatch.setattr(service, "_build_ai_client", lambda provider, api_key="": FakeFastClient())
+
+    payload = service.start_adapt_async(
+        {
+            "title": "fast-whole-script",
+            "original_author": "tester",
+            "original_title": "fast-whole-script",
+            "script_type": "film",
+            "tone": "serious",
+            "genre": "mystery",
+            "novel_text": sample_novel_text(),
+            "provider": "qwen",
+            "api_key": "demo-key",
+            "speed_mode": "fast",
+        }
+    )
+
+    task_id = payload["task"]["task_id"]
+    for _ in range(20):
+        task = service.get_task_status(task_id)
+        if task["status"] == "completed":
+            break
+        sleep(0.05)
+    else:
+        raise AssertionError("async adapt task did not complete in time")
+
+    assert used_whole_script_path["value"] is True
+    assert task["final_version_id"] == "v0001"
+
+
+def test_workbench_exports_compact_yaml_bundle_with_embedded_source_text(tmp_path) -> None:
+    service = WorkbenchService(tmp_path / ".novel2script")
+    payload = service.adapt(
+        {
+            "title": "yaml-export-demo",
+            "original_author": "tester",
+            "original_title": "yaml-export-demo",
+            "script_type": "film",
+            "tone": "balanced",
+            "genre": "mystery",
+            "novel_text": sample_novel_text(),
+            "provider": "mock",
+        }
+    )
+
+    yaml_text = service.export_version_yaml(payload["project_id"], payload["version"]["version_id"])
+
+    bundle = yaml.safe_load(yaml_text)
+
+    assert bundle["schema_version"] == "screenplay-project-1.0"
+    assert "characters" in bundle
+    assert "scenes" in bundle
+    assert "appendix" in bundle
+    assert "source_chapters" in bundle["appendix"]
+    assert "story_bible" not in bundle
+    assert "outline" not in bundle
+    assert "quality" not in bundle
+    assert "extensions" not in bundle
+    assert "script" not in bundle
+    assert "source" not in bundle
+    assert "lines" in bundle["scenes"][0]
+    assert "beats" not in bundle["scenes"][0]
+
+
+def test_workbench_exported_yaml_demotes_narrative_dialogue_to_action(tmp_path) -> None:
+    service = WorkbenchService(tmp_path / ".novel2script")
+    payload = service.adapt(
+        {
+            "title": "yaml-sanitize-demo",
+            "original_author": "tester",
+            "original_title": "yaml-sanitize-demo",
+            "script_type": "film",
+            "tone": "balanced",
+            "genre": "mystery",
+            "novel_text": sample_novel_text(),
+            "provider": "mock",
+        }
+    )
+    document = service.version_store.load_document(payload["project_id"], payload["version"]["version_id"])
+    first_character_id = document.story_bible.characters[0].character_id
+    first_scene = document.script.acts[0].scenes[0]
+    rewritten_scene = first_scene.model_copy(
+        update={
+            "beats": [
+                Beat(
+                    beat_id="b001",
+                    type="dialogue",
+                    text="林默没有回答，只是盯着那枚怀表。",
+                    speaker_ref=first_character_id,
+                )
+            ]
+        }
+    )
+    rewritten_script = Script(
+        acts=[ScriptAct(act_id=document.script.acts[0].act_id, title=document.script.acts[0].title, scenes=[rewritten_scene])]
+    )
+    rewritten_document = document.model_copy(update={"script": rewritten_script})
+    saved = service.version_store.save(
+        payload["project_id"],
+        rewritten_document,
+        intermediates={"chapters": service.version_store.load_intermediate(payload["project_id"], payload["version"]["version_id"], "chapters")},
+        note="sanitize",
+    )
+
+    exported = yaml.safe_load(service.export_version_yaml(payload["project_id"], saved.version_id))
+    first_line = exported["scenes"][0]["lines"][0]
+
+    assert first_line["kind"] == "action"
+    assert first_line.get("speaker", "") == ""
+    assert "没有回答" in first_line["text"]
+
+
+def test_workbench_can_regenerate_from_uploaded_yaml_bundle(monkeypatch, tmp_path) -> None:
+    service = WorkbenchService(tmp_path / ".novel2script")
+    initial = service.adapt(
+        {
+            "title": "yaml-regen-demo",
+            "original_author": "tester",
+            "original_title": "yaml-regen-demo",
+            "script_type": "film",
+            "tone": "balanced",
+            "genre": "mystery",
+            "novel_text": sample_novel_text(),
+            "provider": "mock",
+        }
+    )
+    bundle_yaml = service.export_version_yaml(initial["project_id"], initial["version"]["version_id"])
+    monkeypatch.setattr(service, "_build_ai_client", lambda provider, api_key="": MockAIClient())
+
+    payload = service.start_regenerate_from_yaml_async(
+        {
+            "yaml_text": bundle_yaml,
+            "provider": "qwen",
+            "api_key": "demo-key",
+            "speed_mode": "fast",
+        }
+    )
+
+    task_id = payload["task"]["task_id"]
+    for _ in range(20):
+        task = service.get_task_status(task_id)
+        if task["status"] == "completed":
+            break
+        sleep(0.05)
+    else:
+        raise AssertionError("yaml regeneration task did not complete in time")
+
     assert task["final_version_id"] == "v0002"
-    assert task["result"]["version"]["version_id"] == "v0002"
+    assert task["result"]["project_id"] == initial["project_id"]
+
+
+def test_workbench_can_regenerate_from_screenplay_yaml_without_source_chapters(monkeypatch, tmp_path) -> None:
+    service = WorkbenchService(tmp_path / ".novel2script")
+    monkeypatch.setattr(service, "_build_ai_client", lambda provider, api_key="": MockAIClient())
+    bundle_yaml = yaml.safe_dump(
+        {
+            "schema_version": "screenplay-project-1.0",
+            "meta": {
+                "title": "yaml-blueprint-demo",
+                "original_author": "tester",
+                "original_novel_title": "yaml-blueprint-demo",
+                "target_format": "film",
+                "genre": ["mystery"],
+                "tone": "serious",
+            },
+            "characters": [
+                {"name": "林默", "role": "protagonist"},
+                {"name": "来客", "role": "mysterious visitor"},
+            ],
+            "scenes": [
+                {
+                    "scene_id": "s001",
+                    "title": "雨夜来客",
+                    "setting": {"time_of_day": "深夜", "location": "旧时光古董店"},
+                    "objective": "来客把怀表交给林默",
+                    "summary": "暴雨夜，神秘来客进入古董店。",
+                    "lines": [
+                        {"kind": "action", "text": "暴雨敲打古董店木门。"},
+                        {"kind": "dialogue", "speaker": "来客", "text": "帮我修好它。"},
+                    ],
+                },
+                {
+                    "scene_id": "s002",
+                    "title": "齿轮下的秘密",
+                    "setting": {"time_of_day": "凌晨", "location": "古董店后室"},
+                    "objective": "林默查清怀表来历",
+                    "summary": "林默彻夜翻阅古籍。",
+                    "lines": [
+                        {"kind": "action", "text": "林默翻开残卷，核对怀表刻痕。"},
+                        {"kind": "dialogue", "speaker": "林默", "text": "第三个节点失控了。"},
+                    ],
+                },
+                {
+                    "scene_id": "s003",
+                    "title": "午夜的钟声",
+                    "setting": {"time_of_day": "午夜", "location": "废弃钟楼"},
+                    "objective": "林默完成封印",
+                    "summary": "怀表归位，怨灵消散。",
+                    "lines": [
+                        {"kind": "action", "text": "林默把怀表压进钟摆机关。"},
+                        {"kind": "dialogue", "speaker": "林默", "text": "时间到了，该走了。"},
+                    ],
+                },
+            ],
+        },
+        allow_unicode=True,
+        sort_keys=False,
+    )
+
+    payload = service.start_regenerate_from_yaml_async(
+        {
+            "yaml_text": bundle_yaml,
+            "provider": "qwen",
+            "api_key": "demo-key",
+            "speed_mode": "fast",
+        }
+    )
+
+    task_id = payload["task"]["task_id"]
+    for _ in range(20):
+        task = service.get_task_status(task_id)
+        if task["status"] == "completed":
+            break
+        sleep(0.05)
+    else:
+        raise AssertionError("screenplay yaml regeneration task did not complete in time")
+
+    assert task["final_version_id"] == "v0001"
+    assert task["result"]["project_id"] == "yaml-blueprint-demo"
 
 
 def test_workbench_async_regenerate_returns_preview_then_final(monkeypatch, tmp_path) -> None:

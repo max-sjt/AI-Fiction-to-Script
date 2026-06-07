@@ -42,6 +42,7 @@ const translations = {
     apiKeyLabel: "Qwen API Key",
     apiKeyPlaceholder: "请输入 sk-...",
     uploadLabel: "上传小说文件（txt / doc / docx）",
+    yamlBundleLabel: "上传剧本 YAML（.yaml / .yml）",
     titleLabel: "剧本标题",
     titlePlaceholder: "老街回声",
     authorLabel: "原著作者",
@@ -56,6 +57,7 @@ const translations = {
     pasteTextLabel: "直接粘贴小说文本",
     novelTextPlaceholder: "如果不上传文件，可以在这里粘贴一章或多章小说正文；多章生成会更稳定。",
     generateButton: "生成剧本",
+    regenerateFromYamlButton: "根据 YAML 重生成",
     workspaceHeading: "工作区",
     workspaceEmpty: "尚未选择项目",
     currentProjectLabel: "当前项目",
@@ -96,9 +98,12 @@ const translations = {
     backgroundTaskFailed: "后台 Qwen 任务失败：{error}",
     apiKeyRequired: "请输入 Qwen API Key。",
     inputRequired: "请上传小说文件，或直接粘贴小说文本。",
+    yamlFileRequired: "请先上传一个 YAML 文件。",
     selectVersionBeforeRegenerate: "请先选择一个项目版本再重生成场景。",
     regeneratingSceneStatus: "正在重生成 {sceneId}...",
+    regeneratingFromYamlStatus: "正在根据 YAML 重生成剧本...",
     regeneratedSceneStatus: "已生成新版本 {versionId}",
+    yamlRegenerationPending: "Qwen 正在根据 YAML 重生成整篇剧本；完成前工作区不会切换到新版本。",
     downloadYamlFilename: "{projectId}_{versionId}.yaml",
     projectLatestLabel: "最新版本：{versionId}",
     projectVersionCountLabel: "版本数：{count}",
@@ -123,6 +128,7 @@ const translations = {
     apiKeyLabel: "Qwen API Key",
     apiKeyPlaceholder: "Enter sk-...",
     uploadLabel: "Upload novel file (txt / doc / docx)",
+    yamlBundleLabel: "Upload screenplay YAML (.yaml / .yml)",
     titleLabel: "Screenplay title",
     titlePlaceholder: "Old Street Echo",
     authorLabel: "Original author",
@@ -137,6 +143,7 @@ const translations = {
     pasteTextLabel: "Paste novel text directly",
     novelTextPlaceholder: "If you do not upload a file, paste one or more chapters of source text here. More chapters usually produce better results.",
     generateButton: "Generate Screenplay",
+    regenerateFromYamlButton: "Regenerate From YAML",
     workspaceHeading: "Workspace",
     workspaceEmpty: "No project selected",
     currentProjectLabel: "Current project",
@@ -177,9 +184,12 @@ const translations = {
     backgroundTaskFailed: "Background Qwen task failed: {error}",
     apiKeyRequired: "Enter a Qwen API key first.",
     inputRequired: "Upload a novel file or paste novel text first.",
+    yamlFileRequired: "Upload a YAML file first.",
     selectVersionBeforeRegenerate: "Select a project version before regenerating a scene.",
     regeneratingSceneStatus: "Regenerating {sceneId}...",
+    regeneratingFromYamlStatus: "Regenerating screenplay from YAML...",
     regeneratedSceneStatus: "Generated new version {versionId}",
+    yamlRegenerationPending: "Qwen is regenerating the full screenplay from the YAML bundle. The workspace will switch after it finishes.",
     downloadYamlFilename: "{projectId}_{versionId}.yaml",
     projectLatestLabel: "Latest: {versionId}",
     projectVersionCountLabel: "Versions: {count}",
@@ -197,6 +207,10 @@ const state = {
   lastSceneComparison: null,
   language: localStorage.getItem("workbench.language") || "zh",
   upload: {
+    name: "",
+    base64: "",
+  },
+  yamlUpload: {
     name: "",
     base64: "",
   },
@@ -222,6 +236,7 @@ const els = {
   refreshProjectsButton: document.getElementById("refreshProjectsButton"),
   apiKey: document.getElementById("apiKey"),
   uploadFile: document.getElementById("uploadFile"),
+  uploadYamlFile: document.getElementById("uploadYamlFile"),
   title: document.getElementById("title"),
   author: document.getElementById("author"),
   originalTitle: document.getElementById("originalTitle"),
@@ -231,6 +246,7 @@ const els = {
   speedMode: document.getElementById("speedMode"),
   novelText: document.getElementById("novelText"),
   generateButton: document.getElementById("generateButton"),
+  regenerateFromYamlButton: document.getElementById("regenerateFromYamlButton"),
   projectSelect: document.getElementById("projectSelect"),
   versionSelect: document.getElementById("versionSelect"),
   reloadVersionButton: document.getElementById("reloadVersionButton"),
@@ -542,10 +558,12 @@ function resetFormAndWorkspace() {
   state.activeTaskId = "";
   state.activeTaskKind = "";
   state.upload = { name: "", base64: "" };
+  state.yamlUpload = { name: "", base64: "" };
   state.projects = [];
 
   els.apiKey.value = "";
   els.uploadFile.value = "";
+  els.uploadYamlFile.value = "";
   els.title.value = "";
   els.author.value = "";
   els.originalTitle.value = "";
@@ -744,6 +762,40 @@ async function generateDraft() {
   monitorTask(data.task.task_id, preview.project_id);
 }
 
+async function regenerateDraftFromYaml() {
+  if (!els.apiKey.value.trim()) {
+    throw new Error(t("apiKeyRequired"));
+  }
+  if (!state.yamlUpload.base64) {
+    throw new Error(t("yamlFileRequired"));
+  }
+  setStatus(t("regeneratingFromYamlStatus"));
+  setBanner(t("yamlRegenerationPending"), "info");
+  const data = await api("/api/regenerate-from-yaml-async", {
+    method: "POST",
+    body: JSON.stringify({
+      api_key: els.apiKey.value.trim(),
+      provider: "qwen",
+      title: els.title.value,
+      original_author: els.author.value,
+      original_title: els.originalTitle.value,
+      script_type: els.scriptType.value,
+      genre: els.genre.value,
+      tone: els.tone.value,
+      speed_mode: els.speedMode.value,
+      upload_base64: state.yamlUpload.base64,
+    }),
+  });
+  const preview = data.preview;
+  state.activeTaskId = data.task.task_id;
+  state.activeTaskKind = data.task.kind;
+  setElementText(els.scriptPreview, "");
+  state.lastSceneComparison = null;
+  renderSceneComparison(null);
+  els.workspacePill.textContent = t("workspaceEmpty");
+  monitorTask(data.task.task_id, preview.project_id);
+}
+
 async function regenerateScene() {
   if (!state.selectedProjectId || !state.selectedVersionId) {
     throw new Error(t("selectVersionBeforeRegenerate"));
@@ -899,9 +951,8 @@ async function downloadYaml() {
     return;
   }
   const latest = await api(
-    `/api/projects/${encodeURIComponent(state.selectedProjectId)}/versions/${encodeURIComponent(state.selectedVersionId)}`,
+    `/api/projects/${encodeURIComponent(state.selectedProjectId)}/versions/${encodeURIComponent(state.selectedVersionId)}/export-yaml`,
   );
-  state.selectedVersionPayload = latest;
   const yamlText = latest.yaml_text || "";
   const blob = new Blob([yamlText], { type: "text/yaml;charset=utf-8" });
   const url = URL.createObjectURL(blob);
@@ -909,7 +960,7 @@ async function downloadYaml() {
   anchor.href = url;
   anchor.download = t("downloadYamlFilename", {
     projectId: latest.project_id,
-    versionId: latest.version.version_id,
+    versionId: latest.version_id,
   });
   anchor.click();
   URL.revokeObjectURL(url);
@@ -922,6 +973,15 @@ async function handleFileUpload(file) {
   }
   state.upload.name = file.name;
   state.upload.base64 = await readFileAsBase64(file);
+}
+
+async function handleYamlUpload(file) {
+  if (!file) {
+    state.yamlUpload = { name: "", base64: "" };
+    return;
+  }
+  state.yamlUpload.name = file.name;
+  state.yamlUpload.base64 = await readFileAsBase64(file);
 }
 
 function readFileAsBase64(file) {
@@ -964,8 +1024,19 @@ function registerEvents() {
       handleError(error);
     }
   });
+  els.uploadYamlFile.addEventListener("change", async () => {
+    try {
+      const [file] = els.uploadYamlFile.files;
+      await handleYamlUpload(file);
+    } catch (error) {
+      handleError(error);
+    }
+  });
   els.generateButton.addEventListener("click", () => {
     generateDraft().catch(handleError);
+  });
+  els.regenerateFromYamlButton.addEventListener("click", () => {
+    regenerateDraftFromYaml().catch(handleError);
   });
   els.projectSelect.addEventListener("change", () => {
     selectProject(els.projectSelect.value).catch(handleError);

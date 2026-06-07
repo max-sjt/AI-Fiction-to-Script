@@ -5,6 +5,8 @@ import threading
 from pathlib import Path
 from urllib.request import Request, urlopen
 
+import yaml
+
 from ai_fiction_to_script import __version__
 from ai_fiction_to_script.models.runtime import AdaptationRequest
 from ai_fiction_to_script.pipeline.engine import AdaptationEngine
@@ -76,8 +78,25 @@ def test_web_server_lists_projects_and_serves_html(tmp_path) -> None:
         assert "Qwen 剧本生成工作台" in html
         assert 'id="languageSelect"' in html
         assert 'id="resetProjectsButton"' in html
+        assert 'id="uploadYamlFile"' in html
+        assert 'id="regenerateFromYamlButton"' in html
         assert "中文" in html
         assert cache_control == "no-store, max-age=0"
+    finally:
+        stop_server(server, thread)
+
+
+def test_web_server_serves_frontend_yaml_workflow_wiring(tmp_path) -> None:
+    version_root = tmp_path / ".novel2script"
+    seed_project(version_root)
+    server, thread, base_url = start_server(version_root)
+    try:
+        with urlopen(f"{base_url}/assets/app.js") as response:  # noqa: S310
+            app_js = response.read().decode("utf-8")
+        assert "uploadYamlFile" in app_js
+        assert "regenerateFromYamlButton" in app_js
+        assert "/api/regenerate-from-yaml-async" in app_js
+        assert "/export-yaml" in app_js
     finally:
         stop_server(server, thread)
 
@@ -262,6 +281,65 @@ def test_web_server_supports_async_adapt_and_task_polling(tmp_path) -> None:
         stop_server(server, thread)
 
 
+def test_web_server_exports_compact_yaml_bundle(tmp_path) -> None:
+    version_root = tmp_path / ".novel2script"
+    seed_project(version_root)
+    server, thread, base_url = start_server(version_root)
+    try:
+        exported = api_request(base_url, "/api/projects/web-demo/versions/v0001/export-yaml")
+        assert exported["ok"] is True
+        bundle = yaml.safe_load(exported["data"]["yaml_text"])
+        assert bundle["schema_version"] == "screenplay-project-1.0"
+        assert "characters" in bundle
+        assert "scenes" in bundle
+        assert "appendix" in bundle
+        assert "source_chapters" in bundle["appendix"]
+        assert "story_bible" not in bundle
+        assert "outline" not in bundle
+    finally:
+        stop_server(server, thread)
+
+
+def test_web_server_supports_async_regeneration_from_yaml_bundle(tmp_path) -> None:
+    version_root = tmp_path / ".novel2script"
+    server, thread, base_url = start_server(version_root)
+
+    def fake_start_regenerate_from_yaml_async(payload: dict) -> dict:
+        assert "yaml_text" in payload
+        return {
+            "preview": {
+                "project_id": "yaml-demo",
+                "version": {"version_id": "preview"},
+            },
+            "task": {
+                "task_id": "task-yaml-123",
+                "kind": "adapt",
+                "project_id": "yaml-demo",
+                "preview_version_id": "preview",
+                "status": "running",
+                "final_version_id": "",
+                "error": "",
+                "created_at": "2026-06-06T00:00:00+00:00",
+                "updated_at": "2026-06-06T00:00:00+00:00",
+                "result": None,
+            },
+        }
+
+    server.RequestHandlerClass.service.start_regenerate_from_yaml_async = fake_start_regenerate_from_yaml_async
+    try:
+        response = api_request(
+            base_url,
+            "/api/regenerate-from-yaml-async",
+            method="POST",
+            payload={"yaml_text": "schema_version: compact-1.0"},
+        )
+        assert response["ok"] is True
+        assert response["data"]["task"]["task_id"] == "task-yaml-123"
+        assert response["data"]["preview"]["version"]["version_id"] == "preview"
+    finally:
+        stop_server(server, thread)
+
+
 def test_web_server_can_delete_version_and_remove_files(tmp_path) -> None:
     version_root = tmp_path / ".novel2script"
     seed_project(version_root)
@@ -313,3 +391,4 @@ def test_web_server_delete_last_version_removes_project(tmp_path) -> None:
         assert not (version_root / "web-demo").exists()
     finally:
         stop_server(server, thread)
+

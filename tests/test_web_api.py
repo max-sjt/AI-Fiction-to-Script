@@ -82,6 +82,9 @@ def test_web_server_lists_projects_and_serves_html(tmp_path) -> None:
         assert 'id="regenerateFromYamlButton"' in html
         assert 'id="downloadRegeneratedYamlButton"' in html
         assert "中文" in html
+        assert "hero-controls" not in html
+        assert 'class="sidebar-controls"' in html
+        assert html.index('class="sidebar-controls"') < html.index('data-i18n="projectsHeading"')
         assert cache_control == "no-store, max-age=0"
     finally:
         stop_server(server, thread)

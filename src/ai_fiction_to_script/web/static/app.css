@@ -60,10 +60,7 @@ body {
 
 .hero {
   padding: 2.4rem 0 1.2rem;
-  display: flex;
-  justify-content: space-between;
-  gap: 2rem;
-  align-items: flex-start;
+  display: block;
   animation: rise 500ms ease;
 }
 
@@ -96,10 +93,10 @@ h1 {
   color: rgba(23, 22, 20, 0.72);
 }
 
-.hero-controls {
+.sidebar-controls {
   display: grid;
-  gap: 0.85rem;
-  justify-items: end;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
 }
 
 .build-badge {
@@ -118,21 +115,26 @@ h1 {
 
 .language-switcher,
 .hero-status {
-  display: inline-flex;
+  display: flex;
   align-items: center;
-  gap: 0.7rem;
-  background: rgba(255, 251, 246, 0.82);
-  border: 1px solid rgba(23, 22, 20, 0.06);
-  padding: 0.85rem 1.1rem;
-  border-radius: 999px;
-  box-shadow: var(--shadow);
+  justify-content: space-between;
+  gap: 0.75rem;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  padding: 0.9rem;
+  background: rgba(255, 255, 255, 0.52);
 }
 
 .language-switcher select {
-  width: auto;
-  min-width: 8rem;
+  width: min(9rem, 100%);
+  min-width: 0;
   border-radius: 999px;
   padding: 0.45rem 0.8rem;
+}
+
+.hero-status {
+  justify-content: flex-start;
+  line-height: 1.45;
 }
 
 .status-dot {
@@ -463,18 +465,9 @@ button:hover {
 }
 
 @media (max-width: 720px) {
-  .hero {
-    flex-direction: column;
-  }
-
-  .hero-controls {
-    width: 100%;
-    justify-items: stretch;
-  }
-
-  .build-badge,
   .language-switcher {
-    justify-content: space-between;
+    align-items: stretch;
+    flex-direction: column;
   }
 
   .section-heading,

@@ -472,6 +472,111 @@ class QwenAIClient(BaseAIClient):
             raise ValueError(f"DashScope request failed for model `{model}`: {exc}") from exc
         return parse_json_object("".join(chunks))
 
+    def _chat_text(self, model: str, system: str, user: str, temperature: float) -> str:
+        url = f"{self._settings.base_url.rstrip('/')}/chat/completions"
+        payload = {
+            "model": model,
+            "messages": [
+                {"role": "system", "content": system},
+                {"role": "user", "content": user},
+            ],
+            "temperature": temperature,
+        }
+        headers = {
+            "Authorization": f"Bearer {self._settings.api_key}",
+            "Content-Type": "application/json",
+        }
+        try:
+            response = httpx.post(
+                url,
+                headers=headers,
+                json=payload,
+                timeout=httpx.Timeout(self._settings.timeout_seconds, connect=15.0),
+            )
+        except httpx.ReadTimeout as exc:
+            raise ValueError(
+                f"DashScope request timed out after {self._settings.timeout_seconds} seconds for model `{model}`。"
+                "当前正在生成纯文本剧本；如果仍超时，通常说明当前模型响应过慢、网络不稳定，或账号所在地域与 Base URL 不匹配。"
+            ) from exc
+        except httpx.HTTPError as exc:
+            raise ValueError(f"DashScope request failed for model `{model}`: {exc}") from exc
+        if response.is_error:
+            raise ValueError(self._format_dashscope_error(response, model, url))
+        content = response.json()["choices"][0]["message"]["content"]
+        if isinstance(content, list):
+            return "".join(part.get("text", "") for part in content if isinstance(part, dict))
+        return str(content)
+
+    def _chat_text_stream(
+        self,
+        model: str,
+        system: str,
+        user: str,
+        temperature: float,
+        on_delta: Callable[[str, str], None] | None = None,
+    ) -> str:
+        url = f"{self._settings.base_url.rstrip('/')}/chat/completions"
+        payload = {
+            "model": model,
+            "messages": [
+                {"role": "system", "content": system},
+                {"role": "user", "content": user},
+            ],
+            "temperature": temperature,
+            "stream": True,
+            "stream_options": {"include_usage": True},
+        }
+        headers = {
+            "Authorization": f"Bearer {self._settings.api_key}",
+            "Content-Type": "application/json",
+        }
+        chunks: list[str] = []
+        try:
+            with httpx.stream(
+                "POST",
+                url,
+                headers=headers,
+                json=payload,
+                timeout=httpx.Timeout(self._settings.timeout_seconds, connect=15.0),
+            ) as response:
+                if response.is_error:
+                    raise ValueError(self._format_dashscope_error(response, model, url))
+                for raw_line in response.iter_lines():
+                    line = raw_line.strip()
+                    if not line or not line.startswith("data:"):
+                        continue
+                    data = line.removeprefix("data:").strip()
+                    if not data or data == "[DONE]":
+                        continue
+                    try:
+                        chunk_payload = json.loads(data)
+                    except json.JSONDecodeError as exc:
+                        raise ValueError(f"DashScope streaming chunk was not valid JSON for model `{model}`: {data[:200]}") from exc
+                    choices = chunk_payload.get("choices") or []
+                    if not choices:
+                        continue
+                    delta = choices[0].get("delta") or {}
+                    content = delta.get("content")
+                    if isinstance(content, list):
+                        text_delta = "".join(part.get("text", "") for part in content if isinstance(part, dict))
+                    elif content is None:
+                        text_delta = ""
+                    else:
+                        text_delta = str(content)
+                    if not text_delta:
+                        continue
+                    chunks.append(text_delta)
+                    if on_delta is not None:
+                        on_delta("".join(chunks), text_delta)
+        except httpx.ReadTimeout as exc:
+            raise ValueError(
+                f"DashScope request timed out after {self._settings.timeout_seconds} seconds for model `{model}`。"
+                "当前正在流式生成纯文本剧本；如果仍然超时，通常说明当前模型响应过慢、网络不稳定，或账号所在地域与 Base URL 不匹配。"
+            ) from exc
+        except httpx.HTTPError as exc:
+            raise ValueError(f"DashScope request failed for model `{model}`: {exc}") from exc
+        return "".join(chunks)
+
     def _format_dashscope_error(self, response: httpx.Response, model: str, url: str) -> str:
         try:
             detail = response.text.strip()
@@ -622,9 +727,9 @@ class QwenAIClient(BaseAIClient):
         chapter: ParsedChapter,
         request: AdaptationRequest,
     ) -> Scene:
-        system, user = PromptBuilder.scene(scene_plan, story_bible, chapter, request)
-        payload = self._chat_json(request.model_routing.generation_model, system, user, request.temperature)
-        return _build_scene_from_payload(payload, scene_plan, chapter, story_bible)
+        system, user = PromptBuilder.screenplay_scene_text(scene_plan, story_bible, chapter, request)
+        text = self._chat_text(request.model_routing.generation_model, system, user, request.temperature)
+        return _build_scene_from_screenplay_text(text, scene_plan, chapter, story_bible)
 
     def generate_scene_stream(
         self,
@@ -634,15 +739,15 @@ class QwenAIClient(BaseAIClient):
         request: AdaptationRequest,
         on_delta: Callable[[str, str], None] | None = None,
     ) -> Scene:
-        system, user = PromptBuilder.scene(scene_plan, story_bible, chapter, request)
-        payload = self._chat_json_stream(
+        system, user = PromptBuilder.screenplay_scene_text(scene_plan, story_bible, chapter, request)
+        text = self._chat_text_stream(
             request.model_routing.generation_model,
             system,
             user,
             request.temperature,
             on_delta=on_delta,
         )
-        return _build_scene_from_payload(payload, scene_plan, chapter, story_bible)
+        return _build_scene_from_screenplay_text(text, scene_plan, chapter, story_bible)
 
     def generate_script(
         self,
@@ -651,9 +756,9 @@ class QwenAIClient(BaseAIClient):
         chapters: list[ParsedChapter],
         request: AdaptationRequest,
     ) -> Script:
-        system, user = PromptBuilder.full_script(outline, story_bible, chapters, request)
-        payload = self._chat_json(request.model_routing.generation_model, system, user, request.temperature)
-        return _build_script_from_payload(payload, outline, chapters, story_bible)
+        system, user = PromptBuilder.screenplay_text(outline, story_bible, chapters, request)
+        text = self._chat_text(request.model_routing.generation_model, system, user, request.temperature)
+        return _build_script_from_screenplay_text(text, outline, chapters, story_bible)
 
     def generate_script_stream(
         self,
@@ -663,15 +768,15 @@ class QwenAIClient(BaseAIClient):
         request: AdaptationRequest,
         on_delta: Callable[[str, str], None] | None = None,
     ) -> Script:
-        system, user = PromptBuilder.full_script(outline, story_bible, chapters, request)
-        payload = self._chat_json_stream(
+        system, user = PromptBuilder.screenplay_text(outline, story_bible, chapters, request)
+        text = self._chat_text_stream(
             request.model_routing.generation_model,
             system,
             user,
             request.temperature,
             on_delta=on_delta,
         )
-        return _build_script_from_payload(payload, outline, chapters, story_bible)
+        return _build_script_from_screenplay_text(text, outline, chapters, story_bible)
 
     def review_document(
         self,
@@ -831,6 +936,170 @@ def _build_script_from_payload(
             ScriptAct(act_id=act.act_id, title=act.name, scenes=act_scene_buckets.get(act.act_id, []))
             for act in outline.acts
         ]
+    )
+
+
+def _build_script_from_screenplay_text(
+    text: str,
+    outline: Outline,
+    chapters: list[ParsedChapter],
+    story_bible: StoryBible,
+) -> Script:
+    chapter_map = {chapter.chapter_id: chapter for chapter in chapters}
+    blocks = _split_screenplay_scene_blocks(text)
+    block_by_scene_id = {block["scene_id"]: block for block in blocks if block["scene_id"]}
+    act_scene_buckets: dict[str, list[Scene]] = {act.act_id: [] for act in outline.acts}
+
+    for index, scene_plan in enumerate(outline.scene_plans):
+        block = block_by_scene_id.get(scene_plan.scene_id)
+        if block is None and index < len(blocks):
+            block = blocks[index]
+        chapter = next((chapter_map[item] for item in scene_plan.chapter_refs if item in chapter_map), chapters[0])
+        scene = _build_scene_from_screenplay_block(block, scene_plan, chapter, story_bible)
+        act_scene_buckets.setdefault(scene_plan.act_id, []).append(scene)
+
+    return Script(
+        acts=[
+            ScriptAct(act_id=act.act_id, title=act.name, scenes=act_scene_buckets.get(act.act_id, []))
+            for act in outline.acts
+        ]
+    )
+
+
+def _build_scene_from_screenplay_text(
+    text: str,
+    scene_plan: ScenePlan,
+    chapter: ParsedChapter,
+    story_bible: StoryBible,
+) -> Scene:
+    blocks = _split_screenplay_scene_blocks(text)
+    block = next((item for item in blocks if item.get("scene_id") == scene_plan.scene_id), None)
+    if block is None and blocks:
+        block = blocks[0]
+    return _build_scene_from_screenplay_block(block, scene_plan, chapter, story_bible)
+
+
+def _split_screenplay_scene_blocks(text: str) -> list[dict[str, Any]]:
+    blocks: list[dict[str, Any]] = []
+    current: dict[str, Any] | None = None
+    for raw_line in text.replace("\r\n", "\n").replace("\r", "\n").split("\n"):
+        line = raw_line.strip()
+        if not line or line.startswith("```"):
+            continue
+        header = _parse_screenplay_scene_header(line)
+        if header is not None:
+            if current is not None:
+                blocks.append(current)
+            current = {"scene_id": header[0], "title": header[1], "lines": [line]}
+            continue
+        if current is None:
+            current = {"scene_id": "", "title": "", "lines": []}
+        current["lines"].append(line)
+    if current is not None:
+        blocks.append(current)
+    return blocks
+
+
+def _parse_screenplay_scene_header(line: str) -> tuple[str, str] | None:
+    match = re.match(
+        r"^(?:SCENE|Scene|scene|场景)\s+(?P<scene_id>[A-Za-z][\w-]*)(?:\s*[|｜:：-]\s*(?P<title>.+))?$",
+        line,
+    )
+    if not match:
+        return None
+    return match.group("scene_id").strip(), _normalize_text_field(match.group("title"))
+
+
+def _build_scene_from_screenplay_block(
+    block: dict[str, Any] | None,
+    scene_plan: ScenePlan,
+    chapter: ParsedChapter,
+    story_bible: StoryBible,
+) -> Scene:
+    lines = block.get("lines", []) if isinstance(block, dict) else []
+    title = _normalize_text_field(block.get("title")) if isinstance(block, dict) else ""
+    time_of_day = ""
+    summary = ""
+    transition = ""
+    beats: list[Beat] = []
+
+    for line in lines:
+        if _parse_screenplay_scene_header(line) is not None or line.upper() == "END SCENE":
+            continue
+        label, value = _split_screenplay_label(line)
+        if not value:
+            continue
+        normalized_label = label.casefold()
+        if normalized_label in {"title", "标题"}:
+            title = value
+            continue
+        if normalized_label in {"time", "time_of_day", "时间"}:
+            time_of_day = value
+            continue
+        if normalized_label in {"summary", "概括", "摘要"}:
+            summary = value
+            continue
+        if normalized_label in {"objective", "目标"}:
+            continue
+        if normalized_label in {"transition", "转场"}:
+            transition = value
+            continue
+        if normalized_label in {"action", "动作"}:
+            beats.append(_make_screenplay_beat("action", value, None, len(beats) + 1))
+            continue
+        if normalized_label in {"narration", "旁白"}:
+            beats.append(_make_screenplay_beat("narration", value, None, len(beats) + 1))
+            continue
+        if normalized_label in {"dialogue", "台词", "对白"}:
+            speaker_label, dialogue_text = _split_screenplay_label(value)
+            speaker_ref = _resolve_speaker_ref_from_name(speaker_label, story_bible) if dialogue_text else None
+            beats.append(_make_screenplay_beat("dialogue", dialogue_text or value, speaker_ref, len(beats) + 1))
+            continue
+
+        speaker_ref = _resolve_speaker_ref_from_name(label, story_bible)
+        if speaker_ref is not None or re.match(r"^c\d{3,}$", label, flags=re.IGNORECASE):
+            beats.append(_make_screenplay_beat("dialogue", value, speaker_ref or label, len(beats) + 1))
+        else:
+            beats.append(_make_screenplay_beat("action", line, None, len(beats) + 1))
+
+    if not beats:
+        beats.append(_make_screenplay_beat("action", scene_plan.focus_event or scene_plan.objective, None, 1))
+    if not summary:
+        summary = _compact_text(" ".join(beat.text for beat in beats[:2]), limit=96) or scene_plan.notes
+
+    source_refs = [SourceRef(chapter_id=chapter_id, excerpt_id="p001") for chapter_id in scene_plan.chapter_refs]
+    if not source_refs:
+        source_refs = [SourceRef(chapter_id=chapter.chapter_id, excerpt_id="p001")]
+
+    scene = Scene(
+        scene_id=scene_plan.scene_id,
+        title=title or scene_plan.title,
+        chapter_refs=scene_plan.chapter_refs,
+        time_of_day=time_of_day,
+        objective=scene_plan.objective,
+        summary=summary,
+        beats=beats[:4],
+        transitions=SceneTransition(next_scene_hint=transition or scene_plan.bridge_out, transition_type="cut"),
+        source_refs=source_refs,
+    )
+    return _normalize_scene_refs(scene, story_bible)
+
+
+def _split_screenplay_label(line: str) -> tuple[str, str]:
+    cleaned = re.sub(r"^\s*[-*]\s*", "", line).strip()
+    match = re.match(r"^(?P<label>[^:：]{1,32})[:：]\s*(?P<value>.+)$", cleaned)
+    if not match:
+        return "", cleaned
+    return match.group("label").strip(), match.group("value").strip()
+
+
+def _make_screenplay_beat(beat_type: str, text: str, speaker_ref: str | None, index: int) -> Beat:
+    normalized_type = _normalize_beat_type(beat_type)
+    return Beat(
+        beat_id=make_id("b", index),
+        type=normalized_type,
+        text=_normalize_text_field(text),
+        speaker_ref=speaker_ref if normalized_type == "dialogue" else None,
     )
 
 

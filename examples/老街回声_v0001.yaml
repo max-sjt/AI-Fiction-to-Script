@@ -1,0 +1,189 @@
+schema_version: screenplay-project-1.0
+meta:
+  project_id: 老街回声
+  title: 老街回声
+  original_novel_title: 老街回声
+  original_author: sun
+  target_format: film
+  language: zh-CN
+  genre:
+  - 悬疑成长
+  tone: balanced
+story:
+  logline: 老街回声围绕主要人物逐步揭开核心冲突并推动故事升级。
+  synopsis: 林然在老街咖啡馆守到打烊，窗外的雨把街灯晕成一片模糊的光。 姐姐林薇失踪已经七天，他却只收到一条没有署名的短信：如果想知道真相，就去旧仓库。
+    旧仓库在河堤后面，铁门半掩，里面居然还亮着昏黄的灯。 林然刚踏进去，就看见调查记者沈青站在货架边翻找资料。 循着录音里的地址，林然和沈青赶到旧城区天台。 风很大，霓虹灯从楼缝里切进来，把每个人的脸都照得忽明忽暗。
+  themes:
+  - 真相
+  props:
+  - 短信
+  - 林然在老街咖
+  - 啡馆守到打烊
+  - 旧仓库在河堤
+  - 后面
+characters:
+- character_id: c001
+  name: 如果想知
+  role: protagonist
+  traits:
+  - 克制
+  - 有目标
+  goal: 推动主线发展
+  conflict: 在追求目标时遭遇阻力
+  arc: 从被动进入主动
+  voice: 简洁直接
+- character_id: c002
+  name: 林然本
+  role: supporting
+  traits:
+  - 克制
+  - 有目标
+  goal: 推动主线发展
+  conflict: 在追求目标时遭遇阻力
+  arc: 从被动进入主动
+  voice: 简洁直接
+- character_id: c003
+  name: 林然嘴上
+  role: supporting
+  traits:
+  - 克制
+  - 有目标
+  goal: 推动主线发展
+  conflict: 在追求目标时遭遇阻力
+  arc: 从被动进入主动
+  voice: 简洁直接
+- character_id: c004
+  name: 说知
+  role: supporting
+  traits:
+  - 克制
+  - 有目标
+  goal: 推动主线发展
+  conflict: 在追求目标时遭遇阻力
+  arc: 从被动进入主动
+  voice: 简洁直接
+- character_id: c005
+  name: 沈青
+  role: supporting
+  traits:
+  - 克制
+  - 有目标
+  goal: 推动主线发展
+  conflict: 在追求目标时遭遇阻力
+  arc: 从被动进入主动
+  voice: 简洁直接
+- character_id: c006
+  name: 着怒气追
+  role: supporting
+  traits:
+  - 克制
+  - 有目标
+  goal: 推动主线发展
+  conflict: 在追求目标时遭遇阻力
+  arc: 从被动进入主动
+  voice: 简洁直接
+locations:
+- location_id: l001
+  name: 林然在老街咖啡馆
+  description: 与关键事件相关的地点
+  mood: 悬而未决
+- location_id: l002
+  name: 窗外的雨把街
+  description: 与关键事件相关的地点
+  mood: 悬而未决
+- location_id: l003
+  name: 就去旧仓库
+  description: 与关键事件相关的地点
+  mood: 悬而未决
+- location_id: l004
+  name: 玻璃
+  description: 与关键事件相关的地点
+  mood: 悬而未决
+- location_id: l005
+  name: 旧仓库在河堤
+  description: 与关键事件相关的地点
+  mood: 悬而未决
+scenes:
+- scene_id: s001
+  title: 雨夜来信
+  source_chapters:
+  - ch01
+  setting:
+    time_of_day: 深夜
+    location: ''
+  objective: 姐姐林薇失踪已经七天，他却只收到一条没有署名的短信：如果想知道真相，就去旧仓库
+  summary: 老街咖啡馆即将打烊，林然独自面对窗外被雨水模糊的街灯。老板周叔劝阻他前往废弃的旧仓库，但林然无法忽视那条匿名短信。他在犹豫与担忧中攥紧手机，最终推门走入雨中。
+  lines:
+  - kind: narration
+    text: 咖啡馆内光线昏暗，雨滴密集敲击玻璃。林然盯着桌面，手机屏幕亮起又暗下。
+    emotion: anxious
+  - kind: action
+    text: 周叔擦拭杯子，低声提醒那片区域早已废弃，深夜过去太危险。林然点头应声，目光却未离开门口。
+    emotion: cautious
+  - kind: action
+    text: 林然将手机重新握入掌心，指节泛白。他起身披上外套，推开咖啡馆的玻璃门。
+    emotion: resolved
+  - kind: transition
+    text: 冷风裹挟雨丝扑面而来，街道空无一人。镜头跟随他的背影推向远处的河堤方向。
+    emotion: tense
+- scene_id: s002
+  title: 旧仓库灯光
+  source_chapters:
+  - ch02
+  setting:
+    time_of_day: 深夜
+    location: ''
+  objective: 沈青说，她也在查林薇失踪前接触过的一家公司，但她不确定林然是否值得信任
+  summary: 废弃仓库内昏黄灯光摇曳，沈青正在货架间翻找文件。两人初次交锋，气氛戒备。沈青递出录音笔，播放出林薇提及关键合同的急促声音。林然意识到失踪背后的人为阴谋，两人决定按录音线索行动。
+  lines:
+  - kind: action
+    text: 铁门吱呀作响，林然踏入昏暗空间。远处货架后，沈青迅速合上一份文件夹，转身直视他。
+    emotion: guarded
+  - kind: action
+    text: 沈青询问他为何而来，直言自己也在追踪相关公司，并质疑他的动机与可信度。林然压抑怒火，要求先见姐姐。
+    emotion: skeptical
+  - kind: action
+    text: 沈青抛出一支银色录音笔。按下播放键，林薇急促的喘息与‘那份合同会让很多人闭嘴’的声音在空旷仓库回荡。
+    emotion: urgent
+  - kind: action
+    text: 林然沉默片刻，抬头看向沈青。两人交换眼神，确认目标一致，准备根据录音中的隐藏地址出发。
+    emotion: determined
+- scene_id: s003
+  title: 屋顶对峙
+  source_chapters:
+  - ch03
+  setting:
+    time_of_day: 深夜
+    location: ''
+  objective: 陈默承认自己替那家公司传过话，但他说林薇还活着…
+  summary: 旧城区天台狂风呼啸，霓虹光影切割着三人的面孔。陈默现身，坦白曾为公司传递信息，但坚称林薇只是被迫隐匿。面对陈默以录音笔换取见面的交易条件，林然陷入理智与亲情的拉扯，故事在悬而未决的张力中收尾。
+  lines:
+  - kind: narration
+    text: 天台边缘护栏锈蚀，强风卷起衣角。霓虹灯光从楼宇缝隙刺入，照亮阴影中站立的陈默。
+    emotion: tense
+  - kind: action
+    text: 陈默平静承认曾代为传话，但强调林薇并未出事，只是被保护性软禁。语气平淡却透着不容置疑。
+    emotion: calm
+  - kind: action
+    text: 林然猛地向前逼近，沈青伸手死死拦住他的肩膀。陈默举起手中的旧物，提出用录音笔交换带路见人的机会。
+    emotion: conflicted
+  - kind: action
+    text: 林然停在原地，呼吸粗重。风声掩盖了远处的车流，他低头看着手中的设备，面临是否拿姐姐安危做赌注的最终抉择。
+    emotion: heavy
+appendix:
+  source_chapters:
+  - chapter_id: ch01
+    title: 第一章 雨夜来信
+    text: '林然在老街咖啡馆守到打烊，窗外的雨把街灯晕成一片模糊的光。姐姐林薇失踪已经七天，他却只收到一条没有署名的短信：如果想知道真相，就去旧仓库。林然本想删掉短信，但想到母亲整夜不睡，他还是把手机攥进掌心。
+
+      老板周叔提醒他，旧仓库那一带早就废弃，深夜过去不安全。林然嘴上说知道，心里却更确定那条短信不是恶作剧。雨声敲在玻璃上，像有人在催他立刻动身。'
+  - chapter_id: ch02
+    title: 第二章 旧仓库灯光
+    text: '旧仓库在河堤后面，铁门半掩，里面居然还亮着昏黄的灯。林然刚踏进去，就看见调查记者沈青站在货架边翻找资料。沈青说，她也在查林薇失踪前接触过的一家公司，但她不确定林然是否值得信任。
+
+      林然压着怒气追问姐姐的下落，沈青却递给他一只录音笔。录音里传来林薇急促的声音，她说自己发现了一份会让很多人闭嘴的合同。林然终于明白，姐姐的失踪不是意外，而是有人在提前清理线索。'
+  - chapter_id: ch03
+    title: 第三章 屋顶对峙
+    text: '循着录音里的地址，林然和沈青赶到旧城区天台。风很大，霓虹灯从楼缝里切进来，把每个人的脸都照得忽明忽暗。等在那里的不是别人，而是一直假装帮忙的陈默。
+
+      陈默承认自己替那家公司传过话，但他说林薇还活着，只是被迫躲起来。林然几乎要冲上去，却被沈青拦住。陈默提出交换条件：只要林然交出录音笔，他就带他们去见林薇。林然意识到，真正的选择不是相信谁，而是要不要拿姐姐的安全赌一次真相。'

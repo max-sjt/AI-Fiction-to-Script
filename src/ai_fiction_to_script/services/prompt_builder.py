@@ -21,14 +21,14 @@ def _truncate_text(text: str, limit: int = 240) -> str:
 
 def _chapter_scene_context(chapter: ParsedChapter) -> str:
     excerpt_lines: list[str] = []
-    for excerpt in chapter.excerpts[:3]:
-        excerpt_lines.append(f"- {excerpt.excerpt_id}: {_truncate_text(excerpt.text)}")
+    for excerpt in chapter.excerpts[:2]:
+        excerpt_lines.append(f"- {excerpt.excerpt_id}: {_truncate_text(excerpt.text, limit=120)}")
     if not excerpt_lines:
-        excerpt_lines.append(f"- p001: {_truncate_text(chapter.raw_text)}")
+        excerpt_lines.append(f"- p001: {_truncate_text(chapter.raw_text, limit=120)}")
 
     return (
         f"章节标题：{chapter.title}\n"
-        f"章节摘要：{_truncate_text(chapter.raw_text, limit=180)}\n"
+        f"章节摘要：{_truncate_text(chapter.raw_text, limit=120)}\n"
         "关键摘录：\n"
         + "\n".join(excerpt_lines)
     )
@@ -39,8 +39,8 @@ def _story_bible_scene_context(story_bible: StoryBible) -> str:
     location_names = "、".join(location.name for location in story_bible.locations[:4]) or "未提供"
     themes = "、".join(story_bible.theme[:4]) or "未提供"
     return (
-        f"logline：{_truncate_text(story_bible.logline, limit=120)}\n"
-        f"synopsis：{_truncate_text(story_bible.synopsis, limit=180)}\n"
+        f"logline：{_truncate_text(story_bible.logline, limit=80)}\n"
+        f"synopsis：{_truncate_text(story_bible.synopsis, limit=120)}\n"
         f"主题：{themes}\n"
         f"主要角色：{character_names}\n"
         f"主要地点：{location_names}"
@@ -175,9 +175,9 @@ class PromptBuilder:
             "beats 中每项必须包含 beat_id, type, text，可选 speaker_ref, emotion，且 beats 最多 4 条。\n"
             "如果输出 speaker_ref 或 location_ref，必须使用 Story Bible 已提供的 character_id / location_id，不要使用人物名或地点名。\n"
             "如果 Scene Plan 的 objective 或 notes 带有本次修改要求，必须优先执行，不能沿用旧场景表达。\n"
+            "不要使用 [VO]、不要使用 [SFX]、不要使用 [BGM]、不要使用 OS、不要使用旁白标签或广播剧脚本括号标记；对白只写台词内容，动作只写动作描述。\n"
             "请让场景自然承接上一场并给下一场留出动势，开头用极短的上下文接续即可，不要机械写成 A1/A2/A3 或章节摘要拼贴。\n"
             "请按上述剧本类型和语气要求重写这个场景，而不是只把原小说内容换一种说法复述。\n\n"
-            f"Scene Plan：\n{_json(scene_plan.model_dump())}\n\n"
             f"场景上下文：\n{_scene_plan_context(scene_plan)}\n\n"
             f"Story Bible 摘要：\n{_story_bible_scene_context(story_bible)}\n\n"
             f"来源章节：\n{_chapter_scene_context(chapter)}"

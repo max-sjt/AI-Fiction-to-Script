@@ -211,19 +211,20 @@ def test_workbench_exports_compact_yaml_bundle_with_embedded_source_text(tmp_pat
 
     bundle = yaml.safe_load(yaml_text)
 
-    assert bundle["schema_version"] == "screenplay-project-1.0"
-    assert "characters" in bundle
-    assert "scenes" in bundle
-    assert "appendix" in bundle
-    assert "source_chapters" in bundle["appendix"]
-    assert "story_bible" not in bundle
-    assert "outline" not in bundle
-    assert "quality" not in bundle
-    assert "extensions" not in bundle
-    assert "script" not in bundle
-    assert "source" not in bundle
-    assert "lines" in bundle["scenes"][0]
-    assert "beats" not in bundle["scenes"][0]
+    assert bundle["schema_version"] == "2.0"
+    assert "meta" in bundle
+    assert "source" in bundle
+    assert "adaptation" in bundle
+    assert "story_bible" in bundle
+    assert "outline" in bundle
+    assert "script" in bundle
+    assert "quality" in bundle
+    assert "extensions" in bundle
+    assert "regeneration_bundle" in bundle["extensions"]
+    assert "source_chapters" in bundle["extensions"]["regeneration_bundle"]
+    assert "characters" not in bundle
+    assert "scenes" not in bundle
+    assert bundle["script"]["acts"][0]["scenes"][0]["beats"]
 
 
 def test_workbench_exported_yaml_demotes_narrative_dialogue_to_action(tmp_path) -> None:
@@ -267,10 +268,10 @@ def test_workbench_exported_yaml_demotes_narrative_dialogue_to_action(tmp_path) 
     )
 
     exported = yaml.safe_load(service.export_version_yaml(payload["project_id"], saved.version_id))
-    first_line = exported["scenes"][0]["lines"][0]
+    first_line = exported["script"]["acts"][0]["scenes"][0]["beats"][0]
 
-    assert first_line["kind"] == "action"
-    assert first_line.get("speaker", "") == ""
+    assert first_line["type"] == "action"
+    assert first_line.get("speaker_ref") is None
     assert "没有回答" in first_line["text"]
 
 
@@ -318,54 +319,125 @@ def test_workbench_can_regenerate_from_screenplay_yaml_without_source_chapters(m
     monkeypatch.setattr(service, "_build_ai_client", lambda provider, api_key="": MockAIClient())
     bundle_yaml = yaml.safe_dump(
         {
-            "schema_version": "screenplay-project-1.0",
+            "schema_version": "2.0",
             "meta": {
+                "project_id": "yaml-blueprint-demo",
                 "title": "yaml-blueprint-demo",
                 "original_author": "tester",
                 "original_novel_title": "yaml-blueprint-demo",
                 "target_format": "film",
+                "language": "zh-CN",
                 "genre": ["mystery"],
                 "tone": "serious",
+                "created_at": "2026-06-07T00:00:00+00:00",
+                "model_provider": "qwen",
+                "model_name": "qwen3.6-flash",
             },
-            "characters": [
-                {"name": "林默", "role": "protagonist"},
-                {"name": "来客", "role": "mysterious visitor"},
-            ],
-            "scenes": [
-                {
-                    "scene_id": "s001",
-                    "title": "雨夜来客",
-                    "setting": {"time_of_day": "深夜", "location": "旧时光古董店"},
-                    "objective": "来客把怀表交给林默",
-                    "summary": "暴雨夜，神秘来客进入古董店。",
-                    "lines": [
-                        {"kind": "action", "text": "暴雨敲打古董店木门。"},
-                        {"kind": "dialogue", "speaker": "来客", "text": "帮我修好它。"},
-                    ],
+            "source": {
+                "chapter_count": 3,
+                "chapters": [
+                    {"chapter_id": "ch01", "title": "第一章", "raw_text_ref": "memory://ch01", "summary": "暴雨夜，神秘来客进入古董店。", "excerpt_count": 2},
+                    {"chapter_id": "ch02", "title": "第二章", "raw_text_ref": "memory://ch02", "summary": "林默彻夜翻阅古籍。", "excerpt_count": 2},
+                    {"chapter_id": "ch03", "title": "第三章", "raw_text_ref": "memory://ch03", "summary": "怀表归位，怨灵消散。", "excerpt_count": 2},
+                ],
+            },
+            "adaptation": {
+                "adaptation_goal": "将小说改编为可编辑剧本初稿",
+                "compression_strategy": "merge_minor_events",
+                "pacing_policy": "preserve_key_conflicts",
+                "structure_type": "continuous_sequence",
+                "style_guide": {
+                    "dialogue_style": "自然克制",
+                    "narration_style": "简洁清晰",
+                    "pacing_style": "快速推进",
                 },
-                {
-                    "scene_id": "s002",
-                    "title": "齿轮下的秘密",
-                    "setting": {"time_of_day": "凌晨", "location": "古董店后室"},
-                    "objective": "林默查清怀表来历",
-                    "summary": "林默彻夜翻阅古籍。",
-                    "lines": [
-                        {"kind": "action", "text": "林默翻开残卷，核对怀表刻痕。"},
-                        {"kind": "dialogue", "speaker": "林默", "text": "第三个节点失控了。"},
-                    ],
-                },
-                {
-                    "scene_id": "s003",
-                    "title": "午夜的钟声",
-                    "setting": {"time_of_day": "午夜", "location": "废弃钟楼"},
-                    "objective": "林默完成封印",
-                    "summary": "怀表归位，怨灵消散。",
-                    "lines": [
-                        {"kind": "action", "text": "林默把怀表压进钟摆机关。"},
-                        {"kind": "dialogue", "speaker": "林默", "text": "时间到了，该走了。"},
-                    ],
-                },
-            ],
+            },
+            "story_bible": {
+                "logline": "林默被卷入怀表异变。",
+                "synopsis": "来客带来怀表，林默查清来历并完成封印。",
+                "theme": ["时间", "执念"],
+                "characters": [
+                    {"character_id": "c001", "name": "林默", "role": "protagonist", "traits": [], "relations": []},
+                    {"character_id": "c002", "name": "来客", "role": "supporting", "traits": [], "relations": []},
+                ],
+                "locations": [
+                    {"location_id": "l001", "name": "旧时光古董店"},
+                    {"location_id": "l002", "name": "废弃钟楼"},
+                ],
+                "timeline": [],
+                "props": ["怀表"],
+            },
+            "outline": {
+                "structure_type": "continuous_sequence",
+                "acts": [{"act_id": "main", "name": "正文", "purpose": "推进主线", "scene_count": 3}],
+                "scene_plans": [
+                    {"scene_id": "s001", "act_id": "main", "title": "雨夜来客", "objective": "来客把怀表交给林默", "chapter_refs": ["ch01"]},
+                    {"scene_id": "s002", "act_id": "main", "title": "齿轮下的秘密", "objective": "林默查清怀表来历", "chapter_refs": ["ch02"]},
+                    {"scene_id": "s003", "act_id": "main", "title": "午夜的钟声", "objective": "林默完成封印", "chapter_refs": ["ch03"]},
+                ],
+            },
+            "script": {
+                "acts": [
+                    {
+                        "act_id": "main",
+                        "title": "正文",
+                        "scenes": [
+                            {
+                                "scene_id": "s001",
+                                "title": "雨夜来客",
+                                "chapter_refs": ["ch01"],
+                                "location_ref": "l001",
+                                "time_of_day": "深夜",
+                                "objective": "来客把怀表交给林默",
+                                "summary": "暴雨夜，神秘来客进入古董店。",
+                                "beats": [
+                                    {"beat_id": "b001", "type": "action", "text": "暴雨敲打古董店木门。"},
+                                    {"beat_id": "b002", "type": "dialogue", "text": "帮我修好它。", "speaker_ref": "c002"},
+                                ],
+                                "source_refs": [{"chapter_id": "ch01", "excerpt_id": "p001"}],
+                            },
+                            {
+                                "scene_id": "s002",
+                                "title": "齿轮下的秘密",
+                                "chapter_refs": ["ch02"],
+                                "location_ref": "l001",
+                                "time_of_day": "凌晨",
+                                "objective": "林默查清怀表来历",
+                                "summary": "林默彻夜翻阅古籍。",
+                                "beats": [
+                                    {"beat_id": "b001", "type": "action", "text": "林默翻开残卷，核对怀表刻痕。"},
+                                    {"beat_id": "b002", "type": "dialogue", "text": "第三个节点失控了。", "speaker_ref": "c001"},
+                                ],
+                                "source_refs": [{"chapter_id": "ch02", "excerpt_id": "p001"}],
+                            },
+                            {
+                                "scene_id": "s003",
+                                "title": "午夜的钟声",
+                                "chapter_refs": ["ch03"],
+                                "location_ref": "l002",
+                                "time_of_day": "午夜",
+                                "objective": "林默完成封印",
+                                "summary": "怀表归位，怨灵消散。",
+                                "beats": [
+                                    {"beat_id": "b001", "type": "action", "text": "林默把怀表压进钟摆机关。"},
+                                    {"beat_id": "b002", "type": "dialogue", "text": "时间到了，该走了。", "speaker_ref": "c001"},
+                                ],
+                                "source_refs": [{"chapter_id": "ch03", "excerpt_id": "p001"}],
+                            },
+                        ],
+                    }
+                ]
+            },
+            "quality": {"confidence": 0.9, "warnings": [], "revision_suggestions": [], "continuity_checks": {}},
+            "extensions": {
+                "regeneration_bundle": {
+                    "source_chapters": [
+                        {"chapter_id": "ch01", "title": "第一章", "text": "暴雨敲打古董店木门。 来客：帮我修好它。"},
+                        {"chapter_id": "ch02", "title": "第二章", "text": "林默翻开残卷，核对怀表刻痕。 林默：第三个节点失控了。"},
+                        {"chapter_id": "ch03", "title": "第三章", "text": "林默把怀表压进钟摆机关。 林默：时间到了，该走了。"},
+                    ]
+                }
+            },
         },
         allow_unicode=True,
         sort_keys=False,
@@ -391,6 +463,60 @@ def test_workbench_can_regenerate_from_screenplay_yaml_without_source_chapters(m
 
     assert task["final_version_id"] == "v0001"
     assert task["result"]["project_id"] == "yaml-blueprint-demo"
+
+
+def test_workbench_regenerate_scene_normalizes_audio_drama_markup(monkeypatch, tmp_path) -> None:
+    service = WorkbenchService(tmp_path / ".novel2script")
+    initial = service.adapt(
+        {
+            "title": "regen-format-demo",
+            "original_author": "tester",
+            "original_title": "regen-format-demo",
+            "script_type": "film",
+            "tone": "serious",
+            "genre": "mystery",
+            "novel_text": sample_novel_text(),
+            "provider": "mock",
+        }
+    )
+
+    class FakeClient:
+        def generate_scene(self, scene_plan, story_bible, chapter, request):
+            return Scene(
+                scene_id=scene_plan.scene_id,
+                title=scene_plan.title,
+                chapter_refs=scene_plan.chapter_refs,
+                location_ref=None,
+                time_of_day="night",
+                objective=scene_plan.objective,
+                summary="summary",
+                beats=[
+                    Beat(beat_id="b001", type="action", text="[SFX] 暴雨砸在玻璃上。"),
+                    Beat(beat_id="b002", type="dialogue", text="[VO/林默] 我不会退。"),
+                ],
+                transitions=SceneTransition(next_scene_hint="Cut away", transition_type="cut"),
+                source_refs=[SourceRef(chapter_id=scene_plan.chapter_refs[0], excerpt_id="p001")],
+            )
+
+        def review_document(self, document, request):
+            return [], []
+
+    monkeypatch.setattr(service, "_build_ai_client", lambda provider, api_key="": FakeClient())
+
+    regenerated = service.regenerate_scene(
+        project_id=initial["project_id"],
+        version_id=initial["version"]["version_id"],
+        scene_id=initial["scene_options"][0]["scene_id"],
+        provider_override="qwen",
+        api_key="demo-key",
+    )
+
+    rendered = regenerated["scene_comparison"]["after"]["rendered"]
+
+    assert "[VO" not in rendered
+    assert "[SFX" not in rendered
+    assert "林默：我不会退。" in rendered
+    assert "暴雨砸在玻璃上。" in rendered
 
 
 def test_workbench_async_regenerate_returns_preview_then_final(monkeypatch, tmp_path) -> None:

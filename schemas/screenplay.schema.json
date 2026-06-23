@@ -48,7 +48,7 @@
           "type": "string"
         },
         "structure_type": {
-          "default": "three_act",
+          "default": "continuous_sequence",
           "title": "Structure Type",
           "type": "string"
         },
@@ -493,6 +493,21 @@
         "notes": {
           "default": "",
           "title": "Notes",
+          "type": "string"
+        },
+        "focus_event": {
+          "default": "",
+          "title": "Focus Event",
+          "type": "string"
+        },
+        "bridge_in": {
+          "default": "",
+          "title": "Bridge In",
+          "type": "string"
+        },
+        "bridge_out": {
+          "default": "",
+          "title": "Bridge Out",
           "type": "string"
         }
       },

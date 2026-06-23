@@ -72,16 +72,33 @@ def test_web_server_lists_projects_and_serves_html(tmp_path) -> None:
         projects = api_request(base_url, "/api/projects")
         assert projects["ok"] is True
         assert projects["data"]["projects"][0]["project_id"] == "web-demo"
+        version_summary = projects["data"]["projects"][0]["versions"][0]["generation_summary"]
+        assert version_summary["script_type_label"] == "电视剧剧本"
+        assert version_summary["tone_label"] == "平衡"
+        assert version_summary["detail_label"] in {"标准", "未设置"}
 
         with urlopen(f"{base_url}/") as response:  # noqa: S310
             html = response.read().decode("utf-8")
             cache_control = response.headers.get("Cache-Control")
-        assert "Qwen 剧本生成工作台" in html
+        assert "剧本生成工作台" in html
+        assert "上传小说文件或直接粘贴正文" in html
         assert 'id="languageSelect"' in html
+        assert 'id="statusText"' not in html
+        assert 'class="hero-status"' not in html
         assert 'id="resetProjectsButton"' in html
         assert 'id="uploadYamlFile"' in html
         assert 'id="regenerateFromYamlButton"' in html
         assert 'id="downloadRegeneratedYamlButton"' in html
+        assert 'id="detailLevel"' in html
+        assert 'id="regenDetailLevel"' in html
+        assert 'id="scriptProgress"' in html
+        assert 'id="scriptProgressBar"' in html
+        assert 'class="form-row form-row-2"' in html
+        assert 'class="form-row form-row-4"' in html
+        assert 'class="form-spacer"' in html
+        assert 'class="workspace-toolbar workspace-toolbar-wide"' in html
+        assert 'class="comparison-card-heading"' in html
+        assert 'id="insightsPanel"' not in html
         assert "中文" in html
         assert "hero-controls" not in html
         assert 'class="sidebar-controls"' in html
@@ -108,6 +125,20 @@ def test_web_server_serves_frontend_yaml_workflow_wiring(tmp_path) -> None:
         assert "uploadYamlFile" in app_js
         assert "regenerateFromYamlButton" in app_js
         assert "downloadRegeneratedYamlButton" in app_js
+        assert "renderInsights" not in app_js
+        assert "character_relationship_graph" not in app_js
+        assert "detailOptions" in app_js
+        assert "detail_level: els.detailLevel.value" in app_js
+        assert 'els.regenDetailLevel.value || "standard"' in app_js
+        assert "els.regenDetailLevel.value || els.detailLevel.value" not in app_js
+        assert "genreKeywordRules" in app_js
+        assert "applyGenreInference" in app_js
+        assert "setScriptProgress" in app_js
+        assert "scriptProgressBar" in app_js
+        assert "versionTooltipText" in app_js
+        assert "versionGenerationSummaryHtml" in app_js
+        assert "生成详细度：" in app_js
+        assert "statusText: document.getElementById" not in app_js
         assert "/api/regenerate-from-yaml-async" in app_js
         assert "/export-yaml" in app_js
         for placeholder_key in (
@@ -134,6 +165,26 @@ def test_web_server_health_includes_version_and_start_time(tmp_path) -> None:
         assert health["data"]["version"] == __version__
         assert "T" in health["data"]["server_started_at"]
         assert health["data"]["cache_backend"] in {"disabled", "redis"}
+    finally:
+        stop_server(server, thread)
+
+
+def test_web_server_lists_qwen_models(tmp_path) -> None:
+    version_root = tmp_path / ".novel2script"
+    server, thread, base_url = start_server(version_root)
+    captured: dict[str, str] = {}
+
+    def fake_list_qwen_models(api_key: str = "", base_url: str = "") -> list[dict[str, str]]:
+        captured["api_key"] = api_key
+        captured["base_url"] = base_url
+        return [{"id": "qwen-max", "owned_by": "dashscope"}]
+
+    server.RequestHandlerClass.service.list_qwen_models = fake_list_qwen_models
+    try:
+        response = api_request(base_url, "/api/models?api_key=demo-key&base_url=https%3A%2F%2Fexample.test")
+        assert response["ok"] is True
+        assert response["data"]["models"] == [{"id": "qwen-max", "owned_by": "dashscope"}]
+        assert captured == {"api_key": "demo-key", "base_url": "https://example.test"}
     finally:
         stop_server(server, thread)
 
@@ -193,7 +244,9 @@ def test_web_server_passes_regenerate_overrides(tmp_path) -> None:
         instruction: str = "",
         provider_override: str = "",
         api_key: str = "",
+        model_name: str = "",
         tone_override: str = "",
+        detail_level: str = "",
         note: str = "",
     ) -> dict:
         captured.update(
@@ -204,7 +257,9 @@ def test_web_server_passes_regenerate_overrides(tmp_path) -> None:
                 "instruction": instruction,
                 "provider_override": provider_override,
                 "api_key": api_key,
+                "model_name": model_name,
                 "tone_override": tone_override,
+                "detail_level": detail_level,
                 "note": note,
             }
         )
@@ -222,6 +277,7 @@ def test_web_server_passes_regenerate_overrides(tmp_path) -> None:
                 "provider": "qwen",
                 "api_key": "demo-key",
                 "tone": "dark",
+                "detail_level": "detailed",
                 "note": "web override pass",
             },
         )
@@ -234,7 +290,9 @@ def test_web_server_passes_regenerate_overrides(tmp_path) -> None:
             "instruction": "Make it darker.",
             "provider_override": "qwen",
             "api_key": "demo-key",
+            "model_name": "",
             "tone_override": "dark",
+            "detail_level": "detailed",
             "note": "web override pass",
         }
     finally:

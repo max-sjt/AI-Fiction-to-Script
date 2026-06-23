@@ -58,9 +58,13 @@ class AdaptationRequest(RuntimeModel):
     structure_type: str = "continuous_sequence"
     style_guide: StyleGuide = Field(default_factory=StyleGuide)
     provider: Literal["qwen", "mock"] = "mock"
+    model_name: str = ""
     model_routing: ModelRouting = Field(default_factory=ModelRouting)
     temperature: float = Field(default=0.3, ge=0.0, le=1.0)
     max_scenes_per_chapter: int = Field(default=2, ge=1, le=5)
+    detail_level: Literal["fast", "standard", "detailed"] = "standard"
+    max_beats_per_scene: int = Field(default=6, ge=4, le=12)
+    chapter_context_chars: int = Field(default=700, ge=180, le=2400)
 
 
 class VersionRecord(RuntimeModel):

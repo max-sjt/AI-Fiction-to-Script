@@ -1,0 +1,3062 @@
+schema_version: '2.0'
+meta:
+  project_id: 未命名剧本
+  title: 未命名剧本
+  original_novel_title: 未命名剧本
+  original_author: 未知作者
+  target_format: tv_drama
+  language: zh-CN
+  genre:
+  - 校园、都市
+  tone: balanced
+  created_at: '2026-06-20T03:23:07.586247+00:00'
+  model_provider: qwen
+  model_name: deepseek-v4-flash
+source:
+  chapter_count: 10
+  chapters:
+  - chapter_id: ch01
+    title: 第一章 不能停下来
+    raw_text_ref: .novel2script\_uploads\未命名剧本_20260620032307.txt
+    summary: 陈知律站在明德大学附属医院的走廊尽头，手里攥着那份烫金录取函，指尖微微发白。 走廊很长，日光灯管把白色的墙壁照得惨白，偶尔有护士推着小车从身边经过，车轮碾过地面发出细碎的声响。
+    excerpt_count: 1
+  - chapter_id: ch02
+    title: 第二章 心禾心理
+    raw_text_ref: .novel2script\_uploads\未命名剧本_20260620032307.txt
+    summary: 陈知律第二天早上八点四十就到了心禾心理。 玻璃门上挂着“休息中”的牌子，透过门缝能看到里面正在打扫的林静。
+    excerpt_count: 1
+  - chapter_id: ch03
+    title: 第三章 食堂里的周也
+    raw_text_ref: .novel2script\_uploads\未命名剧本_20260620032307.txt
+    summary: 周也是陈知律大学四年唯一的“熟人”。 说“熟人”不太准确，因为周也单方面把他定义为“最好的朋友”，而陈知律从来没有正面回应过这个定义。
+    excerpt_count: 1
+  - chapter_id: ch04
+    title: 第四章 父亲的影子
+    raw_text_ref: .novel2script\_uploads\未命名剧本_20260620032307.txt
+    summary: 录入档案的第二周，陈知律遇到了一份特殊的记录。 来访者编号是XH-2019-042，时间是三年前的夏天。
+    excerpt_count: 1
+  - chapter_id: ch05
+    title: 第五章 第一个来访者
+    raw_text_ref: .novel2script\_uploads\未命名剧本_20260620032307.txt
+    summary: 实习第三周，林静给陈知律安排了他的第一个来访者。 与其说是来访者，不如说是“陪练”——对方是林静多年的一位老来访者，情况稳定，愿意配合实习生的练习性访谈。
+    excerpt_count: 1
+  - chapter_id: ch06
+    title: 第六章 两个失眠的人
+    raw_text_ref: .novel2script\_uploads\未命名剧本_20260620032307.txt
+    summary: 研究生开学后的第一个月，陈知律的时间被切成三块：上课、心禾实习、医院陪护。 三块之外的所有时间，都属于睡眠——但睡眠不属于他。
+    excerpt_count: 1
+  - chapter_id: ch07
+    title: 第七章 裂痕
+    raw_text_ref: .novel2script\_uploads\未命名剧本_20260620032307.txt
+    summary: 十月中旬，陈母的病情突然加重了。 陈知律是在课堂上接到医院电话的。
+    excerpt_count: 1
+  - chapter_id: ch08
+    title: 第八章 周也的秘密
+    raw_text_ref: .novel2script\_uploads\未命名剧本_20260620032307.txt
+    summary: 周也发现陈知律最近不太对劲，是在一个周三的下午。 那天没有课，她去心禾心理找陈知律——她打听了很久才从系里一个学姐那里问到这个地址。
+    excerpt_count: 1
+  - chapter_id: ch09
+    title: 第九章 临界点
+    raw_text_ref: .novel2script\_uploads\未命名剧本_20260620032307.txt
+    summary: 十一月的最后一周，陈知律崩溃了。 不是在医院，不是在咨询室，也不是在上课的时候。
+    excerpt_count: 1
+  - chapter_id: ch10
+    title: 第十章 梧桐树下
+    raw_text_ref: .novel2script\_uploads\未命名剧本_20260620032307.txt
+    summary: 陈知律请了三天假。 三天里，他什么都没有做。
+    excerpt_count: 1
+adaptation:
+  adaptation_goal: 将小说改编为电视剧剧本，强调连续场景推进、人物关系和持续悬念。
+  compression_strategy: merge_minor_events
+  pacing_policy: preserve_key_conflicts
+  structure_type: continuous_sequence
+  style_guide:
+    dialogue_style: 自然克制
+    narration_style: 清晰平衡
+    pacing_style: 平衡
+story_bible:
+  logline: 未命名剧本围绕主要人物逐步揭开核心冲突并推动故事升级。
+  synopsis: 陈知律站在明德大学附属医院的走廊尽头，手里攥着那份烫金录取函，指尖微微发白。 走廊很长，日光灯管把白色的墙壁照得惨白，偶尔有护士推着小车从身边经过，车轮碾过地面发出细碎的声响。
+    陈知律第二天早上八点四十就到了心禾心理。 玻璃门上挂着“休息中”的牌子，透过门缝能看到里面正在打扫的林静。 周也是陈知律大学四年唯一的“熟人”。 说“熟人”不太准确，因为周也单方面把他定义为“最好的朋友”，而陈知律从来没有正面回应过这个定义。
+    录入档案的第二周，陈知律遇到了一份特殊的记录。 来访者编号是XH-2019-042，时间是三年前的夏天。 实习第三周，林静给陈知律安排了他的第一个来访者。
+    与其说是来访者，不如说是“陪练”——对方是林静多年的一位老来访者，情况稳定，愿意配合实习生的练习性访谈。 研究生开学后的第一个月，陈知律的时间被切成三块：上课、心禾实习、医院陪护。
+    三块之外的所有时间，都属于睡眠——但睡眠不属于他。 十月中旬，陈母的病情突然加重了。 陈知律是在课堂上接到医院电话的。 周也发现陈知律最近不太对劲，是在一个周三的下午。
+    那天没有课，她去心禾心理找陈知律——她打听了很久才从系里一个学姐那里问到这个地址。 十一月的最后一周，陈知律崩溃了。 不是在医院，不是在咨询室，也不是在上课的时候。
+    陈知律请了三天假。 三天里，他什么都没有做。
+  theme:
+  - 成长
+  - 选择
+  characters:
+  - character_id: c001
+    name: 陈知律
+    role: protagonist
+    traits:
+    - 克制
+    - 有目标
+    goal: 推动主线发展
+    conflict: 在追求目标时遭遇阻力
+    arc: 从被动进入主动
+    voice: 简洁直接
+    relations: []
+  - character_id: c002
+    name: 陈母
+    role: supporting
+    traits:
+    - 克制
+    - 有目标
+    goal: 推动主线发展
+    conflict: 在追求目标时遭遇阻力
+    arc: 从被动进入主动
+    voice: 简洁直接
+    relations:
+    - target_character_id: c001
+      relation: 关联角色
+      notes: ''
+  - character_id: c003
+    name: 林静
+    role: supporting
+    traits:
+    - 克制
+    - 有目标
+    goal: 推动主线发展
+    conflict: 在追求目标时遭遇阻力
+    arc: 从被动进入主动
+    voice: 简洁直接
+    relations:
+    - target_character_id: c001
+      relation: 关联角色
+      notes: ''
+  - character_id: c004
+    name: 叶子
+    role: supporting
+    traits:
+    - 克制
+    - 有目标
+    goal: 推动主线发展
+    conflict: 在追求目标时遭遇阻力
+    arc: 从被动进入主动
+    voice: 简洁直接
+    relations:
+    - target_character_id: c001
+      relation: 关联角色
+      notes: ''
+  - character_id: c005
+    name: 林老师
+    role: supporting
+    traits:
+    - 克制
+    - 有目标
+    goal: 推动主线发展
+    conflict: 在追求目标时遭遇阻力
+    arc: 从被动进入主动
+    voice: 简洁直接
+    relations:
+    - target_character_id: c001
+      relation: 关联角色
+      notes: ''
+  - character_id: c006
+    name: 程都
+    role: supporting
+    traits:
+    - 克制
+    - 有目标
+    goal: 推动主线发展
+    conflict: 在追求目标时遭遇阻力
+    arc: 从被动进入主动
+    voice: 简洁直接
+    relations:
+    - target_character_id: c001
+      relation: 关联角色
+      notes: ''
+  locations:
+  - location_id: l001
+    name: 明德大学附属医院的走廊
+    description: 与关键事件相关的地点
+    mood: 悬而未决
+  - location_id: l002
+    name: 公交站台
+    description: 与关键事件相关的地点
+    mood: 悬而未决
+  - location_id: l003
+    name: 一条他从未去过的街
+    description: 与关键事件相关的地点
+    mood: 悬而未决
+  - location_id: l004
+    name: 陈知律站
+    description: 与关键事件相关的地点
+    mood: 悬而未决
+  - location_id: l005
+    name: 前台后面是一条窄走廊
+    description: 与关键事件相关的地点
+    mood: 悬而未决
+  timeline:
+  - event_id: e001
+    time_order: 1
+    summary: 陈知律站在明德大学附属医院的走廊尽头，手里攥着那份烫金录取函，指尖微微发白。 走廊很长，日光灯管把白色的墙壁照得惨白，偶尔有护士推着小车从身边经过，车轮碾过地面发出细碎的声响。
+    chapter_refs:
+    - ch01
+  - event_id: e002
+    time_order: 2
+    summary: 陈知律第二天早上八点四十就到了心禾心理。 玻璃门上挂着“休息中”的牌子，透过门缝能看到里面正在打扫的林静。
+    chapter_refs:
+    - ch02
+  - event_id: e003
+    time_order: 3
+    summary: 周也是陈知律大学四年唯一的“熟人”。 说“熟人”不太准确，因为周也单方面把他定义为“最好的朋友”，而陈知律从来没有正面回应过这个定义。
+    chapter_refs:
+    - ch03
+  - event_id: e004
+    time_order: 4
+    summary: 录入档案的第二周，陈知律遇到了一份特殊的记录。 来访者编号是XH-2019-042，时间是三年前的夏天。
+    chapter_refs:
+    - ch04
+  - event_id: e005
+    time_order: 5
+    summary: 实习第三周，林静给陈知律安排了他的第一个来访者。 与其说是来访者，不如说是“陪练”——对方是林静多年的一位老来访者，情况稳定，愿意配合实习生的练习性访谈。
+    chapter_refs:
+    - ch05
+  - event_id: e006
+    time_order: 6
+    summary: 研究生开学后的第一个月，陈知律的时间被切成三块：上课、心禾实习、医院陪护。 三块之外的所有时间，都属于睡眠——但睡眠不属于他。
+    chapter_refs:
+    - ch06
+  - event_id: e007
+    time_order: 7
+    summary: 十月中旬，陈母的病情突然加重了。 陈知律是在课堂上接到医院电话的。
+    chapter_refs:
+    - ch07
+  - event_id: e008
+    time_order: 8
+    summary: 周也发现陈知律最近不太对劲，是在一个周三的下午。 那天没有课，她去心禾心理找陈知律——她打听了很久才从系里一个学姐那里问到这个地址。
+    chapter_refs:
+    - ch08
+  - event_id: e009
+    time_order: 9
+    summary: 十一月的最后一周，陈知律崩溃了。 不是在医院，不是在咨询室，也不是在上课的时候。
+    chapter_refs:
+    - ch09
+  - event_id: e010
+    time_order: 10
+    summary: 陈知律请了三天假。 三天里，他什么都没有做。
+    chapter_refs:
+    - ch10
+  props:
+  - 她说
+  - 他深吸一口气
+  - 递过去
+  - 陈知律第二天
+  - 早上八点四十
+outline:
+  structure_type: continuous_sequence
+  acts:
+  - act_id: main
+    name: 正文
+    purpose: 按小说章节逐章输出剧本单元，每章只保留一个完整章节剧本。
+    scene_count: 10
+  scene_plans:
+  - scene_id: s001
+    act_id: main
+    title: 不能停下来
+    objective: 靠窗的病床上躺着一个瘦削的中年女人，头发稀疏，脸…
+    chapter_refs:
+    - ch01
+    conflict: 陈知律攥着明德大学研究生录取函站在医院走廊尽头，推开病房门，面对病重的母亲。母亲坚持要他去读研，无论学费有多难。
+    notes: 陈知律攥着明德大学研究生录取函站在医院走廊尽头，推开病房门，面对病重的母亲。母亲坚持要他去读研，无论学费有多难。
+    focus_event: 明德大学附属医院，午间。走廊很长，日光灯管把白色墙壁照得惨白。消毒水的气味浓烈，像一层看不见的薄膜覆住一切。偶尔有护士推着小车经过，车轮碾过地面发出细碎声响。陈知律站在走廊尽头，手里攥着那份烫金录取函，指尖微微发白。
+    bridge_in: ''
+    bridge_out: ''
+  - scene_id: s002
+    act_id: main
+    title: 心禾心理
+    objective: 录入档案是一件机械而枯燥的工作，但陈知律做得极其…
+    chapter_refs:
+    - ch02
+    conflict: 陈知律第一天实习，从机械的档案录入到旁观初始访谈，职业信念被林静一句话击中，深夜独自消化冲击。
+    notes: 陈知律第一天实习，从机械的档案录入到旁观初始访谈，职业信念被林静一句话击中，深夜独自消化冲击。
+    focus_event: 清晨，心禾心理诊所门外的走廊。陈知律站在玻璃门前，身后是清晨稀疏的人流。门上挂着“休息中”的木牌。透过半透明玻璃，能看到林静正弯腰用抹布擦拭前台桌面，动作慢而专注。陈知律低头看了眼手机——8:42。他深吸一口气，把昨晚复习的心理学量表要点在脑中默念一遍，没有敲门，安静地站在门外。
+    bridge_in: ''
+    bridge_out: ''
+  - scene_id: s003
+    act_id: main
+    title: 食堂里的周也
+    objective: 他不习惯那种太热烈的、几乎没有边界感的关系，但也…
+    chapter_refs:
+    - ch03
+    conflict: 周也再次用自己的方式，闯入陈知律封闭的世界
+    notes: 周也再次用自己的方式，闯入陈知律封闭的世界
+    focus_event: 中午的大学食堂，人声嘈杂。陈知律端着餐盘走进来，目光扫过人群。靠窗的位置，周也穿着一件亮橙色卫衣，高马尾，正举着一只手臂用力挥动。桌上已经摆了两份饭菜，她的那份已经吃掉一半
+    bridge_in: ''
+    bridge_out: ''
+  - scene_id: s004
+    act_id: main
+    title: 父亲的影子
+    objective: 但父亲不相信，他开始失眠，开始发脾气，开始把自己…
+    chapter_refs:
+    - ch04
+    conflict: 陈知律在心禾心理录入档案时，发现了三年前父亲陈建军的来访记录，记忆与情感瞬间决堤。他没有惊动任何人，只是安静地完成工作，然后在夜色中独坐。
+    notes: 陈知律在心禾心理录入档案时，发现了三年前父亲陈建军的来访记录，记忆与情感瞬间决堤。他没有惊动任何人，只是安静地完成工作，然后在夜色中独坐。
+    focus_event: 明德大学附属医院心禾心理中心档案室，白天。日光灯惨白，空调低频轰鸣。陈知律坐在工位前，电脑屏幕的光映在他脸上。档案录入页面，光标在“来访者编号”一栏闪烁。他的手指悬在键盘上方。
+    bridge_in: ''
+    bridge_out: ''
+  - scene_id: s005
+    act_id: main
+    title: 第一个来访者
+    objective: 但陈知律注意到，她进门后第一件事是扫视整个房间—…
+    chapter_refs:
+    - ch05
+    conflict: 实习第三周的周四上午，陈知律迎来了他的第一个来访者——一位表情温和却在进门时扫视了整个房间的中年女人。
+    notes: 实习第三周的周四上午，陈知律迎来了他的第一个来访者——一位表情温和却在进门时扫视了整个房间的中年女人。
+    focus_event: 明德大学附属医院心理中心的小咨询室。房间约十平米，靠墙两张浅灰色布艺沙发呈九十度摆放，中间一张小圆木茶几，上面放着一盒白色纸巾和一杯白开水。窗帘半开，午后的阳光斜斜铺了一小截在木地板上。
+    bridge_in: ''
+    bridge_out: ''
+  - scene_id: s006
+    act_id: main
+    title: 两个失眠的人
+    objective: 三块之外的所有时间，都属于睡眠——但睡眠不属于他
+    chapter_refs:
+    - ch06
+    conflict: 凌晨三点，陈知律在出租屋里经历又一次失眠。周也发来自拍和消息，两个学心理的人在黑夜里交换了一段关于恐惧的对话。
+    notes: 凌晨三点，陈知律在出租屋里经历又一次失眠。周也发来自拍和消息，两个学心理的人在黑夜里交换了一段关于恐惧的对话。
+    focus_event: 研究生开学后的第一个月，陈知律的时间被切成三块：上课，心禾实习，医院陪护。三块之外的所有时间，都属于睡眠——但睡眠不属于他。他已经连续两周每天只睡四五个小时了。
+    bridge_in: ''
+    bridge_out: ''
+  - scene_id: s007
+    act_id: main
+    title: 裂痕
+    objective: 你母亲今天上午出现了急性呼吸困难，我们正在进行对…
+    chapter_refs:
+    - ch07
+    conflict: 十月中旬，陈知律在课堂上接到医院电话，得知母亲病情加重，他赶往医院面对新的诊断和费用压力，却依然强撑平静，去完成心禾心理的工作。
+    notes: 十月中旬，陈知律在课堂上接到医院电话，得知母亲病情加重，他赶往医院面对新的诊断和费用压力，却依然强撑平静，去完成心禾心理的工作。
+    focus_event: 明德大学教学楼，阶梯教室。午后的阳光从高窗外斜射进来，尘埃在光柱里浮动。陈知律站在讲台前，手里的遥控器停在PPT最后一页。投影上是一行案例分析的结论。教室里安静了三秒。
+    bridge_in: ''
+    bridge_out: ''
+  - scene_id: s008
+    act_id: main
+    title: 周也的秘密
+    objective: 周也注意到他的手指在微微发抖，但她没有说，只是笑…
+    chapter_refs:
+    - ch08
+    conflict: 周也突然出现在心禾心理，用一杯奶茶和一份简历把自己塞进了陈知律的实习生活。她发现他手指在发抖，但假装没看见。
+    notes: 周也突然出现在心禾心理，用一杯奶茶和一份简历把自己塞进了陈知律的实习生活。她发现他手指在发抖，但假装没看见。
+    focus_event: 心禾心理咨询中心前台区域。空间不大，前台桌面上堆着几本专业期刊和一台老式座机。墙上挂着心理咨询师的资质证书。下午的光线透过百叶窗在木地板上留下斜纹。周也推门进来，手里拎着两杯奶茶，探头看了看四周。
+    bridge_in: ''
+    bridge_out: ''
+  - scene_id: s009
+    act_id: main
+    title: 临界点
+    objective: 而是在一个最普通、最没有仪式感的时刻——他在超市…
+    chapter_refs:
+    - ch09
+    conflict: 十一月的最后一周，陈知律在一个普通超市的泡面货架前彻底崩溃。他在拨出那通电话之后，终于在周也面前承认“我可能也不行”。
+    notes: 十一月的最后一周，陈知律在一个普通超市的泡面货架前彻底崩溃。他在拨出那通电话之后，终于在周也面前承认“我可能也不行”。
+    focus_event: 'ACTION:'
+    bridge_in: ''
+    bridge_out: ''
+  - scene_id: s010
+    act_id: main
+    title: 梧桐树下
+    objective: 睡了很久的觉，把那个租了一年却从没好好用过的电饭…
+    chapter_refs:
+    - ch10
+    conflict: 陈知律请假三天后，周也闯入他的家，两人达成一个约定，随后一起走向心禾心理。
+    notes: 陈知律请假三天后，周也闯入他的家，两人达成一个约定，随后一起走向心禾心理。
+    focus_event: 陈知律的出租屋，光线昏暗。窗帘没拉严，一道灰白的光线落在堆满衣服的椅背上。他穿着一件皱巴巴的T恤坐在出租屋的小餐桌前，桌上的电饭煲正冒着蒸汽，厨房里传来粥沸腾的声音，很快变成一种即将溢出的咕嘟声。他没有任何反应。
+    bridge_in: ''
+    bridge_out: ''
+script:
+  acts:
+  - act_id: main
+    title: 正文
+    scenes:
+    - scene_id: s001
+      title: 不能停下来
+      chapter_refs:
+      - ch01
+      time_of_day: 日
+      objective: 靠窗的病床上躺着一个瘦削的中年女人，头发稀疏，脸…
+      summary: 陈知律攥着明德大学研究生录取函站在医院走廊尽头，推开病房门，面对病重的母亲。母亲坚持要他去读研，无论学费有多难。
+      beats:
+      - beat_id: b001
+        type: action
+        text: 明德大学附属医院，午间。走廊很长，日光灯管把白色墙壁照得惨白。消毒水的气味浓烈，像一层看不见的薄膜覆住一切。偶尔有护士推着小车经过，车轮碾过地面发出细碎声响。陈知律站在走廊尽头，手里攥着那份烫金录取函，指尖微微发白。
+        emotion: ''
+      - beat_id: b002
+        type: dialogue
+        text: 陈知律
+        speaker_ref: c001
+        emotion: ''
+      - beat_id: b003
+        type: action
+        text: 他低头看着录取函上“明德大学”四个烫金字，目光停留很久。走廊另一端传来心电监护的滴滴声，规律的、机械的，像某种古老的计时器。他深吸一口气，将录取函塞进外套内袋，推开走廊尽头那扇门。
+        emotion: ''
+      - beat_id: b004
+        type: action
+        text: 病房里很安静。窗帘半拉着，阳光斜照进来，在白色床单上投下一道光影。心电监护的绿线在屏幕上规律地跳动。靠窗的病床上躺着一个瘦削的中年女人，头发稀疏，脸色蜡黄，嘴唇干裂起皮。她的眼睛是亮的。看见陈知律进来，她撑着手臂想要坐起来，动作迟缓，像被什么东西拽住了身体。
+        emotion: ''
+      - beat_id: b005
+        type: dialogue
+        text: 陈母
+        speaker_ref: c002
+        emotion: ''
+      - beat_id: b006
+        type: action
+        text: （声音有些虚弱）
+        emotion: ''
+      - beat_id: b007
+        type: action
+        text: 知律。
+        emotion: ''
+      - beat_id: b008
+        type: action
+        text: （快步走过去，按住母亲的肩膀）
+        emotion: ''
+      - beat_id: b009
+        type: action
+        text: 别动。
+        emotion: ''
+      - beat_id: b010
+        type: action
+        text: （勉强笑了笑）
+        emotion: ''
+      - beat_id: b011
+        type: action
+        text: 没事，就是躺久了，骨头都硬了。
+        emotion: ''
+      - beat_id: b012
+        type: action
+        text: 陈知律没接话。他从床头柜上拿起保温杯，拧开盖子，倒出一杯温水递过去。陈母接过杯子，双手微微发颤，水面上漾起细小的波纹。她抿了一口，又把杯子放下，重新靠回枕头上，目光始终没有离开儿子的脸。
+        emotion: ''
+      - beat_id: b013
+        type: action
+        text: 你瘦了。
+        emotion: ''
+      - beat_id: b014
+        type: action
+        text: 你每次都这么说。
+        emotion: ''
+      - beat_id: b015
+        type: action
+        text: 陈知律拉过一把折叠椅，在床边坐下。他顺手整理了一下床头柜上散落的药盒，按服用时间重新排好——早晚中的顺序，整齐地码成一排。帕罗西汀、米氮平、劳拉西泮。药名他背得比专业课还熟。
+        emotion: ''
+      - beat_id: b016
+        type: action
+        text: （声音很轻，像怕惊动什么）
+        emotion: ''
+      - beat_id: b017
+        type: action
+        text: 这次是真的瘦了。眼睛里都有红血丝了，昨晚又熬夜了？
+        emotion: ''
+      - beat_id: b018
+        type: action
+        text: （没否认，也没承认）
+        emotion: ''
+      - beat_id: b019
+        type: action
+        text: 妈。
+        emotion: ''
+      - beat_id: b020
+        type: action
+        text: （声音压得很低）
+        emotion: ''
+      - beat_id: b021
+        type: action
+        text: 我跟你说个事。
+        emotion: ''
+      - beat_id: b022
+        type: action
+        text: 陈母的手指微微蜷了一下，指尖扣在床单上。陈知律从内袋抽出那份录取函，展开，递过去。烫金的校徽在日光灯下闪了一下光，上面印着一行字——兹录取陈知律同学为明德大学应用心理系2024级硕士研究生。
+        emotion: ''
+      - beat_id: b023
+        type: action
+        text: 陈母接过录取函，看了很久。她的手指摩挲着那个烫金校徽，指腹一遍遍划过那行字。嘴唇动了动，眼眶慢慢泛红。
+        emotion: ''
+      - beat_id: b024
+        type: action
+        text: （声音有些哽咽，但嘴角是上扬的）
+        emotion: ''
+      - beat_id: b025
+        type: action
+        text: 我就知道。我就知道你一定能考上。
+        emotion: ''
+      - beat_id: b026
+        type: action
+        text: 陈知律没说话。他看着母亲泛红的眼眶，胸腔里像有什么东西堵着，上不来下不去。他张了张嘴，想说点什么，但又觉得说什么都不太对。说“我考上了”太轻巧，说“你别担心钱”又太假——因为他自己都还没想清楚钱从哪里来。
+        emotion: ''
+      - beat_id: b027
+        type: action
+        text: （念着校名，语气里带着近乎虔诚的郑重）
+        emotion: ''
+      - beat_id: b028
+        type: action
+        text: 明德大学。你爸要是还在，肯定高兴坏了。
+        emotion: ''
+      - beat_id: b029
+        type: action
+        text: 陈知律垂下眼。病床上方的心电监护滴滴地响着，走廊上传来护士的脚步声，由远及近，又由近及远。一阵短暂的沉默。陈母慢慢将录取函折好，递还给儿子，动作小心翼翼，像在传递一件易碎的珍宝。
+        emotion: ''
+      - beat_id: b030
+        type: action
+        text: 去读。
+        emotion: ''
+      - beat_id: b031
+        type: action
+        text: 学费——
+        emotion: ''
+      - beat_id: b032
+        type: action
+        text: 我来想办法。
+        emotion: ''
+      - beat_id: b033
+        type: action
+        text: （抬起头，直视母亲的眼睛）
+        emotion: ''
+      - beat_id: b034
+        type: action
+        text: 你怎么想办法？你这病不能停药，每个月光药费就要两千多。舅舅上个月给的那笔钱已经——
+        emotion: ''
+      - beat_id: b035
+        type: action
+        text: （忽然叫了全名，声音不大，却像一根针扎进他的话里）
+        emotion: ''
+      - beat_id: b036
+        type: action
+        text: 陈知律。
+        emotion: ''
+      - beat_id: b037
+        type: action
+        text: 陈知律停住了。母亲看着他，目光平静，却带着一种不容置疑的力量。她的手指还在微微发抖，但语气稳定，每个字都说得很清楚。
+        emotion: ''
+      - beat_id: b038
+        type: action
+        text: 你今年二十二了。你从十六岁开始，一边上学一边打工，照顾了我六年。六年。
+        emotion: ''
+      - beat_id: b039
+        type: action
+        text: （顿了顿）
+        emotion: ''
+      - beat_id: b040
+        type: action
+        text: 你十八岁的时候，我说等你考上大学就好了。你考上了。你二十岁的时候，我说等你毕业就好了。你毕业了。现在你二十二岁，考上了研究生，你还要等什么？
+        emotion: ''
+      - beat_id: b041
+        type: action
+        text: （喉结动了一下）
+        emotion: ''
+      - beat_id: b042
+        type: action
+        text: 妈，我不是——
+        emotion: ''
+      - beat_id: b043
+        type: action
+        text: 我知道你不是在怪自己。但我是在怪我自己。
+        emotion: ''
+      - beat_id: b044
+        type: action
+        text: 陈母说完这句话，转开脸看向窗外。窗外那棵梧桐树的叶子在风里晃动，光影投射在窗帘上，忽明忽灭。陈知律坐在床边，双手交叉放在膝盖上，十指用力扣在一起。
+        emotion: ''
+      - beat_id: b045
+        type: action
+        text: （沉默片刻）
+        emotion: ''
+      - beat_id: b046
+        type: action
+        text: 学费一年两万五。加上生活费、书本费，一年至少三万五。我算过，就算我做两份兼职，顶多能凑出一半。
+        emotion: ''
+      - beat_id: b047
+        type: action
+        text: （转回头）
+        emotion: ''
+      - beat_id: b048
+        type: action
+        text: 你舅舅那边——
+        emotion: ''
+      - beat_id: b049
+        type: action
+        text: 妈，舅舅上个月给的那笔钱，你说借的，我知道是给的。他已经帮了很多了。我不能一直在他的脸面上活着。
+        emotion: ''
+      - beat_id: b050
+        type: action
+        text: （眼神忽然锐利起来）
+        emotion: ''
+      - beat_id: b051
+        type: action
+        text: 那你打算怎么办？不读了？回那个快递站接着打包，一个月三千五，够我们娘俩吃几顿饭？
+        emotion: ''
+      - beat_id: b052
+        type: action
+        text: 我没说不读。我只是说，我再想想办法。
+        emotion: ''
+      - beat_id: b053
+        type: action
+        text: 你不用想办法。我已经想过办法了。
+        emotion: ''
+      - beat_id: b054
+        type: action
+        text: 陈知律骤然抬头，目光里闪过一丝警觉。他看着母亲平静的脸色，眉头慢慢皱起来。
+        emotion: ''
+      - beat_id: b055
+        type: action
+        text: 你做了什么？
+        emotion: ''
+      - beat_id: b056
+        type: action
+        text: 你林阿姨你还记得吗？就是以前住在咱们楼下的那个。
+        emotion: ''
+      - beat_id: b057
+        type: action
+        text: （警惕）
+        emotion: ''
+      - beat_id: b058
+        type: action
+        text: 记得。
+        emotion: ''
+      - beat_id: b059
+        type: action
+        text: 她女儿开了家心理咨询工作室，就在城南。我听她说，那边正缺人手。你要是能去那边实习，工资虽然不高，但总比快递站强。而且你学心理的，专业也对口。
+        emotion: ''
+      - beat_id: b060
+        type: action
+        text: （眼神微微一动）
+        emotion: ''
+      - beat_id: b061
+        type: action
+        text: 你什么时候跟你林阿姨联系的？
+        emotion: ''
+      - beat_id: b062
+        type: action
+        text: （避开了儿子的目光）
+        emotion: ''
+      - beat_id: b063
+        type: action
+        text: 就前几天。
+        emotion: ''
+      - beat_id: b064
+        type: action
+        text: 陈母没有回答。她把被子往上拉了拉，侧过身，背对儿子。病房里安静了几秒，只有心电监护的滴滴声和窗外风穿过树叶的沙沙声。
+        emotion: ''
+      - beat_id: b065
+        type: dialogue
+        text: 'E067: 陈母'
+        speaker_ref: c002
+        emotion: ''
+      - beat_id: b066
+        type: action
+        text: （背对着他，声音闷闷的）
+        emotion: ''
+      - beat_id: b067
+        type: action
+        text: 我今天跟他们科室主任谈过了。他们说我可以申请转去日间病房，白天去输液，晚上回家住。这样能省一半住院费。
+        emotion: ''
+      - beat_id: b068
+        type: action
+        text: （一下子站起来，椅子被推得往后一滑，发出刺耳的声响）
+        emotion: ''
+      - beat_id: b069
+        type: action
+        text: 不行。
+        emotion: ''
+      - beat_id: b070
+        type: action
+        text: （转回身，语气平静）
+        emotion: ''
+      - beat_id: b071
+        type: action
+        text: 医生已经同意了。
+        emotion: ''
+      - beat_id: b072
+        type: action
+        text: （声音拔高）
+        emotion: ''
+      - beat_id: b073
+        type: action
+        text: 你知不知道你现在什么情况？转去日间病房，晚上
+        emotion: ''
+      transitions:
+        next_scene_hint: 陈知律第二天早上八点四十就到了心禾心理。 玻璃门上挂着“休息中”的牌子，透过门缝能看到里面正在打扫的林静。
+        transition_type: cut
+      source_refs:
+      - chapter_id: ch01
+        excerpt_id: p001
+    - scene_id: s002
+      title: 心禾心理
+      chapter_refs:
+      - ch02
+      time_of_day: day - night
+      objective: 录入档案是一件机械而枯燥的工作，但陈知律做得极其…
+      summary: 陈知律第一天实习，从机械的档案录入到旁观初始访谈，职业信念被林静一句话击中，深夜独自消化冲击。
+      beats:
+      - beat_id: b001
+        type: action
+        text: 清晨，心禾心理诊所门外的走廊。陈知律站在玻璃门前，身后是清晨稀疏的人流。门上挂着“休息中”的木牌。透过半透明玻璃，能看到林静正弯腰用抹布擦拭前台桌面，动作慢而专注。陈知律低头看了眼手机——8:42。他深吸一口气，把昨晚复习的心理学量表要点在脑中默念一遍，没有敲门，安静地站在门外。
+        emotion: ''
+      - beat_id: b002
+        type: narration
+        text: 他习惯提前到，也习惯等。这二十多分钟里，他把所有可能被问到的专业问题又过了一遍。
+        emotion: ''
+      - beat_id: b003
+        type: action
+        text: 九点整，木牌翻转为“营业中”。陈知律推门，门铃发出清脆的叮咚声。林静从里间走出来，手里端着一杯冒着热气的咖啡，咖啡的苦味瞬间弥漫开来。
+        emotion: ''
+      - beat_id: b004
+        type: dialogue
+        text: 还挺准时。
+        speaker_ref: c002
+        emotion: ''
+      - beat_id: b005
+        type: dialogue
+        text: 林老师早。
+        speaker_ref: c001
+        emotion: ''
+      - beat_id: b006
+        type: action
+        text: 林静上下打量了他一眼，没有多余寒暄，转身朝里走。
+        emotion: ''
+      - beat_id: b007
+        type: dialogue
+        text: 跟我来吧。
+        speaker_ref: c002
+        emotion: ''
+      - beat_id: b008
+        type: action
+        text: 陈知律跟上。镜头跟随他们的脚步穿过狭窄走廊。墙壁刷成淡绿色，挂着几幅色调柔和的抽象画——海浪、远山、一只停在树枝上的鸟。三扇紧闭的咨询室门依次掠过。
+        emotion: ''
+      - beat_id: b009
+        type: action
+        text: 办公室内，林静从文件柜抽出几本厚重的文件夹，依次摊在桌上。纸张的旧味混着咖啡香。
+        emotion: ''
+      - beat_id: b010
+        type: dialogue
+        text: 这是来访者档案的归档模板，这是知情同意书的标准格式，这是初始访谈记录表。
+        speaker_ref: c002
+        emotion: ''
+      - beat_id: b011
+        type: action
+        text: 她手指一一划过文件，语速平稳。
+        emotion: ''
+      - beat_id: b012
+        type: dialogue
+        text: 你第一周的工作就是把近两年的纸质档案全部电子化，录入我们的内部系统。有问题吗？
+        speaker_ref: c002
+        emotion: ''
+      - beat_id: b013
+        type: dialogue
+        text: 没有。
+        speaker_ref: c001
+        emotion: ''
+      - beat_id: b014
+        type: action
+        text: 林静端着杯子停在嘴边，抬眼看他。
+        emotion: ''
+      - beat_id: b015
+        type: dialogue
+        text: 别回答得这么快。
+        speaker_ref: c002
+        emotion: ''
+      - beat_id: b016
+        type: action
+        text: 她放下杯子，凑近一步，目光锐利。
+        emotion: ''
+      - beat_id: b017
+        type: dialogue
+        text: 录入过程中你会看到所有来访者的个人信息和症状描述。所有内容一律不得外泄——包括对你最亲近的人。能做到吗？
+        speaker_ref: c002
+        emotion: ''
+      - beat_id: b018
+        type: action
+        text: 陈知律迎上她的目光，没有任何闪躲。
+        emotion: ''
+      - beat_id: b019
+        type: dialogue
+        text: 能。
+        speaker_ref: c001
+        emotion: ''
+      - beat_id: b020
+        type: action
+        text: 林静盯着他的眼睛看了两秒，点了下头。她弯腰从抽屉里拿出一份实习协议，推过桌面。陈知律没有犹豫，拿起笔签下名字。笔尖划过纸张的声音清晰可闻。
+        emotion: ''
+      - beat_id: b021
+        type: action
+        text: 从此，陈知律成了心禾心理年纪最小、话最少、走得最晚的实习生。档案录入工作开始。每份纸质档案发黄卷边，钢笔字迹或潦草或工整。陈知律坐在电脑前，一份一份扫描、编辑、上传。但他的手指偶尔会停住——在备注栏里，他额外打下一行字:某强迫症来访者在描述症状时反复搓手指，指尖发红；某抑郁症来访者在提到“父亲”时语速突然从正常降至极慢。
+        emotion: ''
+      - beat_id: b022
+        type: narration
+        text: 这些不是系统要求的内容，但他觉得以后可能会有用。他也不知道为什么这么笃定。
+        emotion: ''
+      - beat_id: b023
+        type: action
+        text: 林静偶尔从办公室门口路过，瞥一眼他的屏幕，什么也没说。嘴角有一丝几乎察觉不到的松动。
+        emotion: ''
+      - beat_id: b024
+        type: action
+        text: 一周后，下午。林静推开咨询室的门，示意陈知律进来。咨询椅上坐着一位中年女人和她十六岁的女儿——化名“小鹿”。女孩低着头，长发遮住半张脸，手腕上缠着一条浅色丝巾。林静在对面坐下，声音平稳而温和，像一张柔软但结实的网。
+        emotion: ''
+      - beat_id: b025
+        type: action
+        text: 访谈持续五十分钟。小鹿从沉默、摇头、只蹦单字，到后来捂着脸断断续续挤出话。
+        emotion: ''
+      - beat_id: b026
+        type: dialogue
+        text: 我就是……觉得自己很脏。
+        speaker_ref: c003
+        emotion: ''
+      - beat_id: b027
+        type: action
+        text: 陈知律坐在角落，笔尖在本子上快速移动，没有停过。
+        emotion: ''
+      - beat_id: b028
+        type: action
+        text: 访谈结束，林静送走母女。门关上的一刻，咨询室静下来。陈知律还在原处，手里的笔悬在半空。林静走回来，靠着门框。
+        emotion: ''
+      - beat_id: b029
+        type: dialogue
+        text: 你的感受？
+        speaker_ref: c002
+        emotion: ''
+      - beat_id: b030
+        type: action
+        text: 陈知律抬起头，几乎没有停顿。
+        emotion: ''
+      - beat_id: b031
+        type: dialogue
+        text: 她不是厌学。她对学校没有明显的负面情绪，提到同学关系时也没有回避回避。她真正卡住的地方是家庭——她母亲提到“爸爸”的时候，她身体明显僵硬了。两次，都是。
+        speaker_ref: c001
+        emotion: ''
+      - beat_id: b032
+        type: action
+        text: 林静微微眯起眼睛，沉默片刻。然后她开口，语气平淡，却像钉子一样敲进空气里。
+        emotion: ''
+      - beat_id: b033
+        type: dialogue
+        text: 你观察得很准。但是陈知律，在这个行业里，看得准不是最难的。
+        speaker_ref: c002
+        emotion: ''
+      - beat_id: b034
+        type: action
+        text: 她停了一下。
+        emotion: ''
+      - beat_id: b035
+        type: dialogue
+        text: 最难的是看完之后，你还能好好吃饭、好好睡觉。
+        speaker_ref: c002
+        emotion: ''
+      - beat_id: b036
+        type: action
+        text: 陈知律握着笔的手指轻微收紧。他没有回答。
+        emotion: ''
+      - beat_id: b037
+        type: action
+        text: 深夜，出租屋。厨房灯光惨白。一锅水烧开，陈知律把面饼放进去，在锅边站了一会儿，又打了一个鸡蛋。他端着碗坐到桌前，吃面的声音在空旷的房间里单调地回响。面汤的热气蒙上他的眼睛，他没有擦，任由雾气凝结成细小水珠，又慢慢消散在灯光里。
+        emotion: ''
+      - beat_id: b038
+        type: action
+        text: 手机在桌上震动一下。屏幕亮起，周也的微信头像弹出一条消息。
+        emotion: ''
+      - beat_id: b039
+        type: narration
+        text: '周也: “陈知律，你到底死没死？三天没回消息了。”'
+        emotion: ''
+      - beat_id: b040
+        type: action
+        text: 陈知律把嘴里的面咽下去，手指悬在屏幕上方。停顿了几秒。然后他按下一个键，发送。
+        emotion: ''
+      - beat_id: b041
+        type: action
+        text: 'CUT TO:'
+        emotion: ''
+      - beat_id: b042
+        type: action
+        text: '手机屏幕显示: “活着。”'
+        emotion: ''
+      transitions:
+        next_scene_hint: FADE TO BLACK
+        transition_type: cut
+      source_refs:
+      - chapter_id: ch02
+        excerpt_id: p001
+    - scene_id: s003
+      title: 食堂里的周也
+      chapter_refs:
+      - ch03
+      time_of_day: noon
+      objective: 他不习惯那种太热烈的、几乎没有边界感的关系，但也…
+      summary: 周也再次用自己的方式，闯入陈知律封闭的世界
+      beats:
+      - beat_id: b001
+        type: action
+        text: 中午的大学食堂，人声嘈杂。陈知律端着餐盘走进来，目光扫过人群。靠窗的位置，周也穿着一件亮橙色卫衣，高马尾，正举着一只手臂用力挥动。桌上已经摆了两份饭菜，她的那份已经吃掉一半
+        emotion: ''
+      - beat_id: b002
+        type: dialogue
+        text: “这里！陈知律，这边！”
+        speaker_ref: c002
+        emotion: ''
+      - beat_id: b003
+        type: action
+        text: 陈知律犹豫了一秒，朝那个方向走过去。周围的几桌学生看了一眼周也，又看了一眼陈知律，目光里带着一种习以为常的好奇
+        emotion: ''
+      - beat_id: b004
+        type: action
+        text: 陈知律在周也对面的椅子上坐下，把餐盘放到一旁。周也立刻把另一份饭推到他的面前
+        emotion: ''
+      - beat_id: b005
+        type: dialogue
+        text: “你瘦了。”
+        speaker_ref: c002
+        emotion: ''
+      - beat_id: b006
+        type: dialogue
+        text: “你跟我妈说的一样。”
+        speaker_ref: c001
+        emotion: ''
+      - beat_id: b007
+        type: action
+        text: “那说明是真的。” 周也用筷子指了指盘子，“吃。我看着你吃完。”
+        emotion: ''
+      - beat_id: b008
+        type: action
+        text: 陈知律低头看了一眼盘子里的菜——红烧排骨、清炒西兰花、一碗紫菜蛋花汤，都是他平时会点的。他拿起筷子夹了一块排骨，动作很慢
+        emotion: ''
+      - beat_id: b009
+        type: action
+        text: 周也咬着筷子，看着他吃了两口，目光一直没移开。陈知律感觉到那种注视，但没有抬头
+        emotion: ''
+      - beat_id: b010
+        type: dialogue
+        text: “你自己不吃？”
+        speaker_ref: c001
+        emotion: ''
+      - beat_id: b011
+        type: dialogue
+        text: “我减肥。”
+        speaker_ref: c002
+        emotion: ''
+      - beat_id: b012
+        type: dialogue
+        text: “你不需要减肥。”
+        speaker_ref: c001
+        emotion: ''
+      - beat_id: b013
+        type: dialogue
+        text: “哇，这算是关心吗？”
+        speaker_ref: c002
+        emotion: ''
+      - beat_id: b014
+        type: action
+        text: 陈知律没有接话，继续吃饭。周也的笑容淡了一瞬，但很快又亮起来。她忽然放下筷子，正色坐直
+        emotion: ''
+      - beat_id: b015
+        type: dialogue
+        text: “陈知律，我跟你说个事。”
+        speaker_ref: c002
+        emotion: ''
+      - beat_id: b016
+        type: dialogue
+        text: “说。”
+        speaker_ref: c001
+        emotion: ''
+      - beat_id: b017
+        type: dialogue
+        text: “我也报了明德的研究生。”
+        speaker_ref: c002
+        emotion: ''
+      - beat_id: b018
+        type: action
+        text: 陈知律的动作停住了，筷子悬在半空。他抬起眼睛看向周也
+        emotion: ''
+      - beat_id: b019
+        type: dialogue
+        text: “同专业？”
+        speaker_ref: c001
+        emotion: ''
+      - beat_id: b020
+        type: dialogue
+        text: “同方向。” 周也的眼睛亮晶晶的，带着一种明知山有虎偏向虎山行的得意，“以后咱俩又是同学。惊不惊喜？意不意外？”
+        speaker_ref: c002
+        emotion: ''
+      - beat_id: b021
+        type: action
+        text: 陈知律沉默了几秒。他重新低下头，夹了一筷子西兰花，嚼了两下才开口
+        emotion: ''
+      - beat_id: b022
+        type: dialogue
+        text: “你本科成绩够保研的，为什么还要考？”
+        speaker_ref: c001
+        emotion: ''
+      - beat_id: b023
+        type: action
+        text: 周也的笑容僵了大约零点几秒。那段时间很短，短到食堂里任何一个人都不会注意到，但陈知律看到了她眼里的光闪了一下又恢复
+        emotion: ''
+      - beat_id: b024
+        type: dialogue
+        text: “因为我乐意。”
+        speaker_ref: c002
+        emotion: ''
+      - beat_id: b025
+        type: narration
+        text: 她没有说的是，保研名额被系主任的侄子挤掉了。她也没有说的是，考研报名截止的最后一天，她把志愿从北方某985改成了明德——只是因为那天晚上陈知律发了一条朋友圈，一张心禾心理门口的法国梧桐照片，配文是一个句号。那是他三年来的第一条朋友圈
+        emotion: ''
+      - beat_id: b026
+        type: action
+        text: 周也从包里抽出一张纸，拍在桌上。是一份录取函的复印件，动作和那天陈知律把录取函拍在母亲面前时如出一辙
+        emotion: ''
+      - beat_id: b027
+        type: dialogue
+        text: “以后请叫我周也同学。”
+        speaker_ref: c002
+        emotion: ''
+      - beat_id: b028
+        type: action
+        text: 陈知律低头看着那张复印件，目光在“明德大学心理学硕士”那一行字上停留了片刻。他的嘴角微微动了一下
+        emotion: ''
+      - beat_id: b029
+        type: narration
+        text: 那不算一个完整的笑容，更像是某种被压制的情绪不小心从裂缝里泄露出来。但周也看见了。她觉得这一个微小的弧度，比任何大笑都值得
+        emotion: ''
+      - beat_id: b030
+        type: action
+        text: 周也迅速举起手机，对准陈知律拍了一张
+        emotion: ''
+      - beat_id: b031
+        type: dialogue
+        text: “删掉。”
+        speaker_ref: c001
+        emotion: ''
+      - beat_id: b032
+        type: dialogue
+        text: “不删。” 周也把手机揣回卫衣口袋里，笑眯眯地拿起筷子，“这张我要留着，以后等你出名了卖给八卦记者。”
+        speaker_ref: c002
+        emotion: ''
+      - beat_id: b033
+        type: action
+        text: 食堂里人来人往，嘈杂的声音在头顶汇成一片嗡嗡的声浪。陈知律低下头继续吃饭，耳尖有一点不易察觉的红。他不知道自己在脸红什么——可能是因为周也的笑容太亮了，亮到他有些不适应，而他已经很久没有被一束光照过
+        emotion: ''
+      - beat_id: b034
+        type: action
+        text: 周也低头扒了两口饭，忽然又抬起头，眼睛弯弯地看着他
+        emotion: ''
+      - beat_id: b035
+        type: dialogue
+        text: “对了，心禾心理怎么样？有没有漂亮女同事？”
+        speaker_ref: c002
+        emotion: ''
+      - beat_id: b036
+        type: dialogue
+        text: “……吃饭。”
+        speaker_ref: c001
+        emotion: ''
+      - beat_id: b037
+        type: dialogue
+        text: “你脸红了。”
+        speaker_ref: c002
+        emotion: ''
+      - beat_id: b038
+        type: dialogue
+        text: “没有。”
+        speaker_ref: c001
+        emotion: ''
+      - beat_id: b039
+        type: dialogue
+        text: “有。”
+        speaker_ref: c002
+        emotion: ''
+      - beat_id: b040
+        type: action
+        text: 陈知律不再说话，把最后一块排骨塞进嘴里，端起餐盘站起来。周也冲着他的背影喊了一声
+        emotion: ''
+      - beat_id: b041
+        type: dialogue
+        text: “明天还这个点！我给你占座！”
+        speaker_ref: c002
+        emotion: ''
+      - beat_id: b042
+        type: action
+        text: 陈知律没有回头，但他的脚步顿了一下，然后才继续往前走
+        emotion: ''
+      transitions:
+        next_scene_hint: 切至
+        transition_type: cut
+      source_refs:
+      - chapter_id: ch03
+        excerpt_id: p001
+    - scene_id: s004
+      title: 父亲的影子
+      chapter_refs:
+      - ch04
+      time_of_day: day
+      objective: 但父亲不相信，他开始失眠，开始发脾气，开始把自己…
+      summary: 陈知律在心禾心理录入档案时，发现了三年前父亲陈建军的来访记录，记忆与情感瞬间决堤。他没有惊动任何人，只是安静地完成工作，然后在夜色中独坐。
+      beats:
+      - beat_id: b001
+        type: action
+        text: 明德大学附属医院心禾心理中心档案室，白天。日光灯惨白，空调低频轰鸣。陈知律坐在工位前，电脑屏幕的光映在他脸上。档案录入页面，光标在“来访者编号”一栏闪烁。他的手指悬在键盘上方。
+        emotion: ''
+      - beat_id: b002
+        type: narration
+        text: 录入档案的第二周，陈知律遇到了一份特殊的记录。来访者编号XH-2019-042，时间是三年前的夏天。主诉——“焦虑状态、疑病倾向”。病程描述一栏写着：来访者长期怀疑自己患有严重疾病，反复就医检查，无法接受无器质性病变的诊断结果，严重影响日常生活。这些描述本身并不特殊。特殊的是来访者的名字——陈建军。
+        emotion: ''
+      - beat_id: b003
+        type: action
+        text: 陈知律的手指没有落下。他盯着屏幕上“陈建军”三个字，眼睛里没有任何表情，只有一种极细微的、像是被慢慢勒紧的死寂。他往下滚动页面，看到更多信息。
+        emotion: ''
+      - beat_id: b004
+        type: narration
+        text: 来访者职业：建筑工人。家庭状况：已婚，育有一子。经济状况：欠佳，因看病频繁已无积蓄。转介来源：综合医院心理科。
+        emotion: ''
+      - beat_id: b005
+        type: action
+        text: 陈知律慢慢靠在椅背上，眼睛还停留在屏幕上，但目光已经透过屏幕，回到了另一个时间。
+        emotion: ''
+      - beat_id: b006
+        type: action
+        text: 闪回——初三那年，傍晚，陈家简陋的客厅。陈建军坐在饭桌边，脸色蜡黄，手里攥着一叠化验单。母亲站在厨房门口，围裙上没有擦干的手紧紧攥着。
+        emotion: ''
+      - beat_id: b007
+        type: dialogue
+        text: “说了没事，你偏要去查，查了也没事，你又不信。”
+        speaker_ref: c002
+        emotion: ''
+      - beat_id: b008
+        type: action
+        text: 陈建军： “他们查错了。我胃里有个东西，我能感觉到。它就在那里。”
+        emotion: ''
+      - beat_id: b009
+        type: dialogue
+        text: “医生说了没有，你还要怎样？”
+        speaker_ref: c002
+        emotion: ''
+      - beat_id: b010
+        type: action
+        text: 陈建军没有回答。他站起来，把化验单一把塞进抽屉，走进卧室，关上了门。门锁咔哒一声。陈知律站在走廊尽头，抱着书包，看着那扇紧闭的门。
+        emotion: ''
+      - beat_id: b011
+        type: action
+        text: 转回现在——档案室。陈知律的指尖在桌沿划了一下，碰到了冰冷的金属水杯。他端起杯子，喝了一口水，放下，然后重新把手放回键盘上。
+        emotion: ''
+      - beat_id: b012
+        type: narration
+        text: 他发现父亲没有被正确诊断过抑郁。那些量表、那些访谈、那些按小时收费的咨询，对一个建筑工人来说太奢侈了——一天工钱两百块，不够做一次心理咨询。
+        emotion: ''
+      - beat_id: b013
+        type: action
+        text: 陈知律慢慢在键盘上敲击。他打字的速度先是正常，然后越来越快，像在追赶什么。
+        emotion: ''
+      - beat_id: b014
+        type: action
+        text: 闪回——初中教室，班主任走到陈知律身边，表情克制而沉重。周围同学的目光好奇而惶恐。班主任的手放在他肩上。
+        emotion: ''
+      - beat_id: b015
+        type: action
+        text: 班主任： “陈知律，你出来一下。你家里……出了点事。”
+        emotion: ''
+      - beat_id: b016
+        type: action
+        text: 陈知律抬起头，看着班主任的脸。教室里钟声滴答。他没有问是什么事。他只是站起来，书包带子从桌沿滑下去，拖着地面走出去。
+        emotion: ''
+      - beat_id: b017
+        type: action
+        text: 转回现在——档案录入窗口。陈知律打完了最后一行。光标闪烁片刻，他移动鼠标，在备注栏里多加了一行字：“建议关注该来访者家族史及长期情绪状态，可能存在未被识别的抑郁发作。”
+        emotion: ''
+      - beat_id: b018
+        type: action
+        text: 他提交了档案。屏幕刷新，新记录上线。他端起水杯，站起来，走到饮水机旁，接了一杯凉水。他一口气喝完，没有停下来喘气。喝完，他把纸杯捏扁，丢进垃圾桶，走回工位，打开下一份档案。手指敲击键盘的速度，比平时快了那么一点点，像在和什么东西赛跑。
+        emotion: ''
+      - beat_id: b019
+        type: action
+        text: 林静从走廊经过，从半开的门缝里看见陈知律的背影。他背脊笔直地坐在工位上，键盘声密集而精准，比平时更急促。她停下脚步，看了两秒。没有打扰他。她转身走开，脚步声轻得没有惊动任何人。
+        emotion: ''
+      - beat_id: b020
+        type: narration
+        text: 但那天下班后，陈知律没有像往常一样直接回家。
+        emotion: ''
+      - beat_id: b021
+        type: action
+        text: 夜晚，心禾心理门口台阶上。法桐叶在路灯下沙沙作响。陈知律坐在台阶最下方一格，秋天的夜风把薄外套吹得贴住后背。他拿出手机，点开微信，翻到最底端一个灰色头像的对话框。最后一条语音消息的时间显示为六年前——只有几秒钟。
+        emotion: ''
+      - beat_id: b022
+        type: action
+        text: 他戴上耳机，点下播放键。一个男人的声音从耳机里传来，略带疲惫但语气温和：
+        emotion: ''
+      - beat_id: b023
+        type: action
+        text: '陈建军（录音）: “知律啊，爸今天发工资了，给你转了两千，你买点好吃的。”'
+        emotion: ''
+      - beat_id: b024
+        type: action
+        text: 语音播放完毕。陈知律没有立刻关掉手机。屏幕的光映在他眼睛里，亮了一小片。他抬头看天。城市的夜空灰蒙蒙的，看不到星星。他坐在那里，很久没有起身。耳机线垂在膝盖上，被风吹得轻轻晃动。
+        emotion: ''
+      transitions:
+        next_scene_hint: 实习第三周，林静给陈知律安排了他的第一个来访者。 与其说是来访者，不如说是“陪练”——对方是林静多年的一位老来访者，情况稳定，愿意配合实习生的练习性访谈。
+        transition_type: cut
+      source_refs:
+      - chapter_id: ch04
+        excerpt_id: p001
+    - scene_id: s005
+      title: 第一个来访者
+      chapter_refs:
+      - ch05
+      time_of_day: day
+      objective: 但陈知律注意到，她进门后第一件事是扫视整个房间—…
+      summary: 实习第三周的周四上午，陈知律迎来了他的第一个来访者——一位表情温和却在进门时扫视了整个房间的中年女人。
+      beats:
+      - beat_id: b001
+        type: action
+        text: 明德大学附属医院心理中心的小咨询室。房间约十平米，靠墙两张浅灰色布艺沙发呈九十度摆放，中间一张小圆木茶几，上面放着一盒白色纸巾和一杯白开水。窗帘半开，午后的阳光斜斜铺了一小截在木地板上。
+        emotion: ''
+      - beat_id: b002
+        type: action
+        text: 陈知律坐在靠门一侧的沙发上，穿白衬衫，袖口卷到小臂中段。他低头看手机上的倒计时——距约定时间还有十七分钟。他抬起头，又看了一眼那把空沙发，然后站起来，走过去，把沙发的角度微微调了一点，退后半步看了看，又调回原来的位置。
+        emotion: ''
+      - beat_id: b003
+        type: action
+        text: 他坐回自己位置，深呼吸三次，第三次吸到一半的时候没忍住，咳了一声。
+        emotion: ''
+      - beat_id: b004
+        type: action
+        text: 敲门声响了。不重，三下，间隔均匀。
+        emotion: ''
+      - beat_id: b005
+        type: action
+        text: 陈知律站起身，走到门前，手搭上门把手时停了一秒，才拧开。
+        emotion: ''
+      - beat_id: b006
+        type: dialogue
+        text: （声音略紧）请进。
+        speaker_ref: c001
+        emotion: ''
+      - beat_id: b007
+        type: action
+        text: 门推开，进来一个四十多岁的女人，短发齐耳，淡妆，卡其色薄风衣敞开穿，内搭黑色高领针织衫。她进门后没有看陈知律，目光先扫过天花板四角，然后快速掠过窗帘与墙壁之间的缝隙，最后落向门口后方——那是门背后的盲区。整个过程不超过两秒，连贯、习惯性、几乎没有停顿。
+        emotion: ''
+      - beat_id: b008
+        type: action
+        text: 女人收回目光，对陈知律笑了笑。
+        emotion: ''
+      - beat_id: b009
+        type: dialogue
+        text: 你好，我是赵敏，林老师应该跟你说过了。
+        speaker_ref: c002
+        emotion: ''
+      - beat_id: b010
+        type: dialogue
+        text: 对，赵女士，你好。我是陈知律，你可以叫我小陈。
+        speaker_ref: c001
+        emotion: ''
+      - beat_id: b011
+        type: action
+        text: 陈知律没有伸手。他侧身让出空间，做了个“请”的手势。
+        emotion: ''
+      - beat_id: b012
+        type: dialogue
+        text: 谢谢你愿意参与这次练习。我们的时间大概三十分钟，你想聊什么都可以，不想聊的可以直接跳过，不用勉强。
+        speaker_ref: c001
+        emotion: ''
+      - beat_id: b013
+        type: action
+        text: 女人坐在靠窗一侧的沙发上，没有立刻落座，而是先用手拂了一下沙发扶手的位置——像是确认上面没有东西。然后才拢了拢风衣下摆坐下，坐得很稳，脊背挺直，两条小腿微微偏向一侧。
+        emotion: ''
+      - beat_id: b014
+        type: action
+        text: 她打量了一下陈知律。
+        emotion: ''
+      - beat_id: b015
+        type: dialogue
+        text: 林老师说你虽然年轻，但很专业。
+        speaker_ref: c002
+        emotion: ''
+      - beat_id: b016
+        type: action
+        text: 女人顿了一下。
+        emotion: ''
+      - beat_id: b017
+        type: dialogue
+        text: 现在看来，不止专业，还很紧张。
+        speaker_ref: c002
+        emotion: ''
+      - beat_id: b018
+        type: dialogue
+        text: （一顿）很明显吗？
+        speaker_ref: c001
+        emotion: ''
+      - beat_id: b019
+        type: dialogue
+        text: 你呼吸的频率变了，从我说第一句话之后。
+        speaker_ref: c002
+        emotion: ''
+      - beat_id: b020
+        type: action
+        text: 女人拿了纸巾但没有用，只是捏在手里。
+        emotion: ''
+      - beat_id: b021
+        type: dialogue
+        text: 不过没关系，我不介意。
+        speaker_ref: c002
+        emotion: ''
+      - beat_id: b022
+        type: action
+        text: 陈知律点了点头，把桌上的水杯往她那边推了推。
+        emotion: ''
+      - beat_id: b023
+        type: dialogue
+        text: 那……你今天想聊些什么？任何话题都可以。
+        speaker_ref: c001
+        emotion: ''
+      - beat_id: b024
+        type: dialogue
+        text: （沉默三秒）最近睡得不好。越来越差了。
+        speaker_ref: c002
+        emotion: ''
+      - beat_id: b025
+        type: dialogue
+        text: 差到什么程度？
+        speaker_ref: c001
+        emotion: ''
+      - beat_id: b026
+        type: dialogue
+        text: （轻轻摇头）入睡倒不难，难的是不醒。凌晨两点、三点、四点，每个小时醒一次。醒了就很久睡不着，脑子里一直转，转的都是没用的东西。
+        speaker_ref: c002
+        emotion: ''
+      - beat_id: b027
+        type: action
+        text: 女人手指在纸巾边缘来回捻着。
+        emotion: ''
+      - beat_id: b028
+        type: dialogue
+        text: 总觉得有什么不好的事情要发生，但又说不清楚是什么事。
+        speaker_ref: c002
+        emotion: ''
+      - beat_id: b029
+        type: dialogue
+        text: 这种感觉，从什么时候开始的？
+        speaker_ref: c001
+        emotion: ''
+      - beat_id: b030
+        type: dialogue
+        text: （手指停住）大概……三年前。
+        speaker_ref: c002
+        emotion: ''
+      - beat_id: b031
+        type: dialogue
+        text: 三年前你生活中发生了什么？
+        speaker_ref: c001
+        emotion: ''
+      - beat_id: b032
+        type: action
+        text: 房间安静下来。空调的出风口嗡嗡响，窗帘动了一下。
+        emotion: ''
+      - beat_id: b033
+        type: action
+        text: 女人看着茶几上的那杯水，没有抬头。
+        emotion: ''
+      - beat_id: b034
+        type: action
+        text: 她一直安静了将近三十秒。陈知律没有动，身体微微前倾，目光落在她肩膀而不是眼睛上。
+        emotion: ''
+      - beat_id: b035
+        type: dialogue
+        text: （终于开口，声音低了很多）我离婚了。
+        speaker_ref: c002
+        emotion: ''
+      - beat_id: b036
+        type: action
+        text: 陈知律没有说话。
+        emotion: ''
+      - beat_id: b037
+        type: dialogue
+        text: 他出轨。我们吵了将近一年，最后我赢了——房子归我，儿子归我。但自从那以后……
+        speaker_ref: c002
+        emotion: ''
+      - beat_id: b038
+        type: action
+        text: 她抬起一只手，指尖对着空气画了一个小圈。
+        emotion: ''
+      - beat_id: b039
+        type: dialogue
+        text: 就变成了这样。每天晚上锁门要锁两遍，出门走到半路要折回来确认煤气有没有关。我知道这些行为不合理，控制不住。
+        speaker_ref: c002
+        emotion: ''
+      - beat_id: b040
+        type: dialogue
+        text: （安静地）离婚对你来说不是一个事件的结束，而是一种新生活方式的开始。这种生活方式里，安全感是需要重新建立的。
+        speaker_ref: c001
+        emotion: ''
+      - beat_id: b041
+        type: action
+        text: 女人抬起头，目光在陈知律脸上停住。她没有说话，但眼眶微微红了一下，很快又控制住。
+        emotion: ''
+      - beat_id: b042
+        type: dialogue
+        text: （把纸巾放回桌上，声音平静下来）小陈，你会是一个很好的咨询师。
+        speaker_ref: c002
+        emotion: ''
+      - beat_id: b043
+        type: action
+        text: 三十分钟到了。陈知律站起来，女人也站起来，整理了一下风衣的肩线和领口。她走到门口，忽然回头看了一眼陈知律。
+        emotion: ''
+      - beat_id: b044
+        type: dialogue
+        text: 你刚才那句话，林老师没教过你吧？
+        speaker_ref: c002
+        emotion: ''
+      - beat_id: b045
+        type: dialogue
+        text: （摇头）没有。我临时想的。
+        speaker_ref: c001
+        emotion: ''
+      - beat_id: b046
+        type: dialogue
+        text: 那你挺有天赋的。
+        speaker_ref: c002
+        emotion: ''
+      - beat_id: b047
+        type: action
+        text: 女人拉开门走了出去。走廊里响起平缓的脚步声，逐渐远去。
+        emotion: ''
+      - beat_id: b048
+        type: action
+        text: 门关上。陈知律站在咨询室中间，没有动。他低头看了一眼自己的手，微微发凉。然后他坐下，拿起保温杯喝了一口水，盖上盖子，在还剩一口气的时候忽然停下。
+        emotion: ''
+      - beat_id: b049
+        type: action
+        text: 他想起父亲。
+        emotion: ''
+      - beat_id: b050
+        type: action
+        text: 那个从来没有被人认真倾听过、也从来不知道如何开口的人。
+        emotion: ''
+      - beat_id: b051
+        type: narration
+        text: 实习第三周，陈知律完成了他的第一个来访者访谈。他不知道自己做得好不好，但他知道，等他回到病房，他不会告诉母亲今天发生了什么。
+        emotion: ''
+      transitions:
+        next_scene_hint: 'CUT TO:'
+        transition_type: cut
+      source_refs:
+      - chapter_id: ch05
+        excerpt_id: p001
+    - scene_id: s006
+      title: 两个失眠的人
+      chapter_refs:
+      - ch06
+      time_of_day: night/early dawn
+      objective: 三块之外的所有时间，都属于睡眠——但睡眠不属于他
+      summary: 凌晨三点，陈知律在出租屋里经历又一次失眠。周也发来自拍和消息，两个学心理的人在黑夜里交换了一段关于恐惧的对话。
+      beats:
+      - beat_id: b001
+        type: narration
+        text: 研究生开学后的第一个月，陈知律的时间被切成三块：上课，心禾实习，医院陪护。三块之外的所有时间，都属于睡眠——但睡眠不属于他。他已经连续两周每天只睡四五个小时了。
+        emotion: ''
+      - beat_id: b002
+        type: action
+        text: 凌晨两点四十五分，出租屋。陈知律平躺在床上，眼睛睁着。天花板上有道裂缝，从墙角蜿蜒到灯泡附近。
+        emotion: ''
+      - beat_id: b003
+        type: dialogue
+        text: 陈知律的呼吸声
+        speaker_ref: c001
+        emotion: ''
+      - beat_id: b004
+        type: action
+        text: 他翻了个身，从侧卧变成平躺，又从平躺翻向另一侧。床垫发出嘎吱的声响。窗外的路灯把树影投在窗帘上，像一片巨大的黑色静脉。
+        emotion: ''
+      - beat_id: b005
+        type: narration
+        text: 入睡不难。难的是凌晨两三点准时醒来。醒来之后再也睡不着。脑海里开始自动播放——父亲的语音，母亲的病历，心禾档案库里那些密密麻麻的来访者记录。
+        emotion: ''
+      - beat_id: b006
+        type: action
+        text: 陈知律闭上眼睛，又睁开。手机就在枕头边，屏幕朝上。他没有碰它。
+        emotion: ''
+      - beat_id: b007
+        type: action
+        text: 凌晨四点十二分。他已经翻了第十八次身。楼上传来拖鞋的声音，咚咚咚，从客厅走到卧室，又从卧室走到厕所。
+        emotion: ''
+      - beat_id: b008
+        type: action
+        text: 手机屏幕忽然亮了。不是闹钟，是微信消息提示音。一把短促的震动。
+        emotion: ''
+      - beat_id: b009
+        type: action
+        text: 陈知律拿起手机。通知栏显示：周也发来一张图片。
+        emotion: ''
+      - beat_id: b010
+        type: action
+        text: 他点开消息。图片是周也的自拍——她穿着睡衣，头发乱糟糟地扎成一个丸子，黑眼圈从眼睛下方延伸到颧骨的位置。她在照片里翻了个白眼，表情介于无奈和自嘲之间。配文：“睡不着的人不止你一个。”
+        emotion: ''
+      - beat_id: b011
+        type: action
+        text: 陈知律盯着那张照片看了几秒。出租屋安静得只剩下楼上的拖鞋声。他的嘴角动了一下。
+        emotion: ''
+      - beat_id: b012
+        type: dialogue
+        text: （打字，发送）？
+        speaker_ref: c001
+        emotion: ''
+      - beat_id: b013
+        type: action
+        text: 对面几乎秒回。
+        emotion: ''
+      - beat_id: b014
+        type: dialogue
+        text: 失眠。
+        speaker_ref: c002
+        emotion: ''
+      - beat_id: b015
+        type: action
+        text: （看着屏幕，等了一会儿，又打了两个字）多久了？
+        emotion: ''
+      - beat_id: b016
+        type: dialogue
+        text: 我妈说我可能有病，让我去看看心理医生。我说我就是学心理的，我有病我自己还不知道吗？
+        speaker_ref: c002
+        emotion: ''
+      - beat_id: b017
+        type: dialogue
+        text: （犹豫了一下）那你去看过吗？
+        speaker_ref: c001
+        emotion: ''
+      - beat_id: b018
+        type: dialogue
+        text: 没有。我怕确诊了毕不了业。
+        speaker_ref: c002
+        emotion: ''
+      - beat_id: b019
+        type: action
+        text: 陈知律把手机握在手里，拇指悬在屏幕上方。他打了一行字，删掉。又打了一行，又删掉。最后只回了一句。
+        emotion: ''
+      - beat_id: b020
+        type: dialogue
+        text: 去看吧。确诊不确诊，你都还是你。
+        speaker_ref: c001
+        emotion: ''
+      - beat_id: b021
+        type: action
+        text: 对面沉默了很久。陈知律盯着那个“对方正在输入”的提示亮了，又灭了。他以为她睡着了。
+        emotion: ''
+      - beat_id: b022
+        type: dialogue
+        text: 陈知律，你有没有觉得我们很可笑？学心理的人最怕看心理医生，就像医生最怕体检。
+        speaker_ref: c002
+        emotion: ''
+      - beat_id: b023
+        type: action
+        text: 陈知律没有立刻回答。他把手机放回枕头边，盯着天花板。楼上的拖鞋声停了。隔壁有人在打鼾。
+        emotion: ''
+      - beat_id: b024
+        type: narration
+        text: 他学了四年心理学，背了一整本变态心理学，能熟练地说出抑郁症的诊断标准和治疗指南。但他从不让任何人在他身上使用那些工具。不是不信任，是不敢。有些东西一旦被打开，他不知道该怎么关上。
+        emotion: ''
+      - beat_id: b025
+        type: action
+        text: 他重新拿起手机。
+        emotion: ''
+      - beat_id: b026
+        type: dialogue
+        text: 周也。
+        speaker_ref: c001
+        emotion: ''
+      - beat_id: b027
+        type: dialogue
+        text: 嗯？
+        speaker_ref: c002
+        emotion: ''
+      - beat_id: b028
+        type: dialogue
+        text: 去睡吧，明天还有早课。
+        speaker_ref: c001
+        emotion: ''
+      - beat_id: b029
+        type: dialogue
+        text: ……你也知道明天有早课？你赶紧睡，你现在就给我关机。
+        speaker_ref: c002
+        emotion: ''
+      - beat_id: b030
+        type: dialogue
+        text: 嘴角微微动了一下。
+        speaker_ref: c001
+        emotion: ''
+      - beat_id: b031
+        type: action
+        text: 他没有关机。他把手机放在枕头边，闭上眼睛。屏幕暗下去之后，房间里重新陷入黑暗和安静。出租屋隔音很差——楼上的人在走动，隔壁的人在打鼾，远处偶尔传来汽车的喇叭声。
+        emotion: ''
+      - beat_id: b032
+        type: narration
+        text: 这些声音交织在一起，像一张粗糙的安全网，把他从那些纷乱的念头里暂时兜住了。
+        emotion: ''
+      - beat_id: b033
+        type: action
+        text: 陈知律被闹钟叫醒。他发现自己握在手里的手机屏幕上，还留着一个没有发出去的草稿。草稿只有四个字：“谢谢你啊。”他没有点发送。
+        emotion: ''
+      - beat_id: b034
+        type: action
+        text: 他坐起来，把手机揣进口袋，翻身下床。窗外是灰蓝色的天，远处有鸟叫。新的一天，三块时间要从第一块上课开始。
+        emotion: ''
+      transitions:
+        next_scene_hint: 清晨七点，闹钟响。
+        transition_type: cut
+      source_refs:
+      - chapter_id: ch06
+        excerpt_id: p001
+    - scene_id: s007
+      title: 裂痕
+      chapter_refs:
+      - ch07
+      time_of_day: day
+      objective: 你母亲今天上午出现了急性呼吸困难，我们正在进行对…
+      summary: 十月中旬，陈知律在课堂上接到医院电话，得知母亲病情加重，他赶往医院面对新的诊断和费用压力，却依然强撑平静，去完成心禾心理的工作。
+      beats:
+      - beat_id: b001
+        type: action
+        text: 明德大学教学楼，阶梯教室。午后的阳光从高窗外斜射进来，尘埃在光柱里浮动。陈知律站在讲台前，手里的遥控器停在PPT最后一页。投影上是一行案例分析的结论。教室里安静了三秒。
+        emotion: ''
+      - beat_id: b002
+        type: dialogue
+        text: 以上就是我的案例汇报，请大家指正。
+        speaker_ref: c001
+        emotion: ''
+      - beat_id: b003
+        type: action
+        text: 教授坐在第一排，微微点头，刚要开口。突然一阵震动从陈知律放在桌上的手机传来，屏幕亮起——来电显示“医院”。陈知律的声音顿了一下，目光停在屏幕上。
+        emotion: ''
+      - beat_id: b004
+        type: dialogue
+        text: 抱歉，我接个电话。
+        speaker_ref: c001
+        emotion: ''
+      - beat_id: b005
+        type: action
+        text: 他拿起手机快步走出教室。走廊空旷，脚步声被墙反弹回来。他按下接听键，放在耳边。电话那头护士的声音公式化而急促。
+        emotion: ''
+      - beat_id: b006
+        type: action
+        text: 'n001: 陈知律吗？你母亲今天上午出现了急性呼吸困难，我们正在进行对症处理，目前生命体征稳定，但需要你尽快来一趟。'
+        emotion: ''
+      - beat_id: b007
+        type: action
+        text: 陈知律握着手机，指节发白。走廊尽头有一扇窗户，风吹进来，吹动了他额前的头发。
+        emotion: ''
+      - beat_id: b008
+        type: dialogue
+        text: 我马上到。
+        speaker_ref: c001
+        emotion: ''
+      - beat_id: b009
+        type: action
+        text: 他挂掉电话返回教室。教授看着他，没有说话，只是点了点头。座位上，周也站起来，张嘴要说什么。陈知律抬手做了一个“不用”的手势，没有看她，径直走到座位拿书包。他的动作很快，拉链拉上时发出急促的声响。他转身走出教室，步子越来越快，最后变成了小跑。
+        emotion: ''
+      - beat_id: b010
+        type: action
+        text: 校园里，正午的大风卷起满地的银杏叶，金色的叶片在脚下碎裂，发出细碎的声响。他跑过图书馆——一排排玻璃窗映出他跑动的身影。跑过食堂——几个学生端着饭盒回头看他。跑过那条连接教学楼和校门的林荫道——一棵棵杨树向后倒去。每一步都像是踩在某种随时会断裂的冰面上，但他不敢停下来。
+        emotion: ''
+      - beat_id: b011
+        type: action
+        text: 医院，重症观察室走廊。陈知律从电梯里冲出来，脚步才放慢了一些。他隔着玻璃看到母亲——比上次又瘦了一圈，颧骨高高凸出来，嘴唇上带着氧气面罩。透明的面罩里弥漫着白色的雾气，一呼一吸，像某种缓慢而沉重的潮汐。他把额头抵在玻璃上，闭上了眼睛。几秒后，他直起身，走向主治医生办公室。
+        emotion: ''
+      - beat_id: b012
+        type: action
+        text: 医生办公室。主治医生坐在办公桌后，面前摊开的检查报告上密密麻麻都是数据和影像。陈知律坐在对面，双手放在膝盖上。
+        emotion: ''
+      - beat_id: b013
+        type: action
+        text: 'd001: 病人的肺部出现了新的感染灶。结合她长期使用激素和免疫抑制剂的情况，这并不意外。我们已经调整了抗生素方案，但如果这个周期控制不住，下一步可能需要上呼吸机。'
+        emotion: ''
+      - beat_id: b014
+        type: action
+        text: 陈知律的表情几乎没有任何变化。他听到“呼吸机”三个字时，只是微微闭了一下眼。随即睁开，目光平稳。
+        emotion: ''
+      - beat_id: b015
+        type: dialogue
+        text: 费用呢？
+        speaker_ref: c001
+        emotion: ''
+      - beat_id: b016
+        type: action
+        text: 医生报了一个数字。陈知律的手指在膝盖上微微蜷缩了一下，随即松开。他站起来。
+        emotion: ''
+      - beat_id: b017
+        type: dialogue
+        text: 我知道了。谢谢您。
+        speaker_ref: c001
+        emotion: ''
+      - beat_id: b018
+        type: action
+        text: 他和医生握手，道谢，转身走出办公室。经过重症观察室的玻璃窗时，他没有停留。步子很稳，一直走到走廊尽头的楼梯间。他推开门，走了进去。空无一人的楼梯间里只有风从窗户缝隙里灌进来，带着深秋的寒意。陈知律靠着墙，慢慢地滑坐到地上。他把头埋进膝盖里，肩膀微微颤抖，但没有发出任何声音。过了大概十分钟，他慢慢抬起头，伸手用力搓了一把脸，然后站起来，走到洗手台前，打开水龙头。冷水冲在他的脸上，顺着下巴滴落。他关掉水龙头，看着镜子里的自己——眼睛下面的青黑色很重，眼底有一丝红。他深吸一口气，拿出手机，拨通了舅舅的电话。
+        emotion: ''
+      - beat_id: b019
+        type: dialogue
+        text: 舅，妈那边……我想跟您借一笔钱。
+        speaker_ref: c001
+        emotion: ''
+      - beat_id: b020
+        type: action
+        text: 电话那头沉默了很久。再开口时，舅舅的声音也带了鼻音。
+        emotion: ''
+      - beat_id: b021
+        type: action
+        text: 'u001: 知律，你听着，你妈的病你不用担心钱的事，我来想办法。但你也要答应我，你自己不能垮。你垮了，你妈就真的没有指望了。'
+        emotion: ''
+      - beat_id: b022
+        type: action
+        text: 陈知律握着手机，用力地闭了一下眼睛。
+        emotion: ''
+      - beat_id: b023
+        type: dialogue
+        text: 我知道。
+        speaker_ref: c001
+        emotion: ''
+      - beat_id: b024
+        type: action
+        text: 晚上，心禾心理。办公室空荡荡的，只有林静还在前台整理预约单。陈知律推门进来，换拖鞋，动作像往常一样熟练。林静抬头，看到他眼睛下面的青黑色，皱了皱眉。
+        emotion: ''
+      - beat_id: b025
+        type: dialogue
+        text: 你还好吗？
+        speaker_ref: c003
+        emotion: ''
+      - beat_id: b026
+        type: dialogue
+        text: 没事。
+        speaker_ref: c001
+        emotion: ''
+      - beat_id: b027
+        type: action
+        text: 他径直走到工位前，坐下来，打开电脑系统，开始录入那份没有录完的档案。键盘敲击声在安静的办公室里回响，单调、枯燥，却构成了一种奇异的秩序感。林静看了他好几秒，最终没有再问，低头继续自己的工作。
+        emotion: ''
+      - beat_id: b028
+        type: action
+        text: 晚上十点，心禾心理关门。陈知律走出玻璃门，夜色很深。他走到公交站台，最后一班夜班公交车正好到站。他刷卡上车。车厢里空荡荡的，只有一个醉汉蜷缩在最后一排座位上，嘴里含混不清地说着什么。陈知律坐在离他最远的角落里，靠窗。公交车启动，路灯一盏一盏地过去，明灭不定。他把头靠在车窗玻璃上，玻璃冰凉。窗外城市的灯火明明灭灭，像某种他看不懂的信号。远处的住院楼某层亮着灯，他盯着那排窗户，嘴唇微微翕动，没有声音。醉汉突然开口。
+        emotion: ''
+      - beat_id: b029
+        type: action
+        text: 's001: 都他妈……回不去了……'
+        emotion: ''
+      - beat_id: b030
+        type: action
+        text: 陈知律没有转头。他的目光仍然望着窗外，但眼眶慢慢泛红。他抬起一只手，按在车窗上，指尖在冰冷的玻璃上微微发抖。
+        emotion: ''
+      - beat_id: b031
+        type: narration
+        text: 他忽然想起舅舅说的那句话——他自己不能垮。
+        emotion: ''
+      - beat_id: b032
+        type: action
+        text: 他的手指从玻璃上滑落，垂在身侧。公交车在红灯前停下，空荡荡的车厢里只有引擎的轰鸣声和醉汉的呢喃。红灯倒计时，一秒一秒地跳动。
+        emotion: ''
+      transitions:
+        next_scene_hint: CUT TO BLACK
+        transition_type: cut
+      source_refs:
+      - chapter_id: ch07
+        excerpt_id: p001
+    - scene_id: s008
+      title: 周也的秘密
+      chapter_refs:
+      - ch08
+      time_of_day: afternoon
+      objective: 周也注意到他的手指在微微发抖，但她没有说，只是笑…
+      summary: 周也突然出现在心禾心理，用一杯奶茶和一份简历把自己塞进了陈知律的实习生活。她发现他手指在发抖，但假装没看见。
+      beats:
+      - beat_id: b001
+        type: action
+        text: 心禾心理咨询中心前台区域。空间不大，前台桌面上堆着几本专业期刊和一台老式座机。墙上挂着心理咨询师的资质证书。下午的光线透过百叶窗在木地板上留下斜纹。周也推门进来，手里拎着两杯奶茶，探头看了看四周。
+        emotion: ''
+      - beat_id: b002
+        type: narration
+        text: 她打听了很久才从系里一个学姐那里问到这个地方。
+        emotion: ''
+      - beat_id: b003
+        type: action
+        text: 前台工作人员抬头看她。周也露出一个标准的乖巧笑容。
+        emotion: ''
+      - beat_id: b004
+        type: dialogue
+        text: 您好，我找陈知律，他是这里的实习生。
+        speaker_ref: c002
+        emotion: ''
+      - beat_id: b005
+        type: action
+        text: 前台工作人员低头翻了翻登记本。
+        emotion: ''
+      - beat_id: b006
+        type: action
+        text: '前台工作人员: 他在里面做模拟访谈，还有半个小时才结束。您要不先坐一会儿？'
+        emotion: ''
+      - beat_id: b007
+        type: dialogue
+        text: 没关系，我等着。
+        speaker_ref: c002
+        emotion: ''
+      - beat_id: b008
+        type: action
+        text: 周也坐到等候区的沙发上，把奶茶放在茶几上。她看了一眼走廊尽头那扇紧闭的咨询室门，百无聊赖地翻了翻桌上的杂志，又掏出手机刷了一会儿。过了二十五分钟，走廊尽头那扇门开了。一个中年女人走出来，眼眶发红，用纸巾按着眼角。陈知律跟在后面送到门口，微微欠身，姿态克制而礼貌，嘴角挂着职业性的微笑。
+        emotion: ''
+      - beat_id: b009
+        type: dialogue
+        text: 张阿姨，这周的变化您回去可以记录一下，下周我们再聊。不着急，慢慢来。
+        speaker_ref: c001
+        emotion: ''
+      - beat_id: b010
+        type: action
+        text: 中年女人点点头，低声说了句“谢谢你，小陈”就低头快步走向门口，与周也擦肩而过。陈知律站在走廊里目送她走远，转过身来，看到了坐在前台的周也。他愣住了，整个人像被人按了暂停键。
+        emotion: ''
+      - beat_id: b011
+        type: dialogue
+        text: （语气有些不自然）你怎么来了？
+        speaker_ref: c001
+        emotion: ''
+      - beat_id: b012
+        type: dialogue
+        text: （举起手中的奶茶）给你送温暖啊。珍珠奶茶，少冰三分糖，你喜欢的。
+        speaker_ref: c002
+        emotion: ''
+      - beat_id: b013
+        type: action
+        text: 周也站起来，笑嘻嘻地走向他。陈知律接过奶茶，没有喝，只是握在手里。周也的目光从他的手指上掠过——那双手正在微微发抖，奶茶杯底的珍珠轻轻晃动。她没有说话，笑容也未减半分，直接侧身从他身边走进走廊。
+        emotion: ''
+      - beat_id: b014
+        type: dialogue
+        text: 林老师在吗？我也给她带了一杯。
+        speaker_ref: c002
+        emotion: ''
+      - beat_id: b015
+        type: dialogue
+        text: （跟在她身后）周也……
+        speaker_ref: c001
+        emotion: ''
+      - beat_id: b016
+        type: dialogue
+        text: 怎么，不欢迎啊？
+        speaker_ref: c002
+        emotion: ''
+      - beat_id: b017
+        type: action
+        text: 陈知律没来得及拦住她，她已经走进了办公室。办公桌后面正走出一个女人——三十岁出头，短发，戴着无框眼镜，气质干练。正是林静。周也将奶茶放在林静桌上，笑盈盈地站直了。
+        emotion: ''
+      - beat_id: b018
+        type: dialogue
+        text: 林老师好，我是周也，陈知律的同学，也是明大心理系的研究生。慕名而来，想问问您这边还招不招实习生？
+        speaker_ref: c002
+        emotion: ''
+      - beat_id: b019
+        type: action
+        text: 林静的目光从奶茶移到周也脸上，又看了一眼陈知律。陈知律站在门口，轻轻摇头，表情里带着“我没有叫她来”的信号。周也假装没看见这一幕，从背包里掏出一份打印精美的简历，双手递过去。
+        emotion: ''
+      - beat_id: b020
+        type: dialogue
+        text: （接过简历翻了翻，挑起眉毛）GPA年级第三，两篇核心期刊二作，三次全国性学术会议报告……你的履历确实漂亮。
+        speaker_ref: c003
+        emotion: ''
+      - beat_id: b021
+        type: dialogue
+        text: 谢谢林老师。
+        speaker_ref: c002
+        emotion: ''
+      - beat_id: b022
+        type: dialogue
+        text: （合上简历）我们这边没有工资。
+        speaker_ref: c003
+        emotion: ''
+      - beat_id: b023
+        type: dialogue
+        text: 我知道。
+        speaker_ref: c002
+        emotion: ''
+      - beat_id: b024
+        type: dialogue
+        text: 实习期至少六个月，每周至少三天。
+        speaker_ref: c003
+        emotion: ''
+      - beat_id: b025
+        type: dialogue
+        text: 没问题。
+        speaker_ref: c002
+        emotion: ''
+      - beat_id: b026
+        type: action
+        text: 林静又看了陈知律一眼，那一眼里带着问号和一点无奈。陈知律微微偏过头，没有接她的目光。林静叹了口气，从抽屉里抽出一份实习协议放在桌上。
+        emotion: ''
+      - beat_id: b027
+        type: dialogue
+        text: 签吧。
+        speaker_ref: c003
+        emotion: ''
+      - beat_id: b028
+        type: action
+        text: 周也坐下来，笑眯眯地快速签完，把协议推回去。然后她抬起头，朝站在门口的陈知律眨了眨眼——那个表情就像在说，“看吧，我也进来了。”陈知律看着她，抬起手揉了揉太阳穴。
+        emotion: ''
+      - beat_id: b029
+        type: dialogue
+        text: （低声）我有点头疼。
+        speaker_ref: c001
+        emotion: ''
+      - beat_id: b030
+        type: dialogue
+        text: 那我这是给你添堵了还是送温暖了？
+        speaker_ref: c002
+        emotion: ''
+      - beat_id: b031
+        type: dialogue
+        text: 两者都有。
+        speaker_ref: c001
+        emotion: ''
+      - beat_id: b032
+        type: action
+        text: 林静拿起协议走回里间。办公室里安静下来，只剩下周也和陈知律两个人。窗外的风吹动百叶窗，光影在两人之间的地板上晃动。周也拿起桌上那杯还没打开的奶茶，把吸管插进去喝了一口。
+        emotion: ''
+      - beat_id: b033
+        type: dialogue
+        text: 那你习惯一下。我要在这里待六个月。
+        speaker_ref: c002
+        emotion: ''
+      - beat_id: b034
+        type: action
+        text: 晚上。公交车行驶在回学校的路上。车上人不多，最后一排并排的位置，陈知律靠窗，周也坐在他旁边。两人之间隔着一杯还没喝的奶茶。车窗外的灯光一帧一帧地流过，路灯、店铺招牌、行道树的影子依次暗了又亮。陈知律盯着窗外，周也则转头看他。
+        emotion: ''
+      - beat_id: b035
+        type: dialogue
+        text: （没转头）周也。
+        speaker_ref: c001
+        emotion: ''
+      - beat_id: b036
+        type: dialogue
+        text: 嗯？
+        speaker_ref: c002
+        emotion: ''
+      - beat_id: b037
+        type: dialogue
+        text: 你为什么非要来心禾？
+        speaker_ref: c001
+        emotion: ''
+      - beat_id: b038
+        type: action
+        text: 周也歪着头想了一下，像是随口要回答，又临时改变主意。她停顿了几秒，声音比平时轻了一些。
+        emotion: ''
+      - beat_id: b039
+        type: dialogue
+        text: 因为你在这里。
+        speaker_ref: c002
+        emotion: ''
+      - beat_id: b040
+        type: action
+        text: 车厢里安静了几秒。陈知律没有转头，但他的手指在膝盖上微微蜷缩了一下。周也很快补了一句，语气恢复了一贯的跳脱。
+        emotion: ''
+      - beat_id: b041
+        type: dialogue
+        text: 别想多啊——我是说，你这个人都能待下去的地方，那一定是个能学到东西的好地方。我这是对你的眼光表示信任。
+        speaker_ref: c002
+        emotion: ''
+      - beat_id: b042
+        type: dialogue
+        text: （声音低）你刚才可不是这么说的。
+        speaker_ref: c001
+        emotion: ''
+      - beat_id: b043
+        type: dialogue
+        text: 刚才说的是人话，现在说的是人话的艺术加工版。别较真。
+        speaker_ref: c002
+        emotion: ''
+      - beat_id: b044
+        type: action
+        text: 陈知律没有说话。公交车经过一片拆迁区，路边是断壁残垣和裸露的钢筋骨架，在路灯下投出参差不齐的影子。那些破碎的轮廓和远处完整建筑的影子混在一起，像一幅还没画完就被涂改过的草图。周也安静了一会儿，像是斟酌了很久，才用一种他从未听过的、很轻的声音开口。
+        emotion: ''
+      - beat_id: b045
+        type: dialogue
+        text: 陈知律……你是不是不太开心啊？
+        speaker_ref: c002
+        emotion: ''
+      - beat_id: b046
+        type: action
+        text: 陈知律的手指停住了。他没有动，没有转头。窗外有一盏路灯的光正好掠过他的脸，让他的眼睛在暗影中亮了一下，又迅速暗下去。
+        emotion: ''
+      - beat_id: b047
+        type: dialogue
+        text: （片刻后）我没事。
+        speaker_ref: c001
+        emotion: ''
+      - beat_id: b048
+        type: dialogue
+        text: 嗯。那就好。
+        speaker_ref: c002
+        emotion: ''
+      - beat_id: b049
+        type: action
+        text: 周也没有追问。她把那杯奶茶从座椅中间拿起来，塞到陈知律手里。
+        emotion: ''
+      - beat_id: b050
+        type: dialogue
+        text: 你喝吧。我不喝你这杯，太甜了。
+        speaker_ref: c002
+        emotion: ''
+      - beat_id: b051
+        type: dialogue
+        text: （终于转头看她）这杯是你特意给我点的。
+        speaker_ref: c001
+        emotion: ''
+      - beat_id: b052
+        type: dialogue
+        text: 是啊。所以你得喝掉啊。
+        speaker_ref: c002
+        emotion: ''
+      - beat_id: b053
+        type: action
+        text: 陈知律看着手里的奶茶，杯壁上凝结的水珠顺着他的指缝滑了下来。他拧开盖子喝了一口，喉结动了一下。周也微笑起来，没有说话。车窗外，城市的光影不断后退，像是要把什么东西远远地抛在后面。
+        emotion: ''
+      - beat_id: b054
+        type: narration
+        text: 不是在医院，不是在咨询室，也不是在上课的时候。
+        emotion: ''
+      transitions:
+        next_scene_hint: 十一月的最后一周，陈知律崩溃了。
+        transition_type: cut
+      source_refs:
+      - chapter_id: ch08
+        excerpt_id: p001
+    - scene_id: s009
+      title: 临界点
+      chapter_refs:
+      - ch09
+      time_of_day: day
+      objective: 而是在一个最普通、最没有仪式感的时刻——他在超市…
+      summary: 十一月的最后一周，陈知律在一个普通超市的泡面货架前彻底崩溃。他在拨出那通电话之后，终于在周也面前承认“我可能也不行”。
+      beats:
+      - beat_id: b001
+        type: action
+        text: 'ACTION:'
+        emotion: ''
+      - beat_id: b002
+        type: action
+        text: 深秋午后，一家普通社区超市。日光灯管发出嗡嗡的低频震动。陈知律站在泡面货架前，身上穿着那件洗得发白的深蓝色卫衣，衣领松松垮垮。他目光落在第三层货架上那排整齐的红烧牛肉面包装上，缓缓伸出手。
+        emotion: ''
+      - beat_id: b003
+        type: narration
+        text: 手指够到了泡面的边缘。这一周他都睡得很少，他以为只要熬过周三下午就好——但他不知道身体从来不懂得讨价还价。
+        emotion: ''
+      - beat_id: b004
+        type: action
+        text: 陈知律的手指屈起，想捏住那包泡面。但指节像被抽走了力气，只是徒劳地碰了碰塑料包装的表面。他试着用力，整只手开始轻微发抖，那包泡面晃了晃，从货架上滑落，啪地掉在地上。
+        emotion: ''
+      - beat_id: b005
+        type: action
+        text: 陈知律低头看着地上的泡面。他蹲下身去捡。可当他蹲下去之后，膝盖像焊在了地砖上。他站不起来了。
+        emotion: ''
+      - beat_id: b006
+        type: action
+        text: 'c003 (工作人员，画外音): 先生？需要帮忙吗？'
+        emotion: ''
+      - beat_id: b007
+        type: action
+        text: 陈知律没有回答。他蹲在过道中央，双手垂在膝盖两侧，视线落在地砖缝隙里一粒灰色的污渍上。周围有购物车轮碾过的声音，有小孩跑过的脚步，有人好奇地回头看了他一眼又走开。他全听见了，又像什么也没听见。
+        emotion: ''
+      - beat_id: b008
+        type: narration
+        text: 脑子里只有一个念头在循环播放，那把钝刀切了整整一个十一月，终于切到了神经末梢——“我不行了。”
+        emotion: ''
+      - beat_id: b009
+        type: action
+        text: 超市工作人员走到他身侧，弯下腰，声音放低了。
+        emotion: ''
+      - beat_id: b010
+        type: action
+        text: 'c003 (工作人员): 你是不是不舒服？要不要帮你叫个人？'
+        emotion: ''
+      - beat_id: b011
+        type: action
+        text: 陈知律的睫毛动了一下。他摇了摇头，很慢，很吃力。然后他按住货架的金属隔板，一截一截把自己撑了起来。他推开空购物车往出口走，购物车被放在门口的铁架上，发出一声金属碰撞的闷响。
+        emotion: ''
+      - beat_id: b012
+        type: narration
+        text: 那声闷响，和心电监护仪的滴滴声完全不同。但同样让他想起医院。
+        emotion: ''
+      - beat_id: b013
+        type: action
+        text: 陈知律走出超市，没有结账。他在门口的台阶上坐下来。右手边放着一包他始终没有力气捏住的泡面。他掏出手机，翻到通讯录，手指在一个名字上停了很久，然后按了下去。
+        emotion: ''
+      - beat_id: b014
+        type: dialogue
+        text: 周也。
+        speaker_ref: c001
+        emotion: ''
+      - beat_id: b015
+        type: action
+        text: 'c002 (周也): 嗯？'
+        emotion: ''
+      - beat_id: b016
+        type: narration
+        text: 她的声音带着刚睡醒的沙哑，和一点点被吵醒之后还没来得及收起来的烦躁。
+        emotion: ''
+      - beat_id: b017
+        type: dialogue
+        text: 你能来一下吗？
+        speaker_ref: c001
+        emotion: ''
+      - beat_id: b018
+        type: action
+        text: 电话那头安静了两秒。
+        emotion: ''
+      - beat_id: b019
+        type: action
+        text: 'c002 (周也): 你在哪？'
+        emotion: ''
+      - beat_id: b020
+        type: action
+        text: 周也到的时候，陈知律还坐在超市门口的台阶上。他穿着那件深蓝色卫衣，衣领下露出锁骨一小截苍白的皮肤。他的瞳孔没有焦点，像一台焦距没调好的相机。周也在他旁边坐下来，没有问任何问题。
+        emotion: ''
+      - beat_id: b021
+        type: action
+        text: 深秋的风把落叶卷成一团又散开。他们并排坐在台阶上，像两个无家可归的人。过了很久，大概十分钟，陈知律开口了。他的声音很平静，平静得不像在承认一件天大的事。
+        emotion: ''
+      - beat_id: b022
+        type: dialogue
+        text: 周也，我可能也不行。
+        speaker_ref: c001
+        emotion: ''
+      - beat_id: b023
+        type: action
+        text: 'c002 (周也): 我知道。'
+        emotion: ''
+      - beat_id: b024
+        type: narration
+        text: 她听懂了那个“也”字。他在承认自己和她一样——是一个需要被接住的人。
+        emotion: ''
+      - beat_id: b025
+        type: action
+        text: 'c002 (周也): 我都知道。'
+        emotion: ''
+      - beat_id: b026
+        type: action
+        text: 陈知律转过头来看她。路灯刚刚亮起来，橘黄色的光落在他眼睛里，像碎掉的玻璃。他的嘴唇动了几下，像是想说什么，但最后只发出很轻的声音。
+        emotion: ''
+      - beat_id: b027
+        type: dialogue
+        text: 我能靠一下吗？
+        speaker_ref: c001
+        emotion: ''
+      - beat_id: b028
+        type: action
+        text: 周也的眼泪一瞬间就掉下来了。她使劲点头，往他的方向挪了挪。陈知律把头靠在她肩上，闭上了眼睛。
+        emotion: ''
+      - beat_id: b029
+        type: narration
+        text: 他的身体很僵硬，像一块绷了太久的铁板。即使靠下来的那一刻也没有完全放松，但他正在努力——周也感觉到肩上传来微微的颤抖。不是哭泣，更像一台过载太久的机器终于被人按下了关机键，所有部件都在缓慢而不协调的惯性里发出最后的嗡鸣。
+        emotion: ''
+      - beat_id: b030
+        type: action
+        text: 街上人来人往。一个穿校服的中学生踩着滑板从他们面前滑过，耳机里的音乐漏出来，是一个女声在唱“我也曾经这样过，在人群里藏起脆弱”。
+        emotion: ''
+      - beat_id: b031
+        type: action
+        text: 周也的眼泪流了很长时间，但没发出任何声音。她一只手握着陈知律的手，另一只手掏出手机，单手打字给林静发了一条消息。
+        emotion: ''
+      - beat_id: b032
+        type: narration
+        text: “林老师，陈知律可能需要休息几天。”
+        emotion: ''
+      - beat_id: b033
+        type: action
+        text: 几秒钟后屏幕亮了。
+        emotion: ''
+      - beat_id: b034
+        type: dialogue
+        text: 好的。
+        speaker_ref: c003
+        emotion: ''
+      - beat_id: b035
+        type: dialogue
+        text: 他也该了。
+        speaker_ref: c003
+        emotion: ''
+      transitions:
+        next_scene_hint: 画面停留在周也手机屏幕上那两行字的白色气泡框。陈知律的肩膀依然靠着她的肩，但微微的颤抖开始一点一点消退。
+        transition_type: cut
+      source_refs:
+      - chapter_id: ch09
+        excerpt_id: p001
+    - scene_id: s010
+      title: 梧桐树下
+      chapter_refs:
+      - ch10
+      time_of_day: 傍晚
+      objective: 睡了很久的觉，把那个租了一年却从没好好用过的电饭…
+      summary: 陈知律请假三天后，周也闯入他的家，两人达成一个约定，随后一起走向心禾心理。
+      beats:
+      - beat_id: b001
+        type: action
+        text: 陈知律的出租屋，光线昏暗。窗帘没拉严，一道灰白的光线落在堆满衣服的椅背上。他穿着一件皱巴巴的T恤坐在出租屋的小餐桌前，桌上的电饭煲正冒着蒸汽，厨房里传来粥沸腾的声音，很快变成一种即将溢出的咕嘟声。他没有任何反应。
+        emotion: ''
+      - beat_id: b002
+        type: dialogue
+        text: （低声自语）……
+        speaker_ref: c001
+        emotion: ''
+      - beat_id: b003
+        type: narration
+        text: 陈知律请了三天假。这是第三天。前两天的内容大致相同——睡觉，发呆，不接电话，不看消息。
+        emotion: ''
+      - beat_id: b004
+        type: action
+        text: 粥沸腾的声音突然变成了焦味。陈知律仿佛刚回过神，起身走向厨房，拔掉电源。他揭开锅盖，白粥表面平静，但锅底显然已经焦黑。
+        emotion: ''
+      - beat_id: b005
+        type: action
+        text: 他面无表情地拿碗，把上面没糊的部分盛出来，厨房里弥漫着焦米味，隐约参杂着一点点米香。他就这样站在灶台前，就着一包榨菜，吃了两口，然后慢慢吃完一整碗，又盛了第二碗。
+        emotion: ''
+      - beat_id: b006
+        type: action
+        text: 吃完后，他洗了碗和锅，把电饭煲擦干，放回橱柜里。然后他拿起手机，看了一眼屏幕，拨出电话。
+        emotion: ''
+      - beat_id: b007
+        type: dialogue
+        text: 妈。
+        speaker_ref: c001
+        emotion: ''
+      - beat_id: b008
+        type: dialogue
+        text: （声音比之前清晰一些）嗯。
+        speaker_ref: c002
+        emotion: ''
+      - beat_id: b009
+        type: dialogue
+        text: 这几天学校有点忙，我……就不去医院了。
+        speaker_ref: c001
+        emotion: ''
+      - beat_id: b010
+        type: dialogue
+        text: 好。不用天天来，妈没那么脆弱。新换的药管用，好多了。
+        speaker_ref: c002
+        emotion: ''
+      - beat_id: b011
+        type: dialogue
+        text: （顿了一下）那行。
+        speaker_ref: c001
+        emotion: ''
+      - beat_id: b012
+        type: dialogue
+        text: 吃饭了没有？
+        speaker_ref: c002
+        emotion: ''
+      - beat_id: b013
+        type: dialogue
+        text: 吃了。
+        speaker_ref: c001
+        emotion: ''
+      - beat_id: b014
+        type: dialogue
+        text: 嗯。那就好。
+        speaker_ref: c002
+        emotion: ''
+      - beat_id: b015
+        type: action
+        text: 电话挂断。陈知律看着黑掉的手机屏，片刻后把手机搁在桌上。
+        emotion: ''
+      - beat_id: b016
+        type: action
+        text: 门锁传来电子解锁声——滴的一声，门被推开了。周也拎着两大袋东西走进来。她看到陈知律站在厨房门口的轮廓，愣了一下。
+        emotion: ''
+      - beat_id: b017
+        type: action
+        text: c003（周也）：你没死啊。
+        emotion: ''
+      - beat_id: b018
+        type: dialogue
+        text: 差一点。
+        speaker_ref: c001
+        emotion: ''
+      - beat_id: b019
+        type: action
+        text: c003（周也）：闭嘴。
+        emotion: ''
+      - beat_id: b020
+        type: action
+        text: 周也不看他，径直走向冰箱。打开冰箱门，里面几乎是空的，只有一盒过期的牛奶和半瓶老干妈。她把袋子里的东西一件一件往里塞：水果、酸奶、面包、速冻水饺、两盒自热米饭。
+        emotion: ''
+      - beat_id: b021
+        type: action
+        text: c003（周也）：冰箱空得能当棺材用。你是认真的？
+        emotion: ''
+      - beat_id: b022
+        type: dialogue
+        text: （靠在厨房门框边）你好像我妈。
+        speaker_ref: c001
+        emotion: ''
+      - beat_id: b023
+        type: action
+        text: c003（周也）：（头也不回）闭嘴，我没有你这么大的儿子。
+        emotion: ''
+      - beat_id: b024
+        type: action
+        text: 陈知律嘴角微微动了动，那个弧度很小很淡，像冬天窗玻璃上结的霜花。
+        emotion: ''
+      - beat_id: b025
+        type: action
+        text: 周也塞完东西，从袋子底部掏出一盒巧克力。她转过身，把巧克力递给他。
+        emotion: ''
+      - beat_id: b026
+        type: action
+        text: c003（周也）：林老师让我带给你的。她说——“给那个孩子吃点甜的。”
+        emotion: ''
+      - beat_id: b027
+        type: action
+        text: 陈知律接过巧克力，拆开包装，掰了一小块放进嘴里。他咀嚼的动作很慢，舌尖上的甜味和一丝苦味交织。
+        emotion: ''
+      - beat_id: b028
+        type: dialogue
+        text: （含含糊糊地）周也。
+        speaker_ref: c001
+        emotion: ''
+      - beat_id: b029
+        type: action
+        text: c003（周也）：嗯？
+        emotion: ''
+      - beat_id: b030
+        type: dialogue
+        text: 你之前说，你失眠。
+        speaker_ref: c001
+        emotion: ''
+      - beat_id: b031
+        type: action
+        text: 周也的动作顿住了。她正把最后一个酸奶往冰箱门上放，那只手停在半空。
+        emotion: ''
+      - beat_id: b032
+        type: dialogue
+        text: 我认识一个很好的咨询师。在心禾那边。如果你愿意的话，我可以帮你约。
+        speaker_ref: c001
+        emotion: ''
+      - beat_id: b033
+        type: action
+        text: 周也转过头看着他。她没有立刻说话，目光里掠过某种复杂的东西——像是被戳穿了，又像是一种终于等到这时刻的释然。她嘴角慢慢弯起来。
+        emotion: ''
+      - beat_id: b034
+        type: action
+        text: c003（周也）：好。但你也要去。
+        emotion: ''
+      - beat_id: b035
+        type: action
+        text: 陈知律沉默。
+        emotion: ''
+      - beat_id: b036
+        type: dialogue
+        text: （轻声）好。
+        speaker_ref: c001
+        emotion: ''
+      - beat_id: b037
+        type: action
+        text: 周也把巧克力盒往他怀里推了推。
+        emotion: ''
+      - beat_id: b038
+        type: action
+        text: c003（周也）：走吧。趁我现在还有勇气，别让我后悔。
+        emotion: ''
+      - beat_id: b039
+        type: action
+        text: 傍晚。外面天光正变成温暖的金红色，法国梧桐排列整齐，叶子的边缘被夕阳照亮，像薄薄的金箔。空气里飘来糖炒栗子和桂花香。
+        emotion: ''
+      - beat_id: b040
+        type: action
+        text: 陈知律和周也并肩沿着种满梧桐的路慢慢走着。两个人的步伐不快不慢，中间隔着半个手臂的距离。周也的手插在外套口袋里，陈知律的手里攥着那块还没吃完的巧克力。
+        emotion: ''
+      - beat_id: b041
+        type: action
+        text: 心禾心理的玻璃门上，招聘启事还在原处。但旁边多了一张手写的便签——字迹娟秀——写着：“我们都在努力活着，这已经很了不起了。”
+        emotion: ''
+      - beat_id: b042
+        type: action
+        text: 陈知律在那行字前停住了。他微微仰着头，目光落在那些字上。周也站在他旁边，没有催他。夕阳将两人的影子拉得很长很长，几乎叠在一起，融成一道没有分界的暗色。
+        emotion: ''
+      - beat_id: b043
+        type: action
+        text: 心禾心理的招牌亮了。暖黄色的光透过玻璃门洒在台阶上，像一扇敞开的门。陈知律深吸一口气，抬手推开了门。
+        emotion: ''
+      - beat_id: b044
+        type: action
+        text: 走廊尽头，暖黄色的光洒出来，微弱却坚定。身后的梧桐叶在风中沙沙作响，像是某种古老的、善意的声音。
+        emotion: ''
+      - beat_id: b045
+        type: dialogue
+        text: （侧过头对周也说，声音很轻）进来吧。
+        speaker_ref: c001
+        emotion: ''
+      transitions:
+        next_scene_hint: 切至——
+        transition_type: cut
+      source_refs:
+      - chapter_id: ch10
+        excerpt_id: p001
+quality:
+  confidence: 1.0
+  warnings:
+  - 生成设置已应用：剧本类型=tv_drama，语气=balanced，详细度=standard，模型=deepseek-v4-flash。
+  - s001 生成正文 2256 字，未达到目标字数范围 2626-4923 字；已保留本次生成结果。
+  - s007 生成正文 1877 字，未达到目标字数范围 947-1776 字；已保留本次生成结果。
+  - 场景s001中，陈母的身份标记为‘c002’，但后续s002中，与‘c002’对话的人物却是林静，与‘c002’原定身份（陈母）不一致，存在人物身份混淆。
+  - 场景s003中，出现了角色‘周也’（未在story_bible的characters列表中定义），与bible中列出的人物不一致，属于未引入的角色。
+  - 场景跳跃：s002中陈知律在‘心禾心理’实习，但s003直接跳到‘大学食堂’，s004又回到‘心禾心理’，场景转换缺乏过渡或时间标记，可能造成理解断裂。
+  - 逻辑断层：s001结尾母亲病重需读研，s002突然开始实习，s003又出现周也在大学食堂，未见明确的情节串联或时间交代，人物动机和情节推进不连贯。
+  - 对白口吻：s002中，林静对陈知律说‘还挺准时’，但林静作为有职业背景的支持角色，此口吻略显随意，后文也缺乏对该对白的回应或呼应，显得突兀。
+  revision_suggestions:
+  - 建议人工复核关键对白，使角色口吻更鲜明。
+  - 建议检查并统一所有角色标识符：将s002和s008中‘c002’正确对应为林静（若误用为陈母则需修正），同时将周也补充进story_bible的characters列表中，并赋予其角色和关系定义。
+  - 建议在s001和s002之间增加一个过渡场景或时间标记（如‘一个月后’），明确从母亲病怒到实习开始的逻辑链条，避免场景跳转带来的断裂感。
+  - 建议在s003、s008等引入周也的场景中，通过对话或动作暗示她与陈知律的已有关系（如同班同学、朋友等），以符合校园类型的人物互动逻辑。
+  - 建议统一每个场景的章节归属：当前s001-s010均标注了chapter_refs，但ch01至ch10的章节编号与场景编号一致，需确认是否每个场景确实对应独立章节，否则应调整。
+  - 建议优化对白风格以匹配‘balanced’语气：例如s002林静的‘还挺准时’可改为更符合职业场景的口吻（如‘你提前到了，很好’），并在后续对白中保持一致性。
+  continuity_checks:
+    character_consistency: true
+    timeline_consistency: true
+    location_consistency: true
+    reference_consistency: true
+extensions:
+  generator: ai-fiction-to-script
+  local_versioning: true
+  ingestion:
+    minimum_required_chapters: 3
+    uploaded_input_ref: .novel2script\_uploads\未命名剧本_20260620032307.txt
+    chapter_split_method: heading_based
+  production_notes:
+    draft_stage: first_pass
+    recommended_episode_count: 1
+    recommended_runtime_minutes: 25
+    review_owner: human_editor
+  generation_settings:
+    script_type: tv_drama
+    tone: balanced
+    detail_level: standard
+    max_beats_per_scene: 10
+    chapter_context_chars: 1200
+  regeneration_bundle:
+    source_chapters:
+    - chapter_id: ch01
+      title: 第一章 不能停下来
+      text: '陈知律站在明德大学附属医院的走廊尽头，手里攥着那份烫金录取函，指尖微微发白。
+
+        走廊很长，日光灯管把白色的墙壁照得惨白，偶尔有护士推着小车从身边经过，车轮碾过地面发出细碎的声响。消毒水的味道比外面浓了三倍，像一层看不见的薄膜覆在鼻腔里，怎么都甩不掉。
+
+        他深吸一口气，将录取函塞进外套内袋，推开走廊尽头那扇门。
+
+        病房里很安静，心电监护发出规律的滴滴声，像某种古老的计时器。靠窗的病床上躺着一个瘦削的中年女人，头发稀疏，脸色蜡黄，嘴唇干裂起皮，眼睛却还是亮的。看见陈知律进来，她撑着手臂想要坐起来，动作迟缓得像被什么东西拽住了身体。
+
+        “妈。”陈知律快步走过去，按住她的肩膀，“别动。”
+
+        “没事，就是躺久了，骨头都硬了。”陈母勉强笑了笑，目光落在儿子脸上，停留了几秒，又移开，“今天不是有课吗？怎么这个点过来了？”
+
+        陈知律没接话，从床头柜上拿起保温杯，拧开盖子，倒出一杯温水递过去。陈母接过杯子，双手微微发颤，水面上漾起细小的波纹。她抿了一口，又把杯子放下，重新靠回枕头上，目光始终没有离开儿子的脸。
+
+        “你瘦了。”她说。
+
+        “你每次都这么说。”陈知律拉过一把折叠椅，在床边坐下，顺手整理了一下床头柜上散落的药盒。帕罗西汀、米氮平、劳拉西泱，药名他背得比专业课还熟。
+
+        “这次是真的瘦了。”陈母的声音很轻，像怕惊动什么，“眼睛里都有红血丝了，昨晚又熬夜了？”
+
+        陈知律没否认，也没承认，只是把药盒按照服用时间重新排好，早晚中的顺序，整齐地码成一排。这是他每次来医院的固定动作，像某种仪式，用秩序对抗那些无法掌控的东西。
+
+        “妈。”他说，声音压得很低，“我跟你说个事。”
+
+        陈母的手指微微蜷了一下。
+
+        陈知律从内袋抽出那份录取函，展开，递过去。烫金的校徽在日光灯下闪了一下光，上面印着一行字——兹录取陈知律同学为明德大学应用心理系2024级硕士研究生。
+
+        陈母接过录取函，看了很久。她的手指摩挲着那个烫金校徽，嘴唇动了动，眼眶慢慢泛红。
+
+        “我就知道。”她说，声音有些哽咽，但嘴角是上扬的，“我就知道你一定能考上。”
+
+        陈知律没说话。他看着母亲泛红的眼眶，胸腔里像有什么东西堵着，上不来下不去。他想说点什么，但又觉得说什么都不太对。说“我考上了”显得太轻巧，说“你别担心钱”又太假，因为他自己都还没想清楚钱从哪里来。
+
+        “明德大学。”陈母念着校名，语气里带着一种近乎虔诚的郑重，“你爸要是还在，肯定高兴坏了。”
+
+        陈知律垂下眼。
+
+        病房安静了片刻，只有心电监护的滴滴声和走廊上偶尔传来的脚步声。陈母慢慢将录取函折好，递还给儿子，动作小心翼翼，像在传递一件易碎的珍宝。
+
+        “去读。”她说，语气平淡，却不容置疑。
+
+        “学费——”
+
+        “我来想办法。”
+
+        “你怎么想办法？”陈知律抬起头，直视母亲的眼睛，“你这病不能停药，每个月光药费就要两千多。舅舅上个月给的那笔钱已经——”
+
+        “陈知律。”陈母忽然叫了他的全名，声音不大，却像一根针，精准地扎进了他的话音里。
+
+        他闭了嘴。
+
+        “你听着，”陈母撑着身体往前倾了一些，目光定定地看着儿子，“我这辈子没什么本事，没能给你攒下什么家底，也没能让你像别人家孩子那样无忧无虑地长大。但有一件事你得给我记住——”
+
+        她的声音因为虚弱而微微发颤，但每个字都咬得很清楚。
+
+        “你不能因为我，停下来。”
+
+        陈知律张了张嘴，想说点什么，却发现嗓子像被人掐住了。他低下头，盯着自己放在膝盖上的手，指节分明，骨感而苍白，像一株在阴暗角落里拼命生长的植物。
+
+        沉默持续了很久。
+
+        “我去打水。”他忽然站起来，拿起床头的暖水瓶，转身往外走。
+
+        走到门口的时候，陈母在身后说了一句什么，声音太轻，被心电监护的滴滴声盖过去了。陈知律没有回头，但他知道那句话是什么。
+
+        她说的是：“妈对不起你。”
+
+        走廊上人来人往，陈知律拎着暖水瓶穿过人群，脸上没什么表情。他的步子很快，快得像在逃离什么，但走到开水间门口的时候，他忽然停下来，靠在墙上，闭了闭眼。
+
+        走廊尽头的窗户开着，初秋的风灌进来，带着一股城市边缘特有的干燥气息。远处是鳞次栉比的高楼，玻璃幕墙反射着午后的阳光，明晃晃的，像一面面巨大的镜子，照出这座城市的繁华与冷漠。
+
+        他深吸一口气，把那些翻涌的情绪压回胸腔最深处，拧开水龙头，将暖水瓶灌满。热水冲击瓶胆的声音沉闷而有力，像一个低沉的鼓点，一下一下敲在心脏上。
+
+        从医院出来的时候，已经是下午四点。
+
+        陈知律没有直接回学校，而是沿着医院门前的路走了很长一段。路两边是老旧的居民区，底层的商铺一个挨着一个，五金店、杂货铺、水果摊，喇叭里循环播放着促销信息，混杂着炒栗子的焦甜气味。他走过那些嘈杂的声响和气味，脑子里反复转着同样的问题。
+
+        明德大学心理学硕士，学费一年三万八，不含住宿和杂费。
+
+        他卡里还有一万二千块钱，是暑假打工攒下的。母亲的医保能报销一部分药费，但每个月的自费部分仍然要两千出头。他不打算用舅舅的钱了，舅舅已经帮了太多，自己家里也不宽裕。
+
+        走到公交站台的时候，他掏出手机，点开那个被置顶的聊天对话框。
+
+        头像是一只卡通猫，备注是“周也”，最后一条消息停留在三天前——周也发了一个“？”的表情包，问他今天怎么没来上讨论课，他没有回复。
+
+        他打了几个字，又删掉，反复几次，最后把手机重新揣回兜里。
+
+        公交车来了，他上车刷卡，走到最后一排靠窗的位置坐下。车厢里人不多，前排坐着一对情侣，女孩靠在男孩肩膀上，耳机线从两人的衣领间垂下来，连在一起。陈知律看了一眼，移开目光，望向窗外。
+
+        天色渐渐暗下来，路灯亮了，橘黄色的光把整个城市笼罩在一层温暖的假象里。公交车走走停停，经过明德大学的校门时，他没有下车，而是多坐了两站，在一条他从未去过的街道下了车。
+
+        街道很窄，两边种着法国梧桐，树叶已经开始泛黄，偶尔飘落一两片，在路灯下打着旋儿。街角有一家很小的心理咨询中心，门面不大，招牌上写着“心禾心理”四个字，玻璃门上贴着一张招聘启事。
+
+        陈知律在门口站了一会儿，透过玻璃门看到里面的前台坐着一个戴眼镜的中年女人，正低头看文件。
+
+        他推门进去。
+
+        “你好，”他说，声音比自己预想的要平静，“我看到你们在招实习生，请问还招吗？”
+
+        中年女人抬起头，目光透过镜片上下打量了他一遍。陈知律穿着一件洗得发白的深蓝色卫衣，牛仔裤，帆布鞋，背着那个用了三年的双肩包。他的外表看起来和任何一个普通的大学生没什么区别，但那双眼睛不太一样——太沉了，像是装了一些不该在这个年纪出现的东西。
+
+        “你是哪个学校的？”中年女人问。
+
+        “明德大学，应用心理系，刚考上研究生。”陈知律说着，从包里翻出学生证和录取函的复印件，放在前台上。
+
+        中年女人拿起复印件看了看，表情微微变了变。她姓林，叫林静，是这家机构的负责人。在这行干了快二十年，她见过各种各样的来访者，也见过各种各样的实习生。眼前这个年轻人身上有种让她说不上来的特质——太干净了，干净得像一把还没开刃的刀，但你隐约能感觉到，那把刀迟早是要见血的。
+
+        “我们要求每周至少到岗三天，实习期至少六个月，没有工资，只有餐补和交通补贴。”林静公事公办地说，“你能接受吗？”
+
+        “能。”
+
+        “什么时候可以开始？”
+
+        “明天。”
+
+        林静又多看了他一眼，从抽屉里拿出一张表格推过去。陈知律接过笔，俯身填写，字迹工整而迅速，像是习惯了与时间赛跑。
+
+        填到紧急联系人的时候，他的笔尖顿了一下，然后写上了母亲的名字和电话。
+
+        林静注意到那个停顿，但没有说什么。她在这行待久了，知道有些东西不能问，要等对方自己愿意说出来。
+
+        表格填完，陈知律把它递回去。林静接过来扫了一眼，点了点头，从名片盒里抽出一张名片递给他。
+
+        “明天早上九点，直接来找我。”
+
+        “好。谢谢林老师。”
+
+        陈知律转身离开，推开玻璃门的时候，晚风吹过来，带着法国梧桐叶子的味道。他把那张名片揣进兜里，抬头看了一眼天空。城市的夜空看不见星星，只有一架飞机闪着灯光，缓缓从头顶划过，像一颗缓慢移动的流星。
+
+        他忽然想起今天母亲说的那句话——你不能因为我，停下来。
+
+        陈知律把手插进卫衣口袋，沿着种满法国梧桐的街道往回走。他走得不快不慢，步子很稳，像一个已经习惯了背负重量的人，不抱怨，不诉苦，只是沉默地、一步一步地往前走。
+
+        身后的心理咨询中心招牌灭了，整条街暗下来。
+
+        路灯把影子拉得很长很长，一直延伸到他即将抵达的、还看不清形状的前方。'
+    - chapter_id: ch02
+      title: 第二章 心禾心理
+      text: '陈知律第二天早上八点四十就到了心禾心理。
+
+        玻璃门上挂着“休息中”的牌子，透过门缝能看到里面正在打扫的林静。他没有敲门，在门口等了一会儿，把昨晚查了一夜的心理学量表资料在脑子里又过了一遍。
+
+        九点整，他推门进去。
+
+        “还挺准时。”林静从里间走出来，手里端着一杯美式，咖啡的苦味在空气中弥漫开，“跟我来吧。”
+
+        心禾心理规模不大，前台后面是一条窄走廊，两侧分布着三间咨询室、一间测评室和一间办公室。墙壁刷成了淡绿色，挂着几幅抽象画，整体色调柔和而克制，像刻意营造的安全感。林静把陈知律领进办公室，从文件柜里抽出几本厚重的文件夹。
+
+        “这是来访者档案的归档模板，这是知情同意书的标准格式，这是初始访谈记录表。”她把文件在桌上摊开，“你第一周的工作就是把近两年的纸质档案全部电子化，录入我们的内部系统。有问题吗？”
+
+        “没有。”
+
+        “别回答得这么快。”林静看了他一眼，“录入过程中你会看到很多来访者的个人信息和症状描述，所有内容一律不得外泄，包括对你最亲近的人。能做到吗？”
+
+        “能。”
+
+        林静盯着他的眼睛看了两秒，然后点了点头，从抽屉里拿出一张实习协议推过去。陈知律签了字，从那天起，他成了心禾心理年纪最小、话最少、走得最晚的实习生。
+
+        录入档案是一件机械而枯燥的工作，但陈知律做得极其认真。他会在每份档案的备注栏里补充一些细节——比如某位强迫症来访者在描述症状时反复搓手指，某位抑郁症来访者在提到某位家人时语速突然变慢。这些不是系统要求的，但他觉得以后可能会有用。
+
+        林静偶尔路过，会瞥一眼他的屏幕，从不评价。
+
+        一周后，档案录入工作完成了一大半。那天下午，林静把他叫到咨询室，让他旁观一次正式的初始访谈。来访者是一个十六岁的女孩，化名“小鹿”，由母亲陪同前来，主诉是厌学、自伤、情绪失控。
+
+        整个访谈持续了五十分钟。林静的声音始终平稳而温和，像一张柔软但结实的网，把那些散落的、尖锐的情绪碎片一一接住。小鹿从最开始的沉默抗拒，到后来捂着脸断断续续地说“我就是觉得自己很脏”，陈知律坐在角落里，手里的笔一直没有停下来。
+
+        访谈结束后，林静送走了母女俩，回到咨询室，看见陈知律还坐在原地。
+
+        “你的感受？”她问。
+
+        “她不是厌学。”陈知律说，“她对学校没有明显的负面情绪，提到同学关系的时候也没有回避。她真正卡住的地方是家庭——她母亲提到‘爸爸’的时候，她的身体明显僵硬了，而且是两次。”
+
+        林静微微眯起眼睛，半晌，说了一句让陈知律记了很久的话。
+
+        “你观察得很准。但是陈知律，在这个行业里，看得准不是最难的。最难的是看完之后，你还能好好吃饭、好好睡觉。”
+
+        那天晚上，陈知律回到出租屋，发现自己已经过了十二点。他煮了一包泡面，加了一个鸡蛋，坐在桌前吃掉。面汤的热气模糊了他的视线，他没有擦，任由那层雾气在眼睛里慢慢凝结成水珠，又慢慢消散。
+
+        手机震了一下。
+
+        周也发来消息：“陈知律，你到底死没死？三天没回消息了。”
+
+        陈知律把嘴里的面咽下去，打了两个字：“活着。”
+
+        那边秒回：“明天中午食堂等我，你敢跑试试。”'
+    - chapter_id: ch03
+      title: 第三章 食堂里的周也
+      text: '周也是陈知律大学四年唯一的“熟人”。
+
+        说“熟人”不太准确，因为周也单方面把他定义为“最好的朋友”，而陈知律从来没有正面回应过这个定义。他不习惯那种太热烈的、几乎没有边界感的关系，但也不讨厌——周也的热情像一团火，隔着一层距离烤过来，不至于烫伤，但足够温暖。
+
+        第二天中午，陈知律准时出现在食堂。
+
+        周也已经占好了位置，桌上摆着两份饭，她的那份已经吃掉了一半。她扎着高马尾，穿着一件亮橙色的卫衣，在一群灰扑扑的大学生里显得格外扎眼。看到陈知律走过来，她用筷子敲了敲桌面。
+
+        “你瘦了。”
+
+        陈知律坐下来：“你跟我妈说的一样。”
+
+        “那说明是真的。”周也把另一份饭推过去，“吃。我看着你吃完。”
+
+        陈知律看了一眼盘子里的菜，红烧排骨、清炒西兰花、一碗紫菜蛋花汤，都是他平时会点的。他动了动筷子，没说什么。
+
+        周也咬着筷子看了他两秒，忽然放下手，正色道：“陈知律，我跟你说个事。”
+
+        “说。”
+
+        “我也报了明德的研究生。”
+
+        陈知律抬起眼。
+
+        “同专业，同方向。”周也的眼睛亮晶晶的，带着一种明知山有虎偏向虎山行的得意，“以后咱俩又是同学。惊不惊喜？意不意外？”
+
+        陈知律沉默了一下：“你本科成绩够保研的，为什么还要考？”
+
+        周也的笑容僵了零点几秒，然后恢复如常：“因为我乐意。”
+
+        她没有说的是，她确实拿到了保研资格，但那个名额被系主任的侄子挤掉了。她也没有说的是，她在考研报名截止的最后一天改了志愿，从原本规划好的北方某985换成了明德大学，只是因为那天晚上陈知律发了一条朋友圈——一张心禾心理门口的法国梧桐照片，配文是一个句号。
+
+        陈知律不发朋友圈。那是他三年来的第一条。
+
+        “你考上了？”陈知律问。
+
+        “废话。”周也从包里抽出一张录取函的复印件拍在桌上，动作和陈知律给母亲看录取函时如出一辙，“以后请叫我周也同学。”
+
+        陈知律看着那张复印件，嘴角微微动了一下。
+
+        那不算一个完整的笑容，更像是某种被压制的情绪不小心泄露了一丝痕迹。但周也看见了，她觉得这一个微小的弧度比任何大笑都值得。
+
+        她举起手机，对着陈知律拍了一张。
+
+        “删掉。”陈知律说。
+
+        “不删。”周也把手机揣回兜里，笑眯眯地拿起筷子，“这张我要留着，以后等你出名了卖给八卦记者。”
+
+        食堂里人来人往，嘈杂的声音在头顶汇成一片嗡嗡的声浪。陈知律低头吃饭，耳尖有一点不易察觉的红。他不知道自己为什么会脸红，可能是因为周也的笑容太亮了，而他已经很久没有被光照过。'
+    - chapter_id: ch04
+      title: 第四章 父亲的影子
+      text: '录入档案的第二周，陈知律遇到了一份特殊的记录。
+
+        来访者编号是XH-2019-042，时间是三年前的夏天。主诉是“焦虑状态、疑病倾向”，病程描述那一栏写着：“来访者长期怀疑自己患有严重疾病，反复就医检查，无法接受‘无器质性病变’的诊断结果，严重影响日常生活。”
+
+        这些描述本身并不特殊。特殊的是来访者的名字——陈建军。
+
+        那是陈知律父亲的名字。
+
+        他的手指悬在键盘上方，停了好几秒。然后他往下滚动页面，看到了初始访谈的详细记录。来访者职业：建筑工人；家庭状况：已婚，育有一子；经济状况：欠佳，因看病频繁已无积蓄；转介来源：综合医院心理科。
+
+        陈知律慢慢靠在椅背上，盯着屏幕上那几行字，胸腔里像被什么东西慢慢勒紧了。
+
+        他想起来了。
+
+        那是初三那年，父亲忽然变得很奇怪。他总觉得自己得了绝症，胃疼怀疑胃癌，头疼怀疑脑瘤，背疼怀疑骨癌。母亲带他辗转了四五家医院，做了无数次检查，结果都显示没有问题。但父亲不相信，他开始失眠，开始发脾气，开始把自己关在房间里不愿意出来。
+
+        后来有一天，父亲忽然不闹了。他变得异常平静，平静得不正常。陈知律那时候不懂，以为父亲的病好了。直到那个冬天的早晨，他在学校上课，班主任把他叫到办公室，说他父亲跳了江。
+
+        尸体三天后才在下游找到。
+
+        母亲收到消息的时候没有哭，只是一遍一遍地说“他最后那几天是安静的，他是想通了才走的”。很多年以后，陈知律学了心理学，才知道那不是什么“想通了”，那是重度抑郁进入“缓解期”的表现——当一个人连挣扎的力气都耗尽的时候，外表看起来反而最平静。
+
+        而他的父亲，从来没有被真正诊断过抑郁症。
+
+        他只被当作“焦虑状态”“疑病倾向”处理过。那些量表、那些访谈、那些按小时收费的咨询，对他父亲来说太奢侈了。一个建筑工人一天工钱两百块，不够做一次心理咨询。
+
+        陈知律把那份档案录入完毕，在备注栏里多写了一行字：“建议关注该来访者家族史及长期情绪状态，可能存在未被识别的抑郁发作。”
+
+        然后他关上系统，去饮水机那里倒了一杯水。水是凉的，他一口一口喝完，把杯子放回桌上，继续录入下一份档案。
+
+        林静从走廊经过，看见他的背影笔直地坐在工位上，手指敲击键盘的速度比平时快了那么一点点，像在和什么东西赛跑。
+
+        她没有打扰他。
+
+        但那天下班后，陈知律没有像往常一样直接回家。他在心禾心理门口的台阶上坐了很久，秋天的夜晚凉意渐深，法国梧桐的叶子在头顶沙沙作响。他拿出手机，翻到父亲生前最后一条语音消息。
+
+        那是六年前，父亲发来的，只有几秒：“知律啊，爸今天发工资了，给你转了两千，你买点好吃的。”
+
+        他把语音听完，关掉手机，抬头看天。
+
+        城市的夜空依然没有星星。'
+    - chapter_id: ch05
+      title: 第五章 第一个来访者
+      text: '实习第三周，林静给陈知律安排了他的第一个来访者。
+
+        与其说是来访者，不如说是“陪练”——对方是林静多年的一位老来访者，情况稳定，愿意配合实习生的练习性访谈。知情同意书签得很清楚，这是一次免费的、仅供教学使用的模拟咨询，时长为三十分钟。
+
+        陈知律提前二十分钟到了咨询室。他把椅子摆成一个九十度的夹角，不直接面对也不完全并排。他在桌上放了一盒纸巾、一杯温水，然后坐在自己的位置上，深呼吸了三次。
+
+        敲门声响了。
+
+        “请进。”
+
+        进来的是一个四十多岁的女人，短发，化着淡妆，穿着一件质地很好的卡其色风衣。她的步态很稳，表情很温和，看起来不像有任何心理问题的人。但陈知律注意到，她进门后第一件事是扫视整个房间——天花板、窗帘后面、门背后，她的目光像一个习惯性检查所有出口的人。
+
+        “你好，我是陈知律，你可以叫我小陈。”他站起来，没有伸手去握，“谢谢你愿意参与这次练习，我们的时间大概三十分钟，你想聊什么都可以，不想聊的可以直接跳过。”
+
+        女人坐在椅子上，把风衣下摆拢了拢，轻轻笑了一下：“林老师说你虽然年轻，但很专业。现在看来，不止专业，还很紧张。”
+
+        陈知律顿了顿：“很明显吗？”
+
+        “你呼吸的频率变了，从我说第一句话之后。”女人说，“不过没关系，我不介意。”
+
+        那三十分钟，陈知律做得并不完美。他问了一个封闭式问题，在沉默中抢先开口，有一次甚至差点给出了建议。但他做对了一件事——他全程都在听，不是那种礼貌性的、等着对方说完好接话的听，而是真正的、把自己放空的、全神贯注地听。
+
+        女人说了很多。她说她失眠，说她对未来感到恐惧，说她总觉得有什么不好的事情要发生。她说她每天晚上要检查门窗好几次，出门后要折返回来确认煤气有没有关，她说她知道这些行为不合理，但就是控制不住。
+
+        “你什么时候开始注意到这些变化的？”陈知律问。
+
+        女人想了想：“大概三年前。”
+
+        “三年前你生活中发生了什么？”
+
+        女人安静了很久。咨询室里只能听见空调运转的低频嗡嗡声。陈知律没有催促，他的身体微微前倾，姿态开放而耐心。
+
+        “我离婚了。”女人终于说，声音低了下去，“他出轨，我们吵了很久，最后我赢了房子和儿子，但……从那以后我就变成了这个样子。”
+
+        陈知律没有问“你恨他吗”，也没有说“时间会治愈一切”。他只是点了点头，说：“离婚对你来说不是一个事件的结束，而是一种新的生活方式的开始。这种生活方式里，安全感是需要重新建立的。”
+
+        女人抬起头看了他一眼，眼神里有一种被看见的释然。
+
+        三十分钟结束的时候，女人站起来，整理了一下风衣。走到门口时，她忽然转过身：“小陈，你会是一个很好的咨询师。”
+
+        陈知律站起来送她，门关上之后，他一个人在咨询室里站了很久。心跳很快，不是紧张，是一种说不清的、类似共鸣的东西。他想起了父亲，想起了那些从未被真正倾听过的恐惧与无助。
+
+        他忽然理解了林静说的那句话——看得准不是最难的，最难的是看完之后还能好好吃饭、好好睡觉。
+
+        但他现在还没到那一步。他现在要做的，是先学会在看完之后，继续坐在那张椅子上，等待下一个来访者。'
+    - chapter_id: ch06
+      title: 第六章 两个失眠的人
+      text: '研究生开学后的第一个月，陈知律的时间被切成三块：上课、心禾实习、医院陪护。三块之外的所有时间，都属于睡眠——但睡眠不属于他。
+
+        他已经连续两周每天只睡四五个小时了。入睡不难，难的是凌晨两三点准时醒来，醒来之后再也睡不着。脑海里会开始自动播放一些画面：父亲的语音、母亲的病历、心禾档案库里那些密密麻麻的来访者记录。
+
+        有一天凌晨四点，他在出租屋的床上翻到第十八次的时候，手机忽然亮了。
+
+        周也发来一张照片，是她自己的自拍，顶着两个巨大的黑眼圈，配文是：“睡不着的人不止你一个。”
+
+        陈知律看着那张照片，忽然有点想笑。他想回点什么，但犹豫了很久，只发了一个问号。
+
+        “失眠。”周也打字飞快，“我妈说我可能有病，让我去看看心理医生。我说我就是学心理的，我有病我自己还不知道吗？”
+
+        “那你去看过吗？”
+
+        “没有。我怕确诊了毕不了业。”
+
+        陈知律盯着那行字看了几秒，打了一行又删掉，最后回了一句很简短的话：“去看吧。确诊不确诊，你都还是你。”
+
+        对面沉默了很久。陈知律以为她睡着了，正准备放下手机，周也又发了一条消息。
+
+        “陈知律，你有没有觉得我们很可笑？学心理的人最怕看心理医生，就像医生最怕体检。”
+
+        陈知律没有回答这个问题。因为他太清楚了——他自己也从来没有做过一次完整的心理咨询。他学了四年心理学，背了一整本变态心理学，能熟练地说出抑郁症的诊断标准和治疗指南，但他从不让任何人在他身上使用那些工具。
+
+        不是不信任，是不敢。
+
+        有些东西一旦被打开，他不知道该怎么关上。
+
+        “周也。”他忽然打字。
+
+        “嗯？”
+
+        “去睡吧，明天还有早课。”
+
+        “……你也知道明天有早课？你赶紧睡，你现在就给我关机。”
+
+        陈知律笑了一下。那个笑容在凌晨四点的黑暗里一闪而过，没有第二个人看见。
+
+        他没有关机，而是把手机放在枕头边，闭上眼睛。屏幕暗下去之后，房间里重新陷入黑暗和安静。出租屋的隔音很差，楼上有人在走动，隔壁有人在打鼾，远处偶尔传来汽车的喇叭声。
+
+        这些声音交织在一起，像一张粗糙的安全网，把他从那些纷乱的念头里暂时兜住了。
+
+        他不知道自己什么时候睡着的。但第二天早上闹钟响的时候，他发现自己握在手里的手机屏幕上，还留着一个没有发出去的草稿。
+
+        草稿只有四个字：“谢谢你啊。”
+
+        他没有点发送。'
+    - chapter_id: ch07
+      title: 第七章 裂痕
+      text: '十月中旬，陈母的病情突然加重了。
+
+        陈知律是在课堂上接到医院电话的。手机震动的时候，他正在做案例汇报，PPT停在最后一页。他看到来电显示是医院，声音顿了一下，然后对教授说了声“抱歉”，走出教室接听。
+
+        电话那头，护士的声音公式化而急促：“陈知律吗？你母亲今天上午出现了急性呼吸困难，我们正在进行对症处理，目前生命体征稳定，但需要你尽快来一趟。”
+
+        他挂掉电话，回教室收拾东西。教授看了他一眼，没有说话，只是点了点头。周也站起来想跟出去，被他用一个手势拦住了。
+
+        他几乎是小跑着穿过校园的。风很大，卷起满地的银杏叶，金色的叶片在他脚下碎裂，发出细碎的声响。他跑过图书馆、跑过食堂、跑过那条连接教学楼和校门的林荫道，每一步都像是踩在某种随时会断裂的冰面上。
+
+        赶到医院的时候，母亲已经转到了重症观察室。
+
+        陈知律隔着玻璃看到她的脸——比上次又瘦了一圈，颧骨高高地凸出来，嘴唇上带着氧气面罩，透明的面罩里弥漫着白色的雾气，一呼一吸，像某种缓慢而沉重的潮汐。
+
+        主治医生把他叫到办公室，摊开了最新的检查报告。
+
+        “病人的肺部出现了新的感染灶，结合她长期使用激素和免疫抑制剂的情况，这并不意外。我们已经调整了抗生素方案，但如果这个周期控制不住，下一步可能需要上呼吸机。”
+
+        陈知律坐在医生对面，手放在膝盖上，表情几乎没有任何变化。他听到“呼吸机”三个字的时候，只是微微闭了一下眼。
+
+        “费用呢？”他问。
+
+        医生报了一个数字。
+
+        陈知律沉默了几秒，点了点头。他站起来，和医生握手，道谢，走出办公室。他经过重症观察室的玻璃窗时没有停留，步子很稳，一直走到走廊尽头的楼梯间才停下来。
+
+        楼梯间空无一人，只有风从窗户缝隙里灌进来，带着深秋的寒意。陈知律靠着墙，慢慢地滑坐到地上。他把头埋进膝盖里，肩膀微微颤抖，但没有发出任何声音。
+
+        过了大概十分钟，他站起来，洗了一把脸，拿出手机，拨通了舅舅的电话。
+
+        “舅，妈那边……我想跟您借一笔钱。”
+
+        他的声音沙哑但平稳，像一根被拉到极限的弦，每一个字都绷得紧紧的，但没有断。
+
+        电话那头沉默了很久，舅舅的声音也带了鼻音：“知律，你听着，你妈的病你不用担心钱的事，我来想办法。但你也要答应我，你自己不能垮。你垮了，你妈就真的没有指望了。”
+
+        陈知律握着手机，用力地闭了一下眼睛。
+
+        “我知道。”他说。
+
+        那天晚上，他照常去了心禾心理。林静看到他眼睛下面的青黑色，问了一句“你还好吗”，他说“没事”。他坐下来，打开系统，继续录入那份没有录完的档案。
+
+        键盘的敲击声在空荡荡的办公室里回响，单调、枯燥，却构成了一种奇异的秩序感。在一切都在失控的时候，这些重复的、机械的动作像一根绳子，把他从漩涡的边缘拉了回来。
+
+        晚上十点，他离开心禾，坐夜班公交车回出租屋。车上只有一个乘客，是一个醉汉，蜷缩在最后一排座位上，嘴里含混不清地说着什么。陈知律坐在离他最远的角落，看着窗外飞速后退的灯火。
+
+        路灯一盏一盏地过去，明灭不定，像某种他不认识的密码。'
+    - chapter_id: ch08
+      title: 第八章 周也的秘密
+      text: '周也发现陈知律最近不太对劲，是在一个周三的下午。
+
+        那天没有课，她去心禾心理找陈知律——她打听了很久才从系里一个学姐那里问到这个地址。她带着两杯奶茶，推门进去的时候，前台说陈知律正在做一个模拟访谈，要等半小时。
+
+        周也就坐在前台等。等了二十五分钟，走廊尽头那间咨询室的门开了，一个中年女人红着眼眶走出来，陈知律站在门口送她，姿态克制而礼貌。等那个女人走远了，陈知律转过身，才看到坐在前台的周也。
+
+        他愣了一下。
+
+        “你怎么来了？”
+
+        “给你送温暖。”周也举起手中的奶茶，“珍珠奶茶，少冰三分糖，你喜欢的。”
+
+        陈知律接过奶茶，没有喝，拿在手里。周也注意到他的手指在微微发抖，但她没有说，只是笑嘻嘻地跟着他走进办公室，把另一杯奶茶放在林静桌上——她来之前就打听好了，这家机构的负责人叫林静，是个不好惹的女人，但她相信伸手不打笑脸人。
+
+        林静从里间走出来，看到桌上的奶茶，看了周也一眼。
+
+        “你是？”
+
+        “林老师好，我是周也，陈知律的同学，也是明大心理系的研究生。慕名而来，想问问您这边还招不招实习生？”
+
+        林静看了看陈知律。陈知律摇了摇头，意思是“我没有叫她来”。周也假装没看到这两个人的眼神交流，从包里掏出一份打印精美的简历，双手递过去。
+
+        林静接过简历翻了翻，眉头微微挑了一下。周也的履历确实漂亮——GPA年级第三，两篇核心期刊的二作，参加过三次全国性学术会议并有报告。这样的人确实不该被一个社区心理咨询中心的实习机会为难。
+
+        “我们这边没有工资。”林静说。
+
+        “我知道。”
+
+        “实习期至少六个月，每周至少三天。”
+
+        “没问题。”
+
+        林静又看了陈知律一眼，叹了口气，从抽屉里又抽出一份实习协议。周也笑眯眯地签了，签完之后朝陈知律眨了眨眼，那表情分明在说：“看吧，我也进来了。”
+
+        陈知律看着她，忽然觉得有点头疼。
+
+        不是厌烦的那种头疼，是一种更复杂的、他暂时不愿意去辨别的情绪。就像是有人在你的壳上敲了一下，不是很重，但你听到了回响。
+
+        那天晚上，两个人一起坐公交车回学校。车上人不多，他们坐在最后一排并排的位置。陈知律靠窗，周也坐在他旁边，两人之间隔着一个奶茶杯的距离。
+
+        “周也。”陈知律忽然开口。
+
+        “嗯？”
+
+        “你为什么非要来心禾？”
+
+        周也歪着头想了一下，说出来的答案却出乎意料地认真：“因为你在这里。”
+
+        车厢里安静了几秒。陈知律没有转头，但他的手指在膝盖上微微蜷了一下。
+
+        “别想多啊，”周也很快补了一句，语气恢复了平时的跳脱，“我是说，你这个人都能待下去的地方，那一定是个能学到东西的好地方。我这是对你的眼光表示信任。”
+
+        “你刚才可不是这么说的。”
+
+        “刚才说的是人话，现在说的是人话的艺术加工版，别较真。”
+
+        陈知律没有说话。公交车经过一片拆迁区，路边是断壁残垣和裸露的钢筋，在路灯下投下参差的影子。那些影子和完整建筑的影子混在一起，像一幅还没画完就被人涂改过的草图。
+
+        周也安静了一会儿，忽然用一种他从未听过的、很轻的声音说：“陈知律，你知道吗，我也失眠。”
+
+        陈知律转头看她。
+
+        她没有看他，眼睛望着窗外飞速倒退的城市夜景，霓虹灯的光在她的脸上明灭不定，把她的表情切成一段一段的。
+
+        “我不是那种偶尔失眠，我是每天都失眠。”她说，声音很平，像在陈述一个和自己无关的事实，“我从大二开始吃安眠药，从半片吃到两片，现在两片也不太管用了。我去看过医生，开过舍曲林，吃了一个月，副作用太大了，我受不了，就自己停了。”
+
+        “你不要自己停药。”陈知律的声音有一点急。
+
+        “你看，你说话的样子就像那些医生一样。”周也终于转过头来看他，路灯的光正好照在她的脸上，他第一次注意到她的眼睛下面有很深的黑眼圈，被遮瑕膏盖住了大半，但凑近看还是能看出来。
+
+        “我不是医生。”陈知律说。
+
+        “但你也没有好到哪里去。”周也说，语气忽然带上了一点尖锐，“陈知律，你每天只睡四五个小时，你把所有的课都上了，把所有的班都加了，你去医院陪护你妈，你从来不请假，也从来不喊累。你看起来像一台永动机，但永动机是不存在的。”
+
+        她的眼眶慢慢红了。
+
+        “你只是在消耗你自己。”
+
+        车窗上映出两个人的影子，靠得很近，又像隔得很远。公交车到站了，报站器的女声机械而清晰：“明德大学站到了，请从后门下车。”
+
+        两个人都没有动。
+
+        车门开了又关，公交车重新启动，驶向下一个站点。
+
+        “我送你回家。”陈知律说。
+
+        “你不是应该回学校吗？”
+
+        “今晚不住学校了。”
+
+        周也没有再问。那一晚，陈知律把她送到出租屋楼下，说了声“晚安”，转身走进夜色里。周也站在楼道口，看着他的背影渐渐变小，路灯把他的影子拉得又长又淡。
+
+        她忽然想起林静下午对她说的那句话：“那孩子太干净了，干净得让人害怕。”
+
+        当时她不理解。现在她理解了——一个太干净的人，不是没有杂质，而是把所有杂质都压在了看不见的地方。而那些被压住的东西，迟早会以另一种方式找上门来。'
+    - chapter_id: ch09
+      title: 第九章 临界点
+      text: '十一月的最后一周，陈知律崩溃了。
+
+        不是在医院，不是在咨询室，也不是在上课的时候。而是在一个最普通、最没有仪式感的时刻——他在超市买泡面，看到货架上摆着一排红烧牛肉味，他伸出手去拿，手指却怎么也使不上力。
+
+        那包泡面掉在地上。
+
+        他蹲下来去捡，然后发现自己站不起来了。不是生理上的站不起来，而是一种从骨头缝里往外渗的、铺天盖地的疲惫，像潮水一样漫过他的头顶。他蹲在超市的过道里，周围是来来往往的购物车和陌生人投来的好奇目光，他什么都看不见，什么都听不见，脑子里只有一个念头在循环播放：
+
+        “我不行了。”
+
+        这三个字像一把钝刀，一下一下地割着他的神经。他想站起来，想走，想逃离这个地方，但他的身体像被钉在了原地。
+
+        最后是一个超市的工作人员过来问他是不是不舒服，他摇了摇头，撑着货架慢慢站起来，推着空购物车走出超市。购物车被放在门口的时候发出一声金属碰撞的闷响，和心电监护的滴滴声截然不同，但同样让他想起医院。
+
+        他拿出手机，翻到通讯录，手指在一个名字上停了一会儿，然后拨了出去。
+
+        “周也。”
+
+        “嗯？”电话那头的声音带着刚睡醒的沙哑，还有一点点被吵醒的烦躁。
+
+        “你能来一下吗？”
+
+        周也到的时候，陈知律坐在超市门口的台阶上，旁边放着一袋没有结账的泡面。他穿着那件洗得发白的深蓝色卫衣，衣领松松垮垮的，露出锁骨下面一小截苍白的皮肤。他的眼睛看着前方，但瞳孔没有焦点，像一台焦距没调好的相机。
+
+        周也没有问任何问题。她在他旁边坐下来，两个人并排坐在超市门前的台阶上，像两个无家可归的人。深秋的风吹过来，把地上的落叶卷成一团又散开。
+
+        坐了大概十分钟，陈知律开口了。
+
+        “周也，我可能也不行。”
+
+        他的声音很平静，平静得不像是在承认一件天大的事。但周也听懂了那个“也”字——他在承认自己和周也一样，是一个需要被接住的人。
+
+        “我知道。”周也说，声音有些哽咽，“我都知道。”
+
+        陈知律转过头来看着她，路灯的光落在他眼睛里，像碎掉的玻璃。他的嘴唇动了几下，像是想说什么，但最后只是很轻很轻地说了一句：
+
+        “我能靠一下吗？”
+
+        周也的眼泪一瞬间就掉了下来。她使劲点头，往他的方向挪了挪。陈知律把头靠在她肩上，闭上了眼睛。他的身体很僵硬，像一块绷了太久的铁板，即使在靠下来的那一刻也没有完全放松。
+
+        但他在努力。
+
+        周也感觉到肩膀上传来微微的颤抖，不是哭泣，更像是一台过载太久的机器终于被人按下了关机键，所有的部件都在那个缓慢的、不协调的过程中发出最后的嗡鸣。
+
+        街上的人来来往往，没有人注意到台阶上靠在一起的两个人。一个穿校服的中学生踩着滑板从他们面前滑过，耳机里的音乐漏出来，是一个女声在唱“我也曾经这样过，在人群里藏起脆弱”。
+
+        周也的眼泪流了很久，但她没有发出声音。她一只手握着陈知律的手，另一只手掏出手机，给林静发了一条消息。
+
+        “林老师，陈知律可能需要休息几天。”
+
+        林静秒回了两个字：“好的。”
+
+        然后又发了一条：“他也该了。”'
+    - chapter_id: ch10
+      title: 第十章 梧桐树下
+      text: '陈知律请了三天假。
+
+        三天里，他什么都没有做。睡了很久的觉，把那个租了一年却从没好好用过的电饭煲拿出来，煮了一锅白粥。粥煮糊了，锅底结了一层焦黑，他把上面没糊的部分盛出来，配着榨菜吃了两碗。
+
+        他给母亲打了一个电话，说自己在学校忙，这几天不能去医院。母亲说好，声音听起来比之前有精神一些，大概是新换的抗生素起效了。她说你不用天天来，妈没那么脆弱。
+
+        他挂了电话，对着那个糊了的电饭煲发了一会儿呆，然后把它洗干净，放回橱柜里。
+
+        第三天下午，周也来了。
+
+        她没有敲门，直接输入了密码——上次陈知律告诉她的，说“万一哪天我死在屋里你还能帮我收尸”，她当时骂了他一句，但记住了。
+
+        她带了一大袋东西：水果、酸奶、面包、速冻水饺、两盒自热米饭。她把东西塞进那个几乎空荡荡的冰箱里，转过头，发现陈知律站在厨房门口看着她。
+
+        “你好像我妈。”他说。
+
+        “闭嘴，我没有你这么大的儿子。”
+
+        陈知律笑了一下。这次的笑容比上次大了一些，但仍然很轻很淡，像冬天早晨窗户上结的霜花，太阳一出来就会消失。
+
+        周也从袋子里掏出最后一盒东西，是一盒巧克力。她把巧克力递给他，认真地说：“这是林老师让我带给你的，她说‘给那个孩子吃点甜的’。”
+
+        陈知律接过巧克力，拆开包装，掰了一小块放进嘴里。巧克力在舌尖慢慢融化，甜味和一点点苦味交织在一起，像某种复杂而真实的人间滋味。
+
+        “周也。”
+
+        “嗯？”
+
+        “你之前说，你失眠。”
+
+        周也的动作顿了一下。
+
+        “我认识一个很好的咨询师，”陈知律说，“在心禾那边，如果你愿意的话，我可以帮你约。”
+
+        周也看着他，看了好几秒。然后她忽然笑了，那个笑容和她平时所有的笑容都不一样——不是夸张的、用来掩盖什么的、大咧咧的笑，而是一种安静的、带着一点点释然的笑。
+
+        “好。”她说，“但你也要去。”
+
+        陈知律沉默了一会儿。
+
+        “好。”
+
+        那天傍晚，他们一起出了门。秋天的夕阳把整条街染成了橘红色，法国梧桐的叶子在光影中变得半透明，像一片片薄薄的金箔。空气里有糖炒栗子的味道，和远处飘来的桂花香混在一起，甜得刚好，不腻。
+
+        他们沿着那条种满梧桐的路慢慢走着，一直走到心禾心理的门口。玻璃门上依然贴着那张招聘启事，但旁边多了一张新的——是一张手写的便签，字迹娟秀，写着：“我们都在努力活着，这已经很了不起了。”
+
+        陈知律站在那行字前面，看了很久。
+
+        周也站在他旁边，没有催他。夕阳把两个人的影子拉得很长很长，长到几乎叠在一起，分不清谁是谁的。
+
+        心禾心理的招牌亮了，暖黄色的光透过玻璃门洒在台阶上，像一扇敞开的门，不问你从哪里来，不问你经历了什么，只是安静地亮着，等待下一个愿意走进去的人。
+
+        陈知律深吸了一口气，推开了那扇门。
+
+        身后的法国梧桐在风中沙沙作响，像在鼓掌，又像在道别。而前方，走廊尽头的那盏灯还亮着，微弱但坚定，像一颗不会熄灭的星。'

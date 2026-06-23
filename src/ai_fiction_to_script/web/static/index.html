@@ -11,8 +11,7 @@
     <div class="background-orb orb-b"></div>
     <header class="hero">
       <div>
-        <p class="eyebrow">AI Fiction to Script</p>
-        <h1 data-i18n="heroTitle">Qwen 剧本生成工作台</h1>
+        <h1 data-i18n="heroTitle">ScriptForge 剧本生成工作台</h1>
         <p class="hero-copy" data-i18n="heroCopy">
           上传小说文件或直接粘贴正文，调用通义千问生成不同类型、不同语气的结构化剧本，并支持场景级重生成。
         </p>
@@ -29,10 +28,6 @@
               <option value="en">English</option>
             </select>
           </label>
-          <div class="hero-status">
-            <span class="status-dot"></span>
-            <span id="statusText" data-i18n="loadingWorkspace">正在加载工作区...</span>
-          </div>
         </div>
         <div class="section-heading">
           <h2 data-i18n="projectsHeading">项目</h2>
@@ -50,46 +45,64 @@
         <section class="card section-card">
           <div class="section-heading">
             <h2 data-i18n="generateHeading">生成剧本</h2>
-            <span class="pill" data-i18n="qwenPill">Qwen 生成</span>
+            <!-- <span class="pill" data-i18n="qwenPill">Qwen 生成</span> -->
           </div>
-          <div class="form-grid">
-            <label class="full-width">
-              <span data-i18n="apiKeyLabel">Qwen API Key</span>
-              <input id="apiKey" type="password" data-i18n-placeholder="apiKeyPlaceholder" placeholder="请输入 sk-..." />
-            </label>
-            <label class="full-width">
-              <span data-i18n="uploadLabel">上传小说文件（txt / doc / docx）</span>
-              <input id="uploadFile" type="file" accept=".txt,.doc,.docx" />
-            </label>
-            <label class="full-width">
-              <span data-i18n="yamlBundleLabel">上传剧本 YAML（.yaml / .yml）</span>
-              <input id="uploadYamlFile" type="file" accept=".yaml,.yml" />
-            </label>
-            <label>
-              <span data-i18n="titleLabel">剧本标题</span>
-              <input id="title" type="text" />
-            </label>
-            <label>
-              <span data-i18n="authorLabel">原著作者</span>
-              <input id="author" type="text" />
-            </label>
-            <label>
-              <span data-i18n="originalTitleLabel">原著标题</span>
-              <input id="originalTitle" type="text" />
-            </label>
-            <label>
-              <span data-i18n="scriptTypeLabel">生成剧本类型</span>
-              <select id="scriptType"></select>
-            </label>
-            <label>
-              <span data-i18n="genreLabel">题材</span>
-              <input id="genre" type="text" />
-            </label>
-            <label>
-              <span data-i18n="toneLabel">语气风格</span>
-              <select id="tone"></select>
-            </label>
-            <label class="full-width">
+          <div class="form-grid screenplay-form">
+            <div class="form-row form-row-2">
+              <label>
+                <span data-i18n="apiKeyLabel">Qwen API Key</span>
+                <input id="apiKey" type="password" data-i18n-placeholder="apiKeyPlaceholder" placeholder="请输入 sk-..." />
+              </label>
+              <label>
+                <span data-i18n="modelNameLabel">模型</span>
+                <input id="modelName" type="text" list="modelNameOptions" data-i18n-placeholder="modelNamePlaceholder" placeholder="例如 qwen-max" />
+                <datalist id="modelNameOptions"></datalist>
+              </label>
+            </div>
+            <div class="form-row form-row-2">
+              <label>
+                <span data-i18n="uploadLabel">上传小说文件（txt / doc / docx）</span>
+                <input id="uploadFile" type="file" accept=".txt,.doc,.docx" />
+              </label>
+              <label>
+                <span data-i18n="yamlBundleLabel">上传剧本 YAML（.yaml / .yml）</span>
+                <input id="uploadYamlFile" type="file" accept=".yaml,.yml" />
+              </label>
+            </div>
+            <div class="form-row form-row-4">
+              <label>
+                <span data-i18n="titleLabel">剧本标题</span>
+                <input id="title" type="text" />
+              </label>
+              <label>
+                <span data-i18n="authorLabel">原著作者</span>
+                <input id="author" type="text" />
+              </label>
+              <label>
+                <span data-i18n="originalTitleLabel">原著标题</span>
+                <input id="originalTitle" type="text" />
+              </label>
+              <label>
+                <span data-i18n="genreLabel">题材</span>
+                <input id="genre" type="text" />
+              </label>
+            </div>
+            <div class="form-row form-row-4">
+              <label>
+                <span data-i18n="scriptTypeLabel">生成剧本类型</span>
+                <select id="scriptType"></select>
+              </label>
+              <label>
+                <span data-i18n="toneLabel">语气风格</span>
+                <select id="tone"></select>
+              </label>
+              <label>
+                <span data-i18n="detailLevelLabel">生成详细度</span>
+                <select id="detailLevel"></select>
+              </label>
+              <div class="form-spacer" aria-hidden="true"></div>
+            </div>
+              <label class="full-width">
               <span data-i18n="pasteTextLabel">直接粘贴小说文本</span>
               <textarea
                 id="novelText"
@@ -111,7 +124,7 @@
             <span class="pill" id="workspacePill" data-i18n="workspaceEmpty">尚未选择项目</span>
           </div>
 
-          <div class="workspace-toolbar">
+          <div class="workspace-toolbar workspace-toolbar-wide">
             <label>
               <span data-i18n="currentProjectLabel">当前项目</span>
               <select id="projectSelect"></select>
@@ -130,8 +143,18 @@
             <div class="panel-heading">
               <h3 data-i18n="finalScriptHeading">最终生成剧本</h3>
             </div>
+            <div id="scriptProgress" class="script-progress hidden" aria-live="polite">
+              <div class="script-progress-meta">
+                <span id="scriptProgressLabel">等待生成</span>
+                <span id="scriptProgressPercent">0%</span>
+              </div>
+              <div class="script-progress-track">
+                <div id="scriptProgressBar" class="script-progress-bar"></div>
+              </div>
+            </div>
             <pre id="scriptPreview" class="script-preview" data-i18n="scriptPreviewPlaceholder">请上传小说后等待 Qwen 生成剧本</pre>
           </div>
+
         </section>
 
         <section class="card section-card">
@@ -154,7 +177,11 @@
               ></textarea>
             </label>
           </div>
-          <div class="action-row">
+          <div class="action-row regeneration-action-row">
+            <label class="regeneration-detail-control">
+              <span data-i18n="regenDetailLevelLabel">重生成详细度</span>
+              <select id="regenDetailLevel"></select>
+            </label>
             <button id="regenerateButton" class="primary-button" data-i18n="regenerateButton">重生成场景</button>
           </div>
 
@@ -173,8 +200,8 @@
                 <pre id="sceneBeforePreview" class="comparison-preview">重生成场景后，这里会显示修改前后对比。</pre>
               </div>
               <div class="comparison-card">
-                <h4 data-i18n="comparisonAfterLabel">修改后</h4>
-                <div class="toolbar-actions">
+                <div class="comparison-card-heading">
+                  <h4 data-i18n="comparisonAfterLabel">修改后</h4>
                   <button id="downloadRegeneratedYamlButton" class="secondary-button" data-i18n="downloadRegeneratedYamlButton">下载修改后 YAML</button>
                 </div>
                 <pre id="sceneAfterPreview" class="comparison-preview">重生成场景后，这里会显示修改前后对比。</pre>

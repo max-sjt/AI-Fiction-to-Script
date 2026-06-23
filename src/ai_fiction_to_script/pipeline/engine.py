@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from collections import defaultdict
+from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from pathlib import Path
@@ -53,16 +54,31 @@ class AdaptationEngine:
         if len(chapters) < 3:
             raise ValueError("输入小说章节数不足 3 章，无法生成符合 Schema 2.0 的结构化剧本。")
 
-        analyses = [self._ai_client.analyze_chapter(chapter, request) for chapter in chapters]
+        analyses = self._map_concurrently(
+            lambda chapter: self._ai_client.analyze_chapter(chapter, request),
+            chapters,
+        )
         story_bible = self._ai_client.build_story_bible(analyses, request)
         outline = self._normalize_outline(self._ai_client.plan_outline(analyses, story_bible, request), analyses, request)
+        outline = normalize_outline_to_chapter_units(outline, analyses, request)
 
         chapter_map = {chapter.chapter_id: chapter for chapter in chapters}
         scenes_by_act: dict[str, list] = defaultdict(list)
-        for scene_plan in outline.scene_plans:
-            chapter = self._resolve_scene_chapter(scene_plan, chapter_map, chapters)
-            scene = self._ai_client.generate_scene(scene_plan, story_bible, chapter, request)
-            scene = _normalize_scene_refs(scene, story_bible)
+        scene_jobs = [
+            (
+                scene_plan,
+                self._resolve_scene_chapter(scene_plan, chapter_map, chapters),
+            )
+            for scene_plan in outline.scene_plans
+        ]
+        scenes = self._map_concurrently(
+            lambda job: _normalize_scene_refs(
+                self._ai_client.generate_scene(job[0], story_bible, job[1], request),
+                story_bible,
+            ),
+            scene_jobs,
+        )
+        for scene_plan, scene in zip(outline.scene_plans, scenes):
             scenes_by_act[scene_plan.act_id].append(scene)
 
         script = Script(
@@ -127,7 +143,6 @@ class AdaptationEngine:
                 },
             },
         )
-
         quality = self._quality_checker.review(document)
         ai_warnings, ai_suggestions = self._ai_client.review_document(document, request)
         quality.warnings = _merge_unique(quality.warnings, ai_warnings)
@@ -153,6 +168,13 @@ class AdaptationEngine:
 
     def _analysis_lookup(self, analyses: list[ChapterAnalysis]) -> dict[str, ChapterAnalysis]:
         return {analysis.chapter_id: analysis for analysis in analyses}
+
+    def _map_concurrently(self, func, items: list):
+        if len(items) <= 1:
+            return [func(item) for item in items]
+        workers = min(6, len(items))
+        with ThreadPoolExecutor(max_workers=workers) as executor:
+            return list(executor.map(func, items))
 
     def _normalize_outline(
         self,
@@ -227,7 +249,7 @@ class AdaptationEngine:
     def _resolve_model_name(self, request: AdaptationRequest) -> str:
         if request.provider == "mock":
             return "mock-qwen-planner"
-        return request.model_routing.generation_model
+        return request.model_name or request.model_routing.generation_model
 
 
 def synchronize_outline_with_script(outline: Outline, script: Script) -> Outline:
@@ -271,6 +293,66 @@ def synchronize_outline_with_script(outline: Outline, script: Script) -> Outline
         )
 
     return outline.model_copy(update={"acts": synced_acts, "scene_plans": synced_scene_plans})
+
+
+def normalize_outline_to_chapter_units(
+    outline: Outline,
+    analyses: list[ChapterAnalysis],
+    request: AdaptationRequest,
+) -> Outline:
+    """Force one generated screenplay unit per source chapter."""
+    chapter_plan_lookup: dict[str, list[ScenePlan]] = {analysis.chapter_id: [] for analysis in analyses}
+    for scene_plan in outline.scene_plans:
+        for chapter_id in scene_plan.chapter_refs:
+            if chapter_id in chapter_plan_lookup:
+                chapter_plan_lookup[chapter_id].append(scene_plan)
+
+    chapter_units: list[ScenePlan] = []
+    for index, analysis in enumerate(analyses, start=1):
+        related_plans = chapter_plan_lookup.get(analysis.chapter_id) or []
+        chapter_units.append(
+            ScenePlan(
+                scene_id=f"s{index:03d}",
+                act_id="main",
+                title=_normalize_scene_title(analysis.title, index),
+                objective=_merge_plan_text(
+                    [plan.objective for plan in related_plans],
+                    fallback=analysis.conflicts[0] if analysis.conflicts else analysis.summary,
+                ),
+                chapter_refs=[analysis.chapter_id],
+                conflict=_merge_plan_text(
+                    [plan.conflict for plan in related_plans],
+                    fallback=analysis.conflicts[0] if analysis.conflicts else "",
+                ),
+                notes=_merge_plan_text(
+                    [plan.notes for plan in related_plans],
+                    fallback=analysis.summary,
+                ),
+                focus_event=_merge_plan_text(
+                    [plan.focus_event for plan in related_plans],
+                    fallback=analysis.key_events[0] if analysis.key_events else analysis.summary,
+                ),
+                bridge_in=analyses[index - 2].summary if index > 1 else "",
+                bridge_out=analyses[index].summary if index < len(analyses) else "",
+            )
+        )
+
+    act = ActOutline(
+        act_id="main",
+        name="正文",
+        purpose="按小说章节逐章输出剧本单元，每章只生成一个完整章节剧本，不把同一章拆成多个场景。",
+        scene_count=len(chapter_units),
+    )
+    return outline.model_copy(update={"structure_type": request.structure_type, "acts": [act], "scene_plans": chapter_units})
+
+
+def _merge_plan_text(values: list[str | None], fallback: str = "") -> str:
+    merged: list[str] = []
+    for value in values:
+        text = (value or "").strip()
+        if text and text not in merged:
+            merged.append(text)
+    return " / ".join(merged) if merged else fallback
 
 
 def _scene_plans_from_script(script: Script) -> list[ScenePlan]:

@@ -1,254 +1,365 @@
-# AI 小说转剧本工具
+# AI Fiction to Script
 
-`AI Fiction to Script` 是一个基于 Qwen 的小说改编系统，用来把原始小说文本转换成结构化、可编辑的 YAML 剧本草稿。它同时提供命令行工作流、浏览器工作台、本地版本管理，以及场景级重生成能力，适合做快速草稿生成、反复迭代和版本对比。
+> 将多章节小说快速改编为结构化、可编辑、可版本管理的 YAML 剧本草稿。
 
-## 演示视频
+`ai-fiction-to-script` 是一个面向小说改编、短剧开发和剧本文案工作流的 AI 辅助工具。它可以读取小说文本或章节目录，生成符合 Schema 的 YAML 剧本，并提供 Web 工作台、CLI、版本管理、差异对比、单场景重生成和 Docker 部署能力。
 
-通过网盘分享的文件：演示视频.mp4
-链接: https://pan.baidu.com/s/1V9hYDU8JnyqVOHsDHOHV8w?pwd=g9r6 提取码: g9r6 
---来自百度网盘超级会员v6的分享
+## 核心特性
 
-## 当前版本
+- **小说到剧本一键改编**：从多章节小说文本生成 Story Bible、分幕大纲、场景计划和剧本正文。
+- **Web + CLI 双入口**：适合本地可视化编辑，也适合批处理、自动化脚本和测试流水线。
+- **可追溯版本管理**：每次生成、编辑、重生成都会落盘到 `.novel2script`，支持版本列表、diff 和回看。
+- **单场景重生成**：针对指定 `scene_id` 追加改写指令，保留原项目上下文并生成新版本。
+- **模型与缓存可配置**：支持 Mock 本地演示、Qwen / DashScope 调用、Redis Web 缓存和 Docker Compose 三层部署。
 
-- `v0.4.0`
-- 当前分支已支持 `Nginx` 反向代理、`Redis` 缓存，以及 Windows 本地联调方案 `Nginx + Memurai + App`
+## 技术栈
 
-## 技术方案
+- **语言与运行时**：Python 3.12+
+- **CLI**：Typer、Rich
+- **数据建模**：Pydantic v2
+- **YAML / Schema**：PyYAML、项目内置 JSON Schema 导出
+- **AI 调用**：httpx、Qwen / DashScope OpenAI-Compatible API
+- **Web 服务**：Python `ThreadingHTTPServer`
+- **前端**：原生 HTML / CSS / JavaScript
+- **缓存与部署**：Redis、Docker、Docker Compose、Nginx
 
-系统当前采用以下组合：
+## 快速开始
 
-- `Python 3.12`：主运行环境
-- `Qwen / DashScope`：在线生成模型
-- `HybridAIClient`：Web 模式下使用本地启发式做分析、大纲、质检，只保留场景正文走 Qwen，优先减少等待时间
-- `ThreadingHTTPServer`：当前应用服务入口
-- `Redis`：缓存项目列表、版本列表、版本详情、diff 等读接口
-- `Nginx`：反向代理统一入口
-- `Memurai`：Windows 下的 Redis 兼容运行时，用于本地联调
+### 环境要求
 
-## 整体架构
+| 依赖 | 版本 / 说明 |
+| --- | --- |
+| Python | `>= 3.12` |
+| pip | 建议使用 Python 自带最新版 |
+| Git | 用于克隆仓库 |
+| Docker | 可选，仅 Docker 部署需要 |
+| Redis | 可选，Web 缓存需要；Docker Compose 会自动启动 |
+| Qwen / DashScope API Key | 可选；不配置时可使用 `mock` 模式跑通流程 |
 
-```mermaid
-flowchart LR
-    U["浏览器 / CLI"] --> N["Nginx 反向代理"]
-    N --> A["Python Web 服务<br/>ai_fiction_to_script.web.server"]
-    A --> C["Redis / Memurai 缓存"]
-    A --> V["本地版本库<br/>.novel2script"]
-    A --> Q["Qwen / DashScope"]
-    A --> P["改编流程引擎<br/>Pipeline + Services"]
-```
-
-### Web 请求链路
-
-1. 用户通过浏览器访问 `Nginx`
-2. `Nginx` 把请求转发到 Python Web 服务
-3. Web 服务优先读取 `Redis` 缓存
-4. 缓存未命中时再读取本地版本库或触发生成流程
-5. 生成流程只在必要步骤调用 Qwen
-6. 写入新版本后，按项目失效缓存，再返回最新结果
-
-### 缓存策略
-
-当前缓存覆盖以下读接口：
-
-- 项目列表
-- 版本列表
-- 单版本详情
-- 版本 diff
-
-以下写操作会触发按项目失效：
-
-- `adapt`
-- `save_edited_yaml`
-- `regenerate_scene`
-
-## 核心能力
-
-- 把小说内容转换为结构化 YAML 剧本草稿
-- 保留章节引用，方便追溯原文来源
-- 为每次生成结果保存本地版本
-- 支持版本差异比较
-- 支持单场景重生成，无需整项目重跑
-- 支持在浏览器工作台中直接查看、下载和调整结果
-- Web 模式支持更快的草稿生成路径，优先减少等待时间
-- 支持 `Nginx + Redis` 部署和 Windows 本地三层联调
-
-## 目录结构
-
-- `src/ai_fiction_to_script/models/`：Pydantic 数据模型与运行时模型
-- `src/ai_fiction_to_script/services/`：解析、生成、校验、版本管理、缓存与工作台服务
-- `src/ai_fiction_to_script/pipeline/`：改编流程编排引擎
-- `src/ai_fiction_to_script/web/`：轻量 Web 服务与静态前端资源
-- `deploy/nginx/`：Docker / Linux 部署用 Nginx 配置
-- `deploy/windows/`：Windows 本地联调用 `Memurai` 和 `Nginx` 配置
-- `scripts/`：本地启动脚本，例如 `run_local_stack.ps1`
-- `runtime/`：本地运行时目录，放置 `nginx`、`Memurai` 等二进制
-- `examples/`：示例输入
-- `schemas/`：导出的 Schema
-- `tests/`：CLI、Pipeline、Web API、缓存与工作台测试
-- `docs/`：架构与 Schema 文档
-- `.novel2script/`：剧本本地版本库
-
-## 安装
+### 1. 克隆并安装
 
 ```bash
-pip install -e .
+git clone [待补充: 仓库地址]
+cd AI-Fiction-to-Script
+python -m pip install --upgrade pip
+python -m pip install -e .
 ```
 
-如果之前安装过旧版本的可编辑包，拉取最新代码后建议重新执行一次安装命令，确保 `novel2script web` 等入口与当前源码保持一致。
-
-## Qwen 配置
-
-调用在线 Qwen 之前，请先设置 DashScope / Qwen API Key：
+验证安装：
 
 ```bash
-set DASHSCOPE_API_KEY=your_key_here
+python -m ai_fiction_to_script.cli version
+novel2script --help
 ```
 
-可选环境变量：
+### 2. 5 分钟本地跑通
 
-- `QWEN_BASE_URL`
-- `QWEN_TIMEOUT_SECONDS`
+三种启动方式：
+```
+1、 novel2script web --host 127.0.0.1 --port 8098 --version-root .novel2script
+浏览器访问http://127.0.0.1:8098
 
-如果你的账号不在默认地域，需要把 `QWEN_BASE_URL` 设置成对应地域的 DashScope OpenAI 兼容地址。
+2、测试 CLI 流程：
+  novel2script quick examples/sample_novel.txt --provider mock --detail fast 
 
-## CLI 运行方式
+3、 如果用 Docker 启动整套服务：
+docker compose up --build
+```
 
-从文本文件生成剧本草稿：
+不需要外部模型，直接使用 `mock` 模式生成示例 YAML：
 
 ```bash
-novel2script adapt examples/sample_novel.txt --title 老街回声 --original-author 测试作者 --project-id demo-project
+novel2script quick examples/sample_novel.txt --provider mock --detail fast
 ```
 
-查看已保存版本：
+生成结果默认写入：
+
+```text
+output/sample_novel.yaml
+.novel2script/sample_novel/versions/v0001/
+```
+
+校验 YAML：
 
 ```bash
-novel2script list-versions demo-project
+novel2script validate output/sample_novel.yaml
 ```
 
-重生成单个场景：
+### 3. 启动 Web 工作台
 
 ```bash
-novel2script regenerate-scene demo-project v0001 s001 --instruction "强化主角的紧迫感。"
+novel2script web --host 127.0.0.1 --port 8098 --version-root .novel2script
 ```
 
-导出 JSON Schema：
-
-```bash
-novel2script export-schema --output schemas/screenplay.schema.json
-```
-
-## Web 工作台运行方式
-
-直接启动 Web 服务：
-
-```bash
-novel2script web --host 127.0.0.1 --port 8098
-```
-
-然后在浏览器中打开：
+浏览器访问：
 
 ```text
 http://127.0.0.1:8098
 ```
 
-工作台支持：
+健康检查：
 
-- 通过文件上传或直接粘贴小说文本生成剧本
-- 浏览项目与版本
-- 查看最终生成剧本
-- 下载 YAML 结果
-- 按修改要求进行场景重生成
-- 查看重生成前后对比
-- 在 `中文` 与 `English` 界面之间切换
+```bash
+curl http://127.0.0.1:8098/api/health
+```
 
-补充说明：
+Windows PowerShell 可使用：
 
-- 现在支持单章或多章文本输入，但多章输入通常会得到更稳定的结果
-- Web 模式默认优先走更快的生成路径，但真实 Qwen 生成速度仍受网络和模型响应影响
+```powershell
+Invoke-WebRequest -UseBasicParsing http://127.0.0.1:8098/api/health
+```
 
-## Docker 运行方式
+## 使用示例
 
-当前仓库已经提供 `Dockerfile` 和 `docker-compose.yml`，可直接启动 `Nginx + App + Redis`：
+### CLI：完整改编命令
+
+```bash
+novel2script adapt examples/sample_novel.txt \
+  --title "老街回声" \
+  --original-author "测试作者" \
+  --project-id demo-project \
+  --target-format tv_drama \
+  --genre "悬疑,都市" \
+  --tone balanced \
+  --provider mock \
+  --detail standard \
+  --output output/demo-project.yaml \
+  --version-root .novel2script \
+  --note "first draft"
+```
+
+### CLI：使用 Qwen / DashScope
+
+```bash
+export DASHSCOPE_API_KEY="[待补充: 你的 DashScope API Key]"
+
+novel2script quick examples/sample_novel.txt \
+  --title "老街回声" \
+  --provider qwen \
+  --model qwen3.6-flash \
+  --detail standard
+```
+
+Windows PowerShell：
+
+```powershell
+$env:DASHSCOPE_API_KEY="[待补充: 你的 DashScope API Key]"
+
+novel2script quick examples/sample_novel.txt `
+  --title "老街回声" `
+  --provider qwen `
+  --model qwen3.6-flash `
+  --detail standard
+```
+
+### CLI：单场景重生成
+
+```bash
+novel2script regenerate-scene demo-project v0001 s001 \
+  --instruction "加强主角发现线索后的紧迫感，并减少旁白。" \
+  --provider mock \
+  --version-root .novel2script \
+  --note "rewrite opening scene"
+```
+
+### HTTP API：提交异步改编任务
+
+启动 Web 服务后，可以通过 API 创建任务：
+
+```bash
+curl -X POST http://127.0.0.1:8098/api/adapt-async \
+  -H "Content-Type: application/json" \
+  -d '{
+    "title": "老街回声",
+    "original_author": "测试作者",
+    "script_type": "tv_drama",
+    "tone": "balanced",
+    "genre": "悬疑,都市",
+    "provider": "mock",
+    "detail_level": "fast",
+    "novel_text": "第一章\n雨夜里，老街尽头的照相馆重新亮起灯。\n\n第二章\n主角发现旧照片背后藏着一串地址。\n\n第三章\n地址指向二十年前失踪案的最后现场。"
+  }'
+```
+
+返回结果中会包含 `task.task_id`。随后轮询任务状态：
+
+```bash
+curl http://127.0.0.1:8098/api/tasks/[待补充: task_id]
+```
+
+## 常用命令
+
+| 场景 | 命令 |
+| --- | --- |
+| 查看版本 | `novel2script version` |
+| 快速生成 | `novel2script quick examples/sample_novel.txt --provider mock` |
+| 完整生成 | `novel2script adapt examples/sample_novel.txt --title "Demo" --project-id demo` |
+| 校验 YAML | `novel2script validate output/sample_novel.yaml` |
+| 查看版本列表 | `novel2script list-versions demo-project --version-root .novel2script` |
+| 对比版本 | `novel2script diff demo-project v0001 v0002 --version-root .novel2script` |
+| 重生成场景 | `novel2script regenerate-scene demo-project v0001 s001 --instruction "..."` |
+| 导出 JSON Schema | `novel2script export-schema --output schemas/screenplay.schema.json` |
+| 启动 Web | `novel2script web --host 127.0.0.1 --port 8098` |
+
+## 配置说明
+
+### 环境变量
+
+| 变量 | 默认值 | 说明 |
+| --- | --- | --- |
+| `DASHSCOPE_API_KEY` | 空 | DashScope / Qwen API Key。`provider=qwen` 时需要。 |
+| `QWEN_API_KEY` | 空 | `DASHSCOPE_API_KEY` 的备用变量名。 |
+| `QWEN_BASE_URL` | `https://dashscope.aliyuncs.com/compatible-mode/v1` | Qwen OpenAI-Compatible API 地址。 |
+| `QWEN_TIMEOUT_SECONDS` | `150` | Qwen 请求超时时间。 |
+| `WEB_CACHE_ENABLED` | `1` | 是否启用 Web 缓存；`0`、`false`、`no` 表示关闭。 |
+| `REDIS_URL` | `redis://127.0.0.1:6379/0` | Redis 连接地址。 |
+| `WEB_CACHE_TTL_SECONDS` | `60` | Web 缓存过期时间，单位秒。 |
+| `WEB_CACHE_KEY_PREFIX` | `novel2script` | Redis 缓存 key 前缀。 |
+
+### 关键目录
+
+| 路径 | 说明 |
+| --- | --- |
+| `src/ai_fiction_to_script/` | Python 源码目录。 |
+| `src/ai_fiction_to_script/web/static/` | Web 工作台前端静态资源。 |
+| `examples/` | 示例小说文本与生成样例。 |
+| `schemas/screenplay.schema.json` | 剧本 YAML 对应的 JSON Schema。 |
+| `docs/` | 架构、Schema、基线版本等补充文档。 |
+| `output/` | CLI 默认输出目录。 |
+| `.novel2script/` | 本地版本库，保存每次生成结果与中间产物。 |
+| `runtime/` | 运行期日志目录，例如异步任务错误日志。 |
+
+### 生成细节档位
+
+| `--detail` | 适用场景 | 说明 |
+| --- | --- | --- |
+| `fast` | 快速预览 | 更少上下文与更短正文，适合验证流程和结构。 |
+| `standard` | 标准初稿 | 默认档位，兼顾速度与完整度。 |
+| `detailed` | 详写草稿 | 更多上下文与更丰富正文，适合进一步打磨。 |
+
+## Docker 部署
+
+使用 Docker Compose 启动 App、Redis 和 Nginx：
 
 ```bash
 docker compose up --build
 ```
 
-启动后访问：
+访问：
 
 ```text
 http://127.0.0.1:8080
 ```
 
-## Windows 本地三层运行方式
+停止：
 
-当前已支持 Windows 本地联调，不依赖 Docker，结构为：
+```bash
+docker compose down
+```
 
-- `Memurai`：本地 Redis 兼容缓存
-- Python Web 服务：运行在 `py312` 环境
-- `Nginx for Windows`：本地反向代理
+Compose 部署会将本地 `.novel2script` 挂载到容器内，便于持久化版本数据。
 
-启动脚本：
+## Windows 本地三层栈
+
+项目提供了 Windows 本地启动脚本：
 
 ```powershell
 .\scripts\run_local_stack.ps1
 ```
 
-默认端口：
-
-- `Memurai`：`127.0.0.1:6380`
-- 应用服务：`http://127.0.0.1:8099`
-- `Nginx` 入口：`http://127.0.0.1:8088`
-
-浏览器访问：
+访问：
 
 ```text
 http://127.0.0.1:8088
 ```
 
-说明：
+停止：
 
-- 为了避开 Windows 版 `nginx.exe` 对中文路径的兼容问题，本地脚本会把 `Nginx` 暂存到 `%TEMP%\ai-fiction-to-script-localstack`
-- 本地脚本使用隔离端口，避免和机器上已有的 `8098 / 8080 / 6379` 服务冲突
+```powershell
+.\scripts\stop_local_stack.ps1
+```
 
-## 缓存配置
+## 输出格式
 
-缓存相关环境变量：
+生成的 YAML 文档包含以下核心结构：
 
-- `WEB_CACHE_ENABLED`
-- `REDIS_URL`
-- `WEB_CACHE_TTL_SECONDS`
-- `WEB_CACHE_KEY_PREFIX`
+```yaml
+schema_version: "2.0"
+meta:
+  title: "老街回声"
+source:
+  chapter_count: 3
+story_bible:
+  characters: []
+outline:
+  acts: []
+  scene_plans: []
+script:
+  acts: []
+quality:
+  confidence: 0.0
+extensions: {}
+```
 
-运行中的服务可通过 `/api/health` 查看当前缓存后端：
-
-- `disabled`
-- `redis`
-
-## 本地版本管理
-
-工具内部维护两层版本：
-
-- 源代码版本：Git 分支、提交和标签
-- 剧本产物版本：`.novel2script/<project>/versions/v000x/`
-
-每个保存版本包含：
-
-- `screenplay.yaml`
-- `screenplay.json`
-- `intermediates/*.json`
-- `index.json`
-
-## 校验与测试
-
-运行测试：
+如需重新生成 Schema：
 
 ```bash
+novel2script export-schema --output schemas/screenplay.schema.json
+```
+
+更多说明见：
+
+- [docs/SCREENPLAY_YAML_SCHEMA_DESIGN.md](docs/SCREENPLAY_YAML_SCHEMA_DESIGN.md)
+- [docs/YAML_SCHEMA.md](docs/YAML_SCHEMA.md)
+- [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)
+
+## 测试
+
+安装测试依赖后运行：
+
+```bash
+python -m pip install -e .
 python -m pytest -q
 ```
 
-## 文档
+如果本地没有安装 `pytest`，请先安装：
 
-- [架构说明](docs/ARCHITECTURE.md)
-- [YAML Schema 说明](docs/YAML_SCHEMA.md)
-- [变更记录](CHANGELOG.md)
+```bash
+python -m pip install pytest
+```
+
+## 安全说明
+
+- 不要把真实 API Key 写入 README、示例文件或提交记录。
+- 推荐使用环境变量传入 `DASHSCOPE_API_KEY` / `QWEN_API_KEY`。
+- `.novel2script/` 会保存生成结果与中间产物，如包含敏感文本，请按团队规范管理访问权限。
+
+## 贡献指南
+
+欢迎通过 Issue 和 Pull Request 改进项目。
+
+1. Fork 本仓库并创建特性分支：
+
+   ```bash
+   git checkout -b feat/your-feature
+   ```
+
+2. 保持改动聚焦，并为核心逻辑补充测试。
+3. 提交前运行测试：
+
+   ```bash
+   python -m pytest -q
+   ```
+
+4. 提交 PR 时请说明：
+   - 变更目的与影响范围
+   - 主要实现思路
+   - 已执行的测试命令
+   - 兼容性或迁移注意事项
+
+代码规范建议：
+
+- Python 代码遵循类型标注优先、函数职责清晰的风格。
+- CLI 参数、Web API 字段和 YAML Schema 的变更需要同步更新文档与测试。
+- 不提交生成缓存、私钥、真实 API Key、大体积临时文件和个人环境配置。
+

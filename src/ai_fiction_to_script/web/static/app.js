@@ -20,11 +20,30 @@ const toneOptions = [
   { value: "uplifting", zh: "振奋", en: "Uplifting" },
 ];
 
+const detailOptions = [
+  { value: "fast", zh: "快速预览（短）", en: "Fast Preview" },
+  { value: "standard", zh: "标准初稿", en: "Standard Draft" },
+  { value: "detailed", zh: "详写模式（更长）", en: "Detailed Draft" },
+];
+
+const genreKeywordRules = [
+  ["悬疑", ["悬疑", "谜", "线索", "真相", "调查", "侦探", "案件", "失踪", "秘密", "嫌疑"]],
+  ["惊悚", ["惊悚", "恐惧", "尖叫", "血", "尸", "鬼", "诅咒", "噩梦", "恐怖"]],
+  ["科幻", ["科幻", "星舰", "宇宙", "机器人", "人工智能", "时间线", "穿越", "实验舱", "量子", "未来"]],
+  ["奇幻", ["奇幻", "魔法", "精灵", "龙", "神殿", "法阵", "巫师", "灵力", "异界"]],
+  ["玄幻", ["玄幻", "修炼", "灵气", "宗门", "丹田", "渡劫", "仙门", "剑气", "妖兽"]],
+  ["武侠", ["武侠", "江湖", "剑客", "门派", "掌门", "轻功", "侠", "刀光", "客栈"]],
+  ["言情", ["言情", "爱情", "喜欢", "恋人", "婚约", "心动", "拥抱", "告白", "分手"]],
+  ["都市", ["都市", "公司", "办公室", "咖啡", "地铁", "小区", "老板", "项目", "合同"]],
+  ["历史", ["历史", "皇帝", "朝廷", "将军", "宫", "王爷", "边关", "战马", "臣"]],
+  ["校园", ["校园", "学校", "教室", "同桌", "老师", "考试", "社团", "操场"]],
+];
+
 const translations = {
   zh: {
     htmlLang: "zh-CN",
-    heroTitle: "Qwen 剧本生成工作台",
-    heroCopy: "上传小说文件或直接粘贴正文，调用通义千问生成不同类型、不同语气的结构化剧本，并支持场景级重生成。",
+    heroTitle: "ScriptForge剧本生成工作台",
+    heroCopy: "上传小说文件或直接粘贴正文，调用大模型生成不同类型、不同语气的结构化剧本，并支持场景级重生成。",
     languageLabel: "界面语言",
     loadingWorkspace: "正在加载工作区...",
     projectsHeading: "项目",
@@ -33,9 +52,11 @@ const translations = {
     deleteButton: "删除",
     noProjectsCard: "还没有项目。先生成一版剧本即可开始。",
     generateHeading: "生成剧本",
-    qwenPill: "Qwen 生成",
-    apiKeyLabel: "Qwen API Key",
+    // qwenPill: "Qwen 生成",
+    apiKeyLabel: "阿里云百炼 API Key",
     apiKeyPlaceholder: "请输入 sk-...",
+    modelNameLabel: "百炼模型",
+    modelNamePlaceholder: "输入或从百炼模型列表选择，例如 qwen-max",
     uploadLabel: "上传小说文件（txt / doc / docx）",
     yamlBundleLabel: "上传剧本 YAML（.yaml / .yml）",
     titleLabel: "剧本标题",
@@ -44,6 +65,7 @@ const translations = {
     scriptTypeLabel: "生成剧本类型",
     genreLabel: "题材",
     toneLabel: "语气风格",
+    detailLevelLabel: "生成详细度",
     pasteTextLabel: "直接粘贴小说文本",
     novelTextPlaceholder: "如果不上传文件，可以在这里粘贴一章或多章小说正文；多章生成会更稳定。",
     generateButton: "生成剧本",
@@ -82,12 +104,15 @@ const translations = {
     loadedVersionStatus: "已加载 {projectId}/{versionId}",
     generatingDraftStatus: "正在调用 Qwen 生成剧本...",
     generatedDraftStatus: "已生成 {projectId}/{versionId}",
-    qwenGenerationPending: "Qwen 正在以极速草稿模式生成，单章通常会快很多；只有在整条流程完成后，工作区才会切换到新版本。",
+    qwenGenerationPending: "Qwen 正在按所选详细度生成剧本；标准/详写会逐章更新，极速预览会优先尝试整篇流式生成。",
     qwenRegenerationPending: "Qwen 正在以极速模式重生成场景；完成前工作区不会更新。",
     localPreviewReady: "已先生成本地草稿 {projectId}/{versionId}，后台正在继续生成 Qwen 正式版。",
     qwenFinalReady: "Qwen 正式版已完成：{projectId}/{versionId}",
     backgroundTaskFailed: "后台 Qwen 任务失败：{error}",
     apiKeyRequired: "请输入 Qwen API Key。",
+    loadingModelsStatus: "正在读取百炼模型列表...",
+    loadedModelsStatus: "已读取 {count} 个百炼模型，可输入或选择模型。",
+    modelListFailedStatus: "读取模型列表失败，可手动输入模型名：{error}",
     inputRequired: "请上传小说文件，或直接粘贴小说文本。",
     yamlFileRequired: "请先上传一个 YAML 文件。",
     selectVersionBeforeRegenerate: "请先选择一个项目版本再重生成场景。",
@@ -105,7 +130,7 @@ const translations = {
   },
   en: {
     htmlLang: "en",
-    heroTitle: "Qwen Screenplay Generation Workbench",
+    heroTitle: "Screenplay Generation Workbench",
     heroCopy: "Upload a novel file or paste source text, use Qwen to generate structured screenplay drafts in different formats and tones, and regenerate individual scenes when needed.",
     languageLabel: "Interface language",
     loadingWorkspace: "Loading workspace...",
@@ -115,9 +140,11 @@ const translations = {
     deleteButton: "Delete",
     noProjectsCard: "No projects yet. Generate a screenplay to begin.",
     generateHeading: "Generate Screenplay",
-    qwenPill: "Qwen Generation",
-    apiKeyLabel: "Qwen API Key",
+    // qwenPill: "Qwen Generation",
+    apiKeyLabel: "ALi Claude API Key",
     apiKeyPlaceholder: "Enter sk-...",
+    modelNameLabel: "Bailian Model",
+    modelNamePlaceholder: "Type or select a Bailian model, for example qwen-max",
     uploadLabel: "Upload novel file (txt / doc / docx)",
     yamlBundleLabel: "Upload screenplay YAML (.yaml / .yml)",
     titleLabel: "Screenplay title",
@@ -126,6 +153,7 @@ const translations = {
     scriptTypeLabel: "Screenplay type",
     genreLabel: "Genre",
     toneLabel: "Tone style",
+    detailLevelLabel: "Generation detail",
     pasteTextLabel: "Paste novel text directly",
     novelTextPlaceholder: "If you do not upload a file, paste one or more chapters of source text here. More chapters usually produce better results.",
     generateButton: "Generate Screenplay",
@@ -142,6 +170,7 @@ const translations = {
     sceneRegenerationHeading: "Scene Regeneration",
     targetedRewritePill: "Targeted rewrite",
     sceneLabel: "Scene",
+    regenDetailLevelLabel: "重生成详细度",
     instructionLabel: "Instruction",
     regenInstructionPlaceholder: "Describe how this scene should be adjusted.",
     regenerateButton: "Regenerate Scene",
@@ -164,12 +193,15 @@ const translations = {
     loadedVersionStatus: "Loaded {projectId}/{versionId}",
     generatingDraftStatus: "Generating screenplay with Qwen...",
     generatedDraftStatus: "Generated {projectId}/{versionId}",
-    qwenGenerationPending: "Qwen is generating in fast-draft mode. Single-chapter drafts should complete much faster, but the workspace updates only after the full pipeline finishes.",
-    qwenRegenerationPending: "Qwen is regenerating the scene in fast mode. The workspace will not update until it finishes.",
+    qwenGenerationPending: "Qwen is generating with the selected detail level. Standard/detailed drafts update by chapter; fast preview tries whole-script streaming first.",
+    qwenRegenerationPending: "Qwen is regenerating the scene with the selected detail level. The workspace will not update until it finishes.",
     localPreviewReady: "Local preview draft is ready: {projectId}/{versionId}. Qwen is still generating the final version in the background.",
     qwenFinalReady: "Qwen final version is ready: {projectId}/{versionId}",
     backgroundTaskFailed: "Background Qwen task failed: {error}",
     apiKeyRequired: "Enter a Qwen API key first.",
+    loadingModelsStatus: "Loading Bailian model list...",
+    loadedModelsStatus: "Loaded {count} Bailian models. You can type or select one.",
+    modelListFailedStatus: "Could not load model list. Type a model name manually: {error}",
     inputRequired: "Upload a novel file or paste novel text first.",
     yamlFileRequired: "Upload a YAML file first.",
     selectVersionBeforeRegenerate: "Select a project version before regenerating a scene.",
@@ -207,6 +239,7 @@ const state = {
   activeTaskId: "",
   activeTaskKind: "",
   activeTaskStream: null,
+  models: [],
 };
 
 const STREAM_FRAME_MS = 24;
@@ -216,7 +249,6 @@ const streamRenderers = new WeakMap();
 
 const els = {
   languageSelect: document.getElementById("languageSelect"),
-  statusText: document.getElementById("statusText"),
   buildBadge: document.getElementById("buildBadge"),
   messageBanner: document.getElementById("messageBanner"),
   workspacePill: document.getElementById("workspacePill"),
@@ -224,6 +256,8 @@ const els = {
   resetProjectsButton: document.getElementById("resetProjectsButton"),
   refreshProjectsButton: document.getElementById("refreshProjectsButton"),
   apiKey: document.getElementById("apiKey"),
+  modelName: document.getElementById("modelName"),
+  modelNameOptions: document.getElementById("modelNameOptions"),
   uploadFile: document.getElementById("uploadFile"),
   uploadYamlFile: document.getElementById("uploadYamlFile"),
   title: document.getElementById("title"),
@@ -232,6 +266,7 @@ const els = {
   scriptType: document.getElementById("scriptType"),
   genre: document.getElementById("genre"),
   tone: document.getElementById("tone"),
+  detailLevel: document.getElementById("detailLevel"),
   novelText: document.getElementById("novelText"),
   generateButton: document.getElementById("generateButton"),
   regenerateFromYamlButton: document.getElementById("regenerateFromYamlButton"),
@@ -241,7 +276,12 @@ const els = {
   downloadYamlButton: document.getElementById("downloadYamlButton"),
   downloadRegeneratedYamlButton: document.getElementById("downloadRegeneratedYamlButton"),
   scriptPreview: document.getElementById("scriptPreview"),
+  scriptProgress: document.getElementById("scriptProgress"),
+  scriptProgressLabel: document.getElementById("scriptProgressLabel"),
+  scriptProgressPercent: document.getElementById("scriptProgressPercent"),
+  scriptProgressBar: document.getElementById("scriptProgressBar"),
   sceneSelect: document.getElementById("sceneSelect"),
+  regenDetailLevel: document.getElementById("regenDetailLevel"),
   regenInstruction: document.getElementById("regenInstruction"),
   regenerateButton: document.getElementById("regenerateButton"),
   sceneComparisonInstruction: document.getElementById("sceneComparisonInstruction"),
@@ -296,6 +336,62 @@ function renderStaticSelects() {
     (item) => (state.language === "zh" ? item.zh : item.en),
     els.tone.value || "balanced",
   );
+  fillSelect(
+    els.detailLevel,
+    detailOptions,
+    (item) => item.value,
+    (item) => (state.language === "zh" ? item.zh : item.en),
+    els.detailLevel.value || "standard",
+  );
+  fillSelect(
+    els.regenDetailLevel,
+    detailOptions,
+    (item) => item.value,
+    (item) => (state.language === "zh" ? item.zh : item.en),
+    els.regenDetailLevel.value || "standard",
+  );
+}
+
+function inferGenresFromText(text) {
+  const compact = String(text || "").trim();
+  if (!compact) {
+    return [];
+  }
+  const scores = [];
+  for (const [genre, keywords] of genreKeywordRules) {
+    let score = 0;
+    for (const keyword of keywords) {
+      const matches = compact.split(keyword).length - 1;
+      score += Math.max(0, matches);
+    }
+    if (score > 0) {
+      scores.push([score, genre]);
+    }
+  }
+  scores.sort((a, b) => b[0] - a[0] || String(a[1]).localeCompare(String(b[1]), "zh-Hans-CN"));
+  return scores.slice(0, 2).map((item) => item[1]);
+}
+
+function applyGenreInference(sourceText) {
+  if (els.genre.value.trim()) {
+    return;
+  }
+  const inferred = inferGenresFromText(sourceText);
+  if (inferred.length) {
+    els.genre.value = inferred.join("、");
+  }
+}
+
+function renderModelOptions(models = []) {
+  if (!els.modelNameOptions) {
+    return;
+  }
+  els.modelNameOptions.innerHTML = "";
+  models.forEach((model) => {
+    const option = document.createElement("option");
+    option.value = model.id || "";
+    els.modelNameOptions.appendChild(option);
+  });
 }
 
 async function api(path, options = {}) {
@@ -327,7 +423,9 @@ async function api(path, options = {}) {
 }
 
 function setStatus(message) {
-  els.statusText.textContent = message;
+  if (els.statusText) {
+    els.statusText.textContent = message;
+  }
 }
 
 function setBanner(message, kind = "info") {
@@ -441,8 +539,9 @@ function renderProjects() {
     card.className = `project-card ${project.project_id === state.selectedProjectId ? "active" : ""}`;
     const versionsHtml = (project.versions || []).map((version) => `
       <div class="project-version-row">
-        <button type="button" class="project-version-button" data-project-id="${escapeHtml(project.project_id)}" data-version-id="${escapeHtml(version.version_id)}">
+        <button type="button" class="project-version-button" data-project-id="${escapeHtml(project.project_id)}" data-version-id="${escapeHtml(version.version_id)}" title="${escapeHtml(versionTooltipText(version))}">
           ${escapeHtml(version.version_id)}
+          ${versionGenerationSummaryHtml(version)}
         </button>
         <button type="button" class="project-version-delete" data-project-id="${escapeHtml(project.project_id)}" data-version-id="${escapeHtml(version.version_id)}">
           ${escapeHtml(t("deleteButton"))}
@@ -484,6 +583,29 @@ function renderProjects() {
     });
     els.projectsList.appendChild(card);
   });
+}
+
+function versionTooltipText(version) {
+  const summary = version.generation_summary || {};
+  return [
+    `剧本类型：${summary.script_type_label || summary.script_type || "未设置"}`,
+    `语气风格：${summary.tone_label || summary.tone || "未设置"}`,
+    `生成详细度：${summary.detail_label || summary.detail_level || "未设置"}`,
+  ].join("\n");
+}
+
+function versionGenerationSummaryHtml(version) {
+  const summary = version.generation_summary || {};
+  const scriptType = summary.script_type_label || summary.script_type || "未设置";
+  const tone = summary.tone_label || summary.tone || "未设置";
+  const detail = summary.detail_label || summary.detail_level || "未设置";
+  return `
+    <span class="version-tooltip" role="tooltip">
+      <span>剧本类型：${escapeHtml(scriptType)}</span>
+      <span>语气风格：${escapeHtml(tone)}</span>
+      <span>生成详细度：${escapeHtml(detail)}</span>
+    </span>
+  `;
 }
 
 function fillSelect(select, items, getValue, getLabel, selectedValue = "") {
@@ -631,6 +753,7 @@ async function loadVersion(projectId, versionId) {
   state.selectedVersionPayload = data;
 
   els.workspacePill.textContent = `${projectId} · ${versionId}`;
+  setScriptProgress(null);
   setElementText(els.scriptPreview, data.rendered_script || t("scriptPreviewPlaceholder"));
   renderSceneOptions(data.scene_options);
   setStatus(t("loadedVersionStatus", { projectId, versionId }));
@@ -726,10 +849,12 @@ async function generateDraft() {
   }
   setStatus(t("generatingDraftStatus"));
   setBanner(t("qwenGenerationPending"), "info");
+  setScriptProgress({ completed_scenes: 0, total_scenes: 1 });
   const data = await api("/api/adapt-async", {
     method: "POST",
     body: JSON.stringify({
       api_key: els.apiKey.value.trim(),
+      model_name: els.modelName.value.trim(),
       provider: "qwen",
       title: els.title.value,
       original_author: els.author.value,
@@ -737,6 +862,7 @@ async function generateDraft() {
       script_type: els.scriptType.value,
       genre: els.genre.value,
       tone: els.tone.value,
+      detail_level: els.detailLevel.value,
       novel_text: els.novelText.value,
       upload_name: state.upload.name,
       upload_base64: state.upload.base64,
@@ -764,10 +890,12 @@ async function regenerateDraftFromYaml() {
   }
   setStatus(t("regeneratingFromYamlStatus"));
   setBanner(t("yamlRegenerationPending"), "info");
+  setScriptProgress({ completed_scenes: 0, total_scenes: 1 });
   const data = await api("/api/regenerate-from-yaml-async", {
     method: "POST",
     body: JSON.stringify({
       api_key: els.apiKey.value.trim(),
+      model_name: els.modelName.value.trim(),
       provider: "qwen",
       title: els.title.value,
       original_author: els.author.value,
@@ -775,6 +903,7 @@ async function regenerateDraftFromYaml() {
       script_type: els.scriptType.value,
       genre: els.genre.value,
       tone: els.tone.value,
+      detail_level: els.detailLevel.value,
       upload_base64: state.yamlUpload.base64,
     }),
   });
@@ -811,7 +940,9 @@ async function regenerateScene() {
         instruction,
         provider: "qwen",
         api_key: els.apiKey.value.trim(),
+        model_name: els.modelName.value.trim(),
         tone: els.tone.value,
+        detail_level: els.regenDetailLevel.value || "standard",
       }),
     },
   );
@@ -831,11 +962,53 @@ async function loadHealth() {
   renderBuildBadge();
 }
 
+async function loadModels() {
+  if (!els.apiKey.value.trim()) {
+    state.models = [];
+    renderModelOptions([]);
+    return;
+  }
+  setStatus(t("loadingModelsStatus"));
+  try {
+    const data = await api(`/api/models?api_key=${encodeURIComponent(els.apiKey.value.trim())}`);
+    state.models = data.models || [];
+    renderModelOptions(state.models);
+    setStatus(t("loadedModelsStatus", { count: state.models.length }));
+  } catch (error) {
+    state.models = [];
+    renderModelOptions([]);
+    setStatus(t("modelListFailedStatus", { error: error.message }));
+    setBanner(t("modelListFailedStatus", { error: error.message }), "info");
+  }
+}
+
+function setScriptProgress(result = null) {
+  if (!els.scriptProgress || !els.scriptProgressBar || !els.scriptProgressLabel || !els.scriptProgressPercent) {
+    return;
+  }
+  const total = Number(result?.total_scenes || 0);
+  const completed = Number(result?.completed_scenes || 0);
+  if (!result || total <= 0) {
+    els.scriptProgress.classList.add("hidden");
+    els.scriptProgressBar.style.width = "0%";
+    els.scriptProgressPercent.textContent = "0%";
+    els.scriptProgressLabel.textContent = "";
+    return;
+  }
+  const percent = Math.max(0, Math.min(100, Math.round((completed / total) * 100)));
+  const active = result.active_scene_id ? ` · ${result.active_scene_id}` : "";
+  els.scriptProgress.classList.remove("hidden");
+  els.scriptProgressBar.style.width = `${percent}%`;
+  els.scriptProgressPercent.textContent = `${percent}%`;
+  els.scriptProgressLabel.textContent = `生成进度 ${completed}/${total}${active}`;
+}
+
 function renderStreamingTask(task) {
   const result = task.result;
   if (!result) {
     return;
   }
+  setScriptProgress(result);
   const isModelChunkStream = result.stream_source === "model_chunk";
   if (result.rendered_script) {
     if (isModelChunkStream) {
@@ -869,6 +1042,7 @@ async function finalizeTask(task, projectId) {
   stopTaskMonitor();
   await loadProjects(projectId || result.project_id);
   await loadVersion(result.project_id, result.version.version_id);
+  setScriptProgress(null);
   if (result.scene_comparison) {
     state.lastSceneComparison = result.scene_comparison;
     renderSceneComparison(state.lastSceneComparison);
@@ -887,6 +1061,7 @@ async function finalizeTask(task, projectId) {
 function handleTaskFailure(task) {
   state.activeTaskId = "";
   stopTaskMonitor();
+  setScriptProgress(null);
   setBanner(t("backgroundTaskFailed", { error: task.error || t("unknownError") }), "error");
   setStatus(task.error || t("unknownError"));
 }
@@ -988,6 +1163,13 @@ async function handleFileUpload(file) {
   }
   state.upload.name = file.name;
   state.upload.base64 = await readFileAsBase64(file);
+  if (/\.(txt|md)$/i.test(file.name)) {
+    try {
+      applyGenreInference(await file.text());
+    } catch (_error) {
+      applyGenreInference("");
+    }
+  }
 }
 
 async function handleYamlUpload(file) {
@@ -1031,6 +1213,12 @@ function registerEvents() {
   els.refreshProjectsButton.addEventListener("click", () => {
     loadProjects().catch(handleError);
   });
+  els.apiKey.addEventListener("input", () => {
+    loadModels().catch(handleError);
+  });
+  els.modelName.addEventListener("change", () => {
+    state.models = state.models || [];
+  });
   els.uploadFile.addEventListener("change", async () => {
     try {
       const [file] = els.uploadFile.files;
@@ -1038,6 +1226,9 @@ function registerEvents() {
     } catch (error) {
       handleError(error);
     }
+  });
+  els.novelText.addEventListener("input", () => {
+    applyGenreInference(els.novelText.value);
   });
   els.uploadYamlFile.addEventListener("change", async () => {
     try {
@@ -1088,4 +1279,4 @@ function handleError(error) {
 applyTranslations();
 syncRegeneratedYamlButton();
 registerEvents();
-Promise.all([loadHealth(), loadProjects()]).catch(handleError);
+Promise.all([loadHealth(), loadProjects(), loadModels()]).catch(handleError);

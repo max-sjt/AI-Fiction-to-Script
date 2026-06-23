@@ -81,16 +81,18 @@ h4 {
 }
 
 h1 {
-  font-size: clamp(2.25rem, 3vw, 4rem);
+  font-size: clamp(2.25rem, 3vw, 3.4rem);
   line-height: 0.98;
-  max-width: 11ch;
+  max-width: none;
+  white-space: nowrap;
 }
 
 .hero-copy {
-  max-width: 64ch;
+  max-width: none;
   line-height: 1.65;
   margin: 1rem 0 0;
   color: rgba(23, 22, 20, 0.72);
+  white-space: nowrap;
 }
 
 .sidebar-controls {
@@ -113,8 +115,7 @@ h1 {
   font-size: 0.82rem;
 }
 
-.language-switcher,
-.hero-status {
+.language-switcher {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -123,6 +124,7 @@ h1 {
   border-radius: 18px;
   padding: 0.9rem;
   background: rgba(255, 255, 255, 0.52);
+  white-space: nowrap;
 }
 
 .language-switcher select {
@@ -130,18 +132,6 @@ h1 {
   min-width: 0;
   border-radius: 999px;
   padding: 0.45rem 0.8rem;
-}
-
-.hero-status {
-  justify-content: flex-start;
-  line-height: 1.45;
-}
-
-.status-dot {
-  width: 0.72rem;
-  height: 0.72rem;
-  border-radius: 50%;
-  background: linear-gradient(135deg, #e26c3a, #1f5d5f);
 }
 
 .layout {
@@ -230,11 +220,42 @@ h1 {
 
 .project-version-button {
   text-align: left;
+  position: relative;
 }
 
 .project-version-delete {
   color: #8a1f1f;
   background: rgba(144, 22, 22, 0.08);
+}
+
+.version-tooltip {
+  position: absolute;
+  left: calc(100% + 0.6rem);
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 20;
+  display: grid;
+  gap: 0.25rem;
+  min-width: 13rem;
+  padding: 0.65rem 0.75rem;
+  border: 1px solid rgba(67, 53, 45, 0.16);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.98);
+  box-shadow: 0 12px 26px rgba(51, 35, 25, 0.16);
+  color: var(--ink);
+  font-size: 0.78rem;
+  line-height: 1.45;
+  white-space: nowrap;
+  pointer-events: none;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 140ms ease, visibility 140ms ease;
+}
+
+.project-version-button:hover .version-tooltip,
+.project-version-button:focus-visible .version-tooltip {
+  opacity: 1;
+  visibility: visible;
 }
 
 .content {
@@ -289,6 +310,14 @@ h1 {
   align-items: center;
 }
 
+.regeneration-action-row {
+  justify-content: flex-end;
+}
+
+.regeneration-detail-control {
+  width: min(18rem, 100%);
+}
+
 .pill {
   display: inline-flex;
   align-items: center;
@@ -304,6 +333,37 @@ h1 {
   display: grid;
   gap: 0.9rem;
   grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.workspace-toolbar-wide {
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) auto;
+  align-items: end;
+}
+
+.workspace-toolbar-wide .toolbar-actions {
+  justify-content: flex-end;
+}
+
+.screenplay-form {
+  grid-template-columns: 1fr;
+}
+
+.form-row {
+  display: grid;
+  gap: 0.9rem;
+  align-items: end;
+}
+
+.form-row-2 {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.form-row-4 {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.form-spacer {
+  min-height: 1px;
 }
 
 label {
@@ -385,6 +445,40 @@ button:hover {
   margin-top: 1rem;
 }
 
+.script-progress {
+  margin: 0.7rem 0 0.9rem;
+  display: grid;
+  gap: 0.45rem;
+}
+
+.script-progress.hidden {
+  display: none;
+}
+
+.script-progress-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  color: rgba(23, 22, 20, 0.72);
+  font-size: 0.88rem;
+}
+
+.script-progress-track {
+  height: 0.55rem;
+  overflow: hidden;
+  border-radius: 999px;
+  background: rgba(23, 22, 20, 0.1);
+}
+
+.script-progress-bar {
+  width: 0%;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #1f5d5f, #d98248);
+  transition: width 220ms ease;
+}
+
 .comparison-stage {
   margin-top: 1.4rem;
   display: grid;
@@ -437,6 +531,17 @@ button:hover {
   white-space: pre-wrap;
 }
 
+.comparison-card-heading {
+  display: flex;
+  gap: 0.85rem;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.comparison-card-heading h4 {
+  margin: 0;
+}
+
 @keyframes rise {
   from {
     opacity: 0;
@@ -458,6 +563,9 @@ button:hover {
   }
 
   .form-grid,
+  .form-row-2,
+  .form-row-4,
+  .workspace-toolbar-wide,
   .workspace-toolbar,
   .comparison-grid {
     grid-template-columns: 1fr;
@@ -465,6 +573,11 @@ button:hover {
 }
 
 @media (max-width: 720px) {
+  h1,
+  .hero-copy {
+    white-space: normal;
+  }
+
   .language-switcher {
     align-items: stretch;
     flex-direction: column;

@@ -31,6 +31,7 @@ class WorkbenchRequestHandler(BaseHTTPRequestHandler):
     def do_GET(self) -> None:  # noqa: N802
         try:
             parsed = urlparse(self.path)
+            parts = self._path_parts(parsed.path)
             if parsed.path == "/":
                 self._serve_static("index.html")
                 return
@@ -53,16 +54,20 @@ class WorkbenchRequestHandler(BaseHTTPRequestHandler):
             if parsed.path == "/api/projects":
                 self._send_json({"ok": True, "data": {"projects": self.service.list_projects()}})
                 return
-            if len(self._path_parts(parsed.path)) == 3 and self._path_parts(parsed.path)[:2] == ["api", "tasks"]:
-                task_id = self._path_parts(parsed.path)[2]
+            if parsed.path == "/api/models":
+                api_key = parse_qs(parsed.query).get("api_key", [""])[0]
+                base_url = parse_qs(parsed.query).get("base_url", [""])[0]
+                self._send_json({"ok": True, "data": {"models": self.service.list_qwen_models(api_key=api_key, base_url=base_url)}})
+                return
+            if len(parts) == 3 and parts[:2] == ["api", "tasks"]:
+                task_id = parts[2]
                 self._send_json({"ok": True, "data": self.service.get_task_status(task_id)})
                 return
-            if len(self._path_parts(parsed.path)) == 4 and self._path_parts(parsed.path)[:2] == ["api", "tasks"] and self._path_parts(parsed.path)[3] == "stream":
-                task_id = self._path_parts(parsed.path)[2]
+            if len(parts) == 4 and parts[:2] == ["api", "tasks"] and parts[3] == "stream":
+                task_id = parts[2]
                 self._stream_task(task_id)
                 return
 
-            parts = self._path_parts(parsed.path)
             if len(parts) == 4 and parts[:2] == ["api", "projects"] and parts[3] == "versions":
                 project_id = parts[2]
                 self._send_json({"ok": True, "data": {"project_id": project_id, "versions": self.service.list_versions(project_id)}})
@@ -164,7 +169,9 @@ class WorkbenchRequestHandler(BaseHTTPRequestHandler):
                             instruction=payload.get("instruction", ""),
                             provider_override=payload.get("provider", ""),
                             api_key=payload.get("api_key", ""),
+                            model_name=payload.get("model_name", ""),
                             tone_override=payload.get("tone", ""),
+                            detail_level=payload.get("detail_level", ""),
                             note=payload.get("note", ""),
                         ),
                     },
@@ -187,7 +194,9 @@ class WorkbenchRequestHandler(BaseHTTPRequestHandler):
                             instruction=payload.get("instruction", ""),
                             provider_override=payload.get("provider", ""),
                             api_key=payload.get("api_key", ""),
+                            model_name=payload.get("model_name", ""),
                             tone_override=payload.get("tone", ""),
+                            detail_level=payload.get("detail_level", ""),
                             note=payload.get("note", ""),
                         ),
                     },

@@ -4,6 +4,11 @@
 
 `ai-fiction-to-script` 是一个面向小说改编、短剧开发和剧本文案工作流的 AI 辅助工具。它可以读取小说文本或章节目录，生成符合 Schema 的 YAML 剧本，并提供 Web 工作台、CLI、版本管理、差异对比、单场景重生成和 Docker 部署能力。
 
+## 演示视频
+
+通过网盘分享的文件：演示视频.mp4
+链接: https://pan.baidu.com/s/1ig9r5Wt5VHFaUgLGzfxMaw?pwd=7u84 提取码: 7u84 
+
 ## 核心特性
 
 - **小说到剧本一键改编**：从多章节小说文本生成 Story Bible、分幕大纲、场景计划和剧本正文。
@@ -39,7 +44,7 @@
 ### 1. 克隆并安装
 
 ```bash
-git clone [待补充: 仓库地址]
+git clone https://github.com/max-sjt/AI-Fiction-to-Script
 cd AI-Fiction-to-Script
 python -m pip install --upgrade pip
 python -m pip install -e .
@@ -309,6 +314,7 @@ novel2script export-schema --output schemas/screenplay.schema.json
 
 更多说明见：
 
+- [docs/FUNCTION_DESIGN_EXPLANATION.md](docs/FUNCTION_DESIGN_EXPLANATION.md)
 - [docs/SCREENPLAY_YAML_SCHEMA_DESIGN.md](docs/SCREENPLAY_YAML_SCHEMA_DESIGN.md)
 - [docs/YAML_SCHEMA.md](docs/YAML_SCHEMA.md)
 - [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)
@@ -362,4 +368,3 @@ python -m pip install pytest
 - Python 代码遵循类型标注优先、函数职责清晰的风格。
 - CLI 参数、Web API 字段和 YAML Schema 的变更需要同步更新文档与测试。
 - 不提交生成缓存、私钥、真实 API Key、大体积临时文件和个人环境配置。
-
